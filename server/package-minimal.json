@@ -1,0 +1,31 @@
+{
+  "name": "true-label-server-minimal",
+  "version": "1.0.0",
+  "description": "True Label Backend - Minimal Version",
+  "main": "src/index-minimal.ts",
+  "scripts": {
+    "dev": "tsx src/index-minimal.ts",
+    "dev-minimal": "tsx src/index-minimal.ts",
+    "start": "node dist/index-minimal.js",
+    "build": "tsc",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "compression": "^1.7.4",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/cors": "^2.8.13",
+    "@types/compression": "^1.7.2",
+    "@types/node": "^20.4.5",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.6"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

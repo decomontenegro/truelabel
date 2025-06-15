@@ -1,0 +1,24 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = require("../middleware/auth");
+const certificationController_1 = require("../controllers/certificationController");
+const router = (0, express_1.Router)();
+router.post('/certifications/:id/verify', certificationController_1.verifyCertification);
+router.use(auth_1.authenticateToken);
+router.get('/certifications/expiring-soon', certificationController_1.getExpiringCertifications);
+router.get('/certifications/statistics', certificationController_1.getCertificationStatistics);
+router.get('/certifications/alerts', certificationController_1.getCertificationAlerts);
+router.get('/certifications/expiration-alerts', certificationController_1.getCertificationAlerts);
+router.get('/certifications', certificationController_1.getCertifications);
+router.get('/certifications/:id', certificationController_1.getCertificationById);
+router.post('/certifications', certificationController_1.createCertification);
+router.put('/certifications/:id', certificationController_1.updateCertification);
+router.delete('/certifications/:id', certificationController_1.deleteCertification);
+router.get('/products/:productId/certifications', certificationController_1.getProductCertifications);
+router.get('/certifications/:id/timeline', certificationController_1.getCertificationTimeline);
+router.put('/certifications/alerts/:alertId/read', certificationController_1.markAlertAsRead);
+router.put('/certifications/alerts/settings', certificationController_1.configureAlertSettings);
+router.post('/certifications/badges/generate', certificationController_1.generateBadge);
+exports.default = router;
+//# sourceMappingURL=certifications.js.map

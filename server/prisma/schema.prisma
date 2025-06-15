@@ -1,0 +1,231 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Configuração do seed
+// Para executar: npm run seed
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("BRAND") // ADMIN, BRAND, LAB, CONSUMER
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  products              Product[]
+  validations           Validation[]
+  queueRequestedBy      ValidationQueue[]        @relation("QueueRequestedBy")
+  queueAssignedTo       ValidationQueue[]        @relation("QueueAssignedTo")
+  queueHistoryActions   ValidationQueueHistory[]
+  analyticsEvents       AnalyticsEvent[]
+
+  @@map("users")
+}
+
+model Laboratory {
+  id            String   @id @default(uuid())
+  name          String
+  accreditation String // ISO/IEC 17025, etc.
+  email         String   @unique
+  phone         String?
+  address       String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relacionamentos
+  reports Report[]
+
+  @@map("laboratories")
+}
+
+model Product {
+  id              String   @id @default(uuid())
+  name            String
+  brand           String
+  category        String
+  description     String?
+  sku             String   @unique
+  batchNumber     String?
+  nutritionalInfo String? // JSON como string
+  claims          String? // Claims separados por vírgula
+  imageUrl        String?
+  qrCode          String?  @unique
+  status          String   @default("DRAFT") // DRAFT, PENDING, VALIDATED, REJECTED, EXPIRED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relacionamentos
+  userId          String
+  user            User              @relation(fields: [userId], references: [id])
+  validations     Validation[]
+  reports         Report[]
+  seals           ProductSeal[]
+  validationQueue ValidationQueue[]
+
+  @@map("products")
+}
+
+model Report {
+  id              String   @id @default(uuid())
+  fileName        String
+  originalName    String
+  filePath        String
+  fileSize        Int
+  mimeType        String
+  analysisType    String // "nutritional", "gluten", "protein", etc.
+  results         String // JSON como string
+  isVerified      Boolean  @default(false)
+  verificationHash String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relacionamentos
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  laboratoryId  String
+  laboratory    Laboratory  @relation(fields: [laboratoryId], references: [id])
+  validations   Validation[]
+
+  @@map("reports")
+}
+
+model Validation {
+  id          String   @id @default(uuid())
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED, PARTIAL
+  type        String   @default("MANUAL") // MANUAL, LABORATORY
+  claimsValidated String? // JSON como string
+  summary     String? // Resumo em linguagem simples
+  notes       String? // Observações técnicas
+  validatedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacionamentos
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  reportId  String?  // Opcional para permitir validação manual
+  report    Report?  @relation(fields: [reportId], references: [id])
+  userId    String // Quem fez a validação
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@map("validations")
+}
+
+model ProductSeal {
+  id                   String   @id @default(uuid())
+  productId            String
+  sealId               String   // ID do selo (hardcoded)
+  certificateNumber    String?
+  issuedDate           DateTime?
+  expiryDate           DateTime?
+  validatingLaboratory String?
+  documentUrl          String?
+  status               String   @default("PENDING") // PENDING, VERIFIED, EXPIRED, INVALID
+  verifiedBy           String?
+  verifiedAt           DateTime?
+  notes                String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // Relacionamentos
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("product_seals")
+}
+
+model QRCodeAccess {
+  id        String   @id @default(uuid())
+  qrCode    String
+  ipAddress String?
+  userAgent String?
+  location  String? // Geolocalização se disponível
+  accessedAt DateTime @default(now())
+
+  @@map("qr_code_accesses")
+}
+
+// Validation Queue System Models
+model ValidationQueue {
+  id                String   @id @default(uuid())
+  productId         String
+  requestedById     String
+  assignedToId      String?
+  status            String   @default("PENDING") // PENDING, ASSIGNED, IN_PROGRESS, COMPLETED, CANCELLED, EXPIRED
+  priority          String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  category          String
+  estimatedDuration Int? // in minutes
+  actualDuration    Int? // in minutes
+  assignedAt        DateTime?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  dueDate           DateTime?
+  notes             String?
+  metadata          String? // JSON as string
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  product     Product                   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  requestedBy User                      @relation("QueueRequestedBy", fields: [requestedById], references: [id])
+  assignedTo  User?                     @relation("QueueAssignedTo", fields: [assignedToId], references: [id])
+  history     ValidationQueueHistory[]
+
+  @@map("validation_queue")
+}
+
+model ValidationQueueHistory {
+  id             String   @id @default(uuid())
+  queueId        String
+  action         String
+  previousStatus String?
+  newStatus      String?
+  performedById  String
+  reason         String?
+  metadata       String? // JSON as string
+  createdAt      DateTime @default(now())
+
+  // Relationships
+  queue       ValidationQueue @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  performedBy User            @relation(fields: [performedById], references: [id])
+
+  @@map("validation_queue_history")
+}
+
+// Real-time Analytics Events
+model AnalyticsEvent {
+  id         String   @id @default(uuid())
+  eventType  String
+  entityType String
+  entityId   String
+  userId     String?
+  sessionId  String?
+  data       String? // JSON as string
+  ipAddress  String?
+  userAgent  String?
+  timestamp  DateTime @default(now())
+
+  // Relationships
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("analytics_events")
+}
+
+// Enums como comentários para referência:
+// UserRole: ADMIN, BRAND, LAB, CONSUMER
+// ProductStatus: DRAFT, PENDING, VALIDATED, REJECTED, EXPIRED
+// ValidationStatus: PENDING, APPROVED, REJECTED, PARTIAL
+// ValidationTypes: MANUAL (sem relatório), LABORATORY (com relatório)
+// ValidationQueueStatus: PENDING, ASSIGNED, IN_PROGRESS, COMPLETED, CANCELLED, EXPIRED
+// ValidationPriority: LOW, NORMAL, HIGH, URGENT

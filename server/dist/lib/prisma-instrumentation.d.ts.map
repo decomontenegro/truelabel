@@ -1,0 +1,1 @@
+{"version":3,"file":"prisma-instrumentation.d.ts","sourceRoot":"","sources":["../../src/lib/prisma-instrumentation.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,YAAY,EAAE,MAAM,gBAAgB,CAAC;AAM9C,wBAAgB,sBAAsB,CAAC,MAAM,EAAE,YAAY,kIAuG1D;AAGD,wBAAgB,8BAA8B,mIA+C7C;AAGD,wBAAsB,gBAAgB,CAAC,MAAM,EAAE,YAAY;;;;;;;;GAkB1D"}
