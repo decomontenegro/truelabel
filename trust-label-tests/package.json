@@ -1,0 +1,31 @@
+{
+  "name": "trust-label-tests",
+  "version": "1.0.0",
+  "description": "Test suite for TRUST LABEL platform",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:unit": "jest --testPathPattern=unit",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:e2e": "jest --testPathPattern=e2e --runInBand",
+    "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "test:debug": "node --inspect-brk ./node_modules/.bin/jest --runInBand",
+    "test:clear": "jest --clearCache"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.30",
+    "@types/supertest": "^6.0.2",
+    "jest": "^29.7.0",
+    "jest-watch-typeahead": "^2.2.2",
+    "supertest": "^6.3.4",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.3"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "@prisma/client": "^5.11.0",
+    "dotenv": "^16.4.5"
+  }
+}

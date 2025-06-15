@@ -1,0 +1,452 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-06-15T00:00:00.000Z",
+  "apiVersion": "v1",
+  "baseUrl": "http://localhost:3334",
+  "routes": {
+    "auth": {
+      "prefix": "/auth",
+      "routes": {
+        "login": {
+          "method": "POST",
+          "path": "/login",
+          "implemented": true,
+          "authentication": false,
+          "description": "User authentication",
+          "requestSchema": {
+            "email": "string",
+            "password": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "token": "string",
+            "user": "object"
+          },
+          "errorCodes": [401, 400]
+        },
+        "verify": {
+          "method": "GET",
+          "path": "/verify",
+          "implemented": true,
+          "authentication": true,
+          "description": "Verify JWT token",
+          "responseSchema": {
+            "valid": "boolean",
+            "user": "object"
+          }
+        },
+        "profile": {
+          "method": "GET",
+          "path": "/profile",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get user profile",
+          "responseSchema": {
+            "success": "boolean",
+            "user": "object"
+          }
+        }
+      }
+    },
+    "products": {
+      "prefix": "/products",
+      "routes": {
+        "list": {
+          "method": "GET",
+          "path": "/",
+          "implemented": true,
+          "authentication": true,
+          "description": "List all products",
+          "queryParams": {
+            "page": "number",
+            "limit": "number",
+            "search": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "products": "array",
+            "pagination": "object"
+          }
+        },
+        "create": {
+          "method": "POST",
+          "path": "/",
+          "implemented": true,
+          "authentication": true,
+          "description": "Create new product",
+          "requestSchema": {
+            "name": "string",
+            "brand": "string",
+            "category": "string",
+            "description": "string",
+            "claims": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "product": "object",
+            "message": "string"
+          }
+        },
+        "get": {
+          "method": "GET",
+          "path": "/:id",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get product by ID",
+          "pathParams": {
+            "id": "string"
+          }
+        },
+        "update": {
+          "method": "PUT",
+          "path": "/:id",
+          "implemented": true,
+          "authentication": true,
+          "description": "Update product",
+          "pathParams": {
+            "id": "string"
+          },
+          "requestSchema": {
+            "name": "string",
+            "brand": "string",
+            "category": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "product": "object",
+            "message": "string"
+          }
+        },
+        "delete": {
+          "method": "DELETE",
+          "path": "/:id",
+          "implemented": true,
+          "authentication": true,
+          "description": "Delete product",
+          "pathParams": {
+            "id": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "message": "string"
+          }
+        }
+      }
+    },
+    "validations": {
+      "prefix": "/validations",
+      "routes": {
+        "list": {
+          "method": "GET",
+          "path": "/",
+          "implemented": true,
+          "authentication": true,
+          "description": "List validations"
+        },
+        "queue": {
+          "method": "GET",
+          "path": "/queue",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get validation queue"
+        },
+        "metrics": {
+          "method": "GET",
+          "path": "/metrics",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get validation metrics"
+        },
+        "expiring": {
+          "method": "GET",
+          "path": "/expiring",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get expiring validations",
+          "queryParams": {
+            "days": "number"
+          }
+        },
+        "revalidationRequests": {
+          "method": "GET",
+          "path": "/revalidation-requests",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get revalidation requests"
+        },
+        "formulaChangeAlerts": {
+          "method": "GET",
+          "path": "/formula-change-alerts",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get formula change alerts"
+        },
+        "lifecycleMetrics": {
+          "method": "GET",
+          "path": "/lifecycle-metrics",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get lifecycle metrics"
+        }
+      }
+    },
+    "certifications": {
+      "prefix": "/certifications",
+      "routes": {
+        "list": {
+          "method": "GET",
+          "path": "/",
+          "implemented": true,
+          "authentication": true,
+          "description": "List certifications"
+        },
+        "alerts": {
+          "method": "GET",
+          "path": "/alerts",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get certification alerts"
+        },
+        "statistics": {
+          "method": "GET",
+          "path": "/statistics",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get certification statistics"
+        }
+      }
+    },
+    "reports": {
+      "prefix": "/reports",
+      "routes": {
+        "list": {
+          "method": "GET",
+          "path": "/",
+          "implemented": true,
+          "authentication": true,
+          "description": "List reports"
+        },
+        "create": {
+          "method": "POST",
+          "path": "/",
+          "implemented": true,
+          "authentication": true,
+          "description": "Create new report",
+          "requestSchema": {
+            "title": "string",
+            "type": "string",
+            "filters": "object",
+            "format": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "report": "object",
+            "message": "string"
+          }
+        }
+      }
+    },
+    "notifications": {
+      "prefix": "/notifications",
+      "routes": {
+        "list": {
+          "method": "GET",
+          "path": "/",
+          "implemented": true,
+          "authentication": true,
+          "description": "List notifications"
+        }
+      }
+    },
+    "qr": {
+      "prefix": "/qr",
+      "routes": {
+        "generate": {
+          "method": "POST",
+          "path": "/generate",
+          "implemented": true,
+          "authentication": true,
+          "description": "Generate QR code",
+          "requestSchema": {
+            "productId": "string",
+            "data": "object"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "qrCode": "object",
+            "message": "string"
+          }
+        },
+        "validate": {
+          "method": "GET",
+          "path": "/validate/:code",
+          "implemented": true,
+          "authentication": false,
+          "description": "Validate QR code",
+          "pathParams": {
+            "code": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "valid": "boolean",
+            "product": "object",
+            "message": "string"
+          }
+        }
+      }
+    },
+    "laboratories": {
+      "baseUrl": "/laboratories",
+      "routes": {
+        "list": {
+          "method": "GET",
+          "path": "/",
+          "implemented": true,
+          "authentication": true,
+          "description": "List all laboratories",
+          "queryParams": {
+            "page": "number",
+            "limit": "number",
+            "search": "string",
+            "active": "boolean"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "data": "array",
+            "pagination": "object"
+          }
+        },
+        "create": {
+          "method": "POST",
+          "path": "/",
+          "implemented": true,
+          "authentication": true,
+          "description": "Create new laboratory",
+          "requestSchema": {
+            "name": "string",
+            "accreditation": "string",
+            "email": "string",
+            "phone": "string",
+            "address": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "laboratory": "object",
+            "message": "string"
+          }
+        },
+        "get": {
+          "method": "GET",
+          "path": "/:id",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get laboratory by ID",
+          "pathParams": {
+            "id": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "laboratory": "object"
+          }
+        },
+        "update": {
+          "method": "PUT",
+          "path": "/:id",
+          "implemented": true,
+          "authentication": true,
+          "description": "Update laboratory",
+          "pathParams": {
+            "id": "string"
+          },
+          "requestSchema": {
+            "name": "string",
+            "accreditation": "string",
+            "email": "string",
+            "phone": "string",
+            "address": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "laboratory": "object",
+            "message": "string"
+          }
+        },
+        "delete": {
+          "method": "DELETE",
+          "path": "/:id",
+          "implemented": true,
+          "authentication": true,
+          "description": "Delete laboratory",
+          "pathParams": {
+            "id": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "message": "string"
+          }
+        },
+        "stats": {
+          "method": "GET",
+          "path": "/:id/stats",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get laboratory statistics",
+          "pathParams": {
+            "id": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "stats": "object"
+          }
+        },
+        "reports": {
+          "method": "GET",
+          "path": "/:id/reports",
+          "implemented": true,
+          "authentication": true,
+          "description": "Get laboratory reports",
+          "pathParams": {
+            "id": "string"
+          },
+          "queryParams": {
+            "page": "number",
+            "limit": "number",
+            "status": "string"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "data": "array",
+            "pagination": "object"
+          }
+        },
+        "updateStatus": {
+          "method": "PATCH",
+          "path": "/:id/status",
+          "implemented": true,
+          "authentication": true,
+          "description": "Update laboratory status",
+          "pathParams": {
+            "id": "string"
+          },
+          "requestSchema": {
+            "isActive": "boolean"
+          },
+          "responseSchema": {
+            "success": "boolean",
+            "laboratory": "object",
+            "message": "string"
+          }
+        }
+      }
+    }
+  },
+  "metadata": {
+    "totalRoutes": 33,
+    "implementedRoutes": 33,
+    "implementationRate": "100%",
+    "missingRoutes": 0,
+    "lastAudit": "2025-06-15T14:30:00.000Z",
+    "backendFile": "server/src/index-managed.js",
+    "status": "LABORATORIES_COMPLETE"
+  }
+}

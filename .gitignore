@@ -1,0 +1,4 @@
+deprecated-backup-*/
+backup-*/
+*.log
+api-route-*-report.json

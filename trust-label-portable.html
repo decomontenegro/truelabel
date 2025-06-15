@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRUST LABEL - Sistema Portátil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .validation-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border: 2px solid #e0e0e0;
+            position: relative;
+            overflow: hidden;
+        }
+        .validation-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.05) 10px,
+                rgba(255,255,255,0.05) 20px
+            );
+            animation: slide 20s linear infinite;
+        }
+        @keyframes slide {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        .trust-badge {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app" class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-10 h-10" viewBox="0 0 40 40" fill="none">
+                            <path d="M8 8h8v24H8V8z" fill="#000"/>
+                            <path d="M16 8h16v8H16V8z" fill="#000"/>
+                            <circle cx="24" cy="24" r="8" fill="#000"/>
+                        </svg>
+                        <div>
+                            <span class="text-2xl font-bold">trust</span>
+                            <span class="text-2xl">label</span>
+                            <span class="text-xs text-gray-500 ml-2">v3.0 portable</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Hero Section -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                    Validação Inteligente com IA
+                </h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Sistema completo de validação de produtos com inteligência artificial,
+                    QR codes rastreáveis e certificações brasileiras
+                </p>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <button onclick="showValidateProduct()" class="bg-blue-600 text-white p-6 rounded-xl hover:bg-blue-700 transition transform hover:scale-105">
+                    <svg class="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="text-lg font-semibold">Validar Produto</h3>
+                    <p class="text-sm mt-2 opacity-90">Análise completa com IA</p>
+                </button>
+
+                <button onclick="showGenerateQR()" class="bg-purple-600 text-white p-6 rounded-xl hover:bg-purple-700 transition transform hover:scale-105">
+                    <svg class="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M8 20h2m-2-4v-4m0-4h2"></path>
+                    </svg>
+                    <h3 class="text-lg font-semibold">Gerar QR Code</h3>
+                    <p class="text-sm mt-2 opacity-90">Rastreamento inteligente</p>
+                </button>
+
+                <button onclick="showDashboard()" class="bg-green-600 text-white p-6 rounded-xl hover:bg-green-700 transition transform hover:scale-105">
+                    <svg class="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <h3 class="text-lg font-semibold">Dashboard</h3>
+                    <p class="text-sm mt-2 opacity-90">Analytics em tempo real</p>
+                </button>
+            </div>
+
+            <!-- Dynamic Content Area -->
+            <div id="content-area">
+                <!-- Validation Example -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Product Card -->
+                    <div class="validation-card rounded-2xl p-8 relative">
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-900">Whey Protein Premium</h2>
+                                    <p class="text-gray-600">EAN: 7891234567890</p>
+                                </div>
+                                <span class="trust-badge">Validado</span>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-3">
+                                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>80g de proteína por porção verificado</span>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Certificação ANVISA válida</span>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Laboratório acreditado ISO 17025</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 pt-6 border-t border-gray-300">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Validado em</p>
+                                        <p class="font-semibold">14/06/2025</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Confiança</p>
+                                        <p class="font-semibold text-green-600">95%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code Card -->
+                    <div class="bg-white rounded-2xl shadow-lg p-8">
+                        <h3 class="text-xl font-bold mb-6 text-center">QR Code Rastreável</h3>
+                        <div id="qr-display" class="flex justify-center mb-6"></div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 mb-4">
+                                Escaneie para verificar autenticidade
+                            </p>
+                            <button onclick="downloadQR()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                                Baixar QR Code
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12">
+                    <div class="bg-white rounded-lg shadow p-6 text-center">
+                        <p class="text-3xl font-bold text-blue-600">1,234</p>
+                        <p class="text-gray-600 mt-2">Produtos Validados</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6 text-center">
+                        <p class="text-3xl font-bold text-green-600">95%</p>
+                        <p class="text-gray-600 mt-2">Taxa de Aprovação</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6 text-center">
+                        <p class="text-3xl font-bold text-purple-600">45,678</p>
+                        <p class="text-gray-600 mt-2">QR Scans</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6 text-center">
+                        <p class="text-3xl font-bold text-yellow-600">23</p>
+                        <p class="text-gray-600 mt-2">Laboratórios Parceiros</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modals -->
+        <div id="validate-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <h2 class="text-2xl font-bold mb-6">Validar Produto</h2>
+                <form id="validate-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
+                        <input type="text" class="w-full px-4 py-2 border rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">EAN/Código de Barras</label>
+                        <input type="text" class="w-full px-4 py-2 border rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                        <select class="w-full px-4 py-2 border rounded-lg">
+                            <option>Suplemento Alimentar</option>
+                            <option>Alimento Funcional</option>
+                            <option>Cosmético</option>
+                            <option>Medicamento</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Claims do Produto</label>
+                        <textarea class="w-full px-4 py-2 border rounded-lg" rows="4" placeholder="Ex: 80g de proteína por porção, Zero açúcar, etc"></textarea>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+                            Iniciar Validação com IA
+                        </button>
+                        <button type="button" onclick="closeModal('validate-modal')" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+                <div id="validation-result" class="hidden mt-6 p-6 bg-green-50 rounded-lg">
+                    <h3 class="text-lg font-semibold text-green-800 mb-3">✓ Validação Concluída</h3>
+                    <p class="text-green-700">Produto validado com 95% de confiança. QR Code gerado.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="qr-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-8 max-w-md w-full">
+                <h2 class="text-2xl font-bold mb-6">Gerar QR Code</h2>
+                <form id="qr-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Selecione o Produto</label>
+                        <select class="w-full px-4 py-2 border rounded-lg">
+                            <option>Whey Protein Premium</option>
+                            <option>BCAA Complex</option>
+                            <option>Creatina Monohidratada</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de QR</label>
+                        <select class="w-full px-4 py-2 border rounded-lg">
+                            <option>Validação Completa</option>
+                            <option>Rastreamento Simples</option>
+                            <option>Certificado Digital</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="submit" class="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700">
+                            Gerar QR Code
+                        </button>
+                        <button type="button" onclick="closeModal('qr-modal')" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+                <div id="qr-result" class="hidden mt-6 text-center">
+                    <div id="qr-modal-display" class="mb-4"></div>
+                    <button onclick="downloadModalQR()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                        Baixar QR Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize QR Code on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            generateSampleQR();
+        });
+
+        function generateSampleQR() {
+            const qrContainer = document.getElementById('qr-display');
+            qrContainer.innerHTML = '';
+            const canvas = document.createElement('canvas');
+            QRCode.toCanvas(canvas, 'https://trustlabel.com/v/sample-product-123', {
+                width: 200,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            }, function(error) {
+                if (!error) qrContainer.appendChild(canvas);
+            });
+        }
+
+        function showValidateProduct() {
+            document.getElementById('validate-modal').classList.remove('hidden');
+        }
+
+        function showGenerateQR() {
+            document.getElementById('qr-modal').classList.remove('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('content-area').innerHTML = `
+                <h2 class="text-3xl font-bold mb-8">Dashboard Analytics</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Validações por Mês</h3>
+                        <canvas id="chart-validations" height="200"></canvas>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Categorias Mais Validadas</h3>
+                        <canvas id="chart-categories" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="mt-8 bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4">Últimas Validações</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                            <div>
+                                <p class="font-medium">Whey Protein Premium</p>
+                                <p class="text-sm text-gray-600">Validado há 2 horas</p>
+                            </div>
+                            <span class="text-green-600 font-medium">95% confiança</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                            <div>
+                                <p class="font-medium">BCAA Complex</p>
+                                <p class="text-sm text-gray-600">Validado há 5 horas</p>
+                            </div>
+                            <span class="text-green-600 font-medium">92% confiança</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                            <div>
+                                <p class="font-medium">Creatina Monohidratada</p>
+                                <p class="text-sm text-gray-600">Validado há 1 dia</p>
+                            </div>
+                            <span class="text-green-600 font-medium">98% confiança</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Create charts
+            setTimeout(() => {
+                createCharts();
+            }, 100);
+        }
+
+        function createCharts() {
+            // Validations chart
+            const ctx1 = document.getElementById('chart-validations').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: 'Validações',
+                        data: [65, 78, 90, 120, 145, 189],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Categories chart
+            const ctx2 = document.getElementById('chart-categories').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Suplementos', 'Alimentos', 'Cosméticos', 'Medicamentos'],
+                    datasets: [{
+                        data: [45, 30, 15, 10],
+                        backgroundColor: [
+                            'rgb(59, 130, 246)',
+                            'rgb(16, 185, 129)',
+                            'rgb(251, 146, 60)',
+                            'rgb(147, 51, 234)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function downloadQR() {
+            const canvas = document.querySelector('#qr-display canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'trustlabel-qrcode.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+        }
+
+        function downloadModalQR() {
+            const canvas = document.querySelector('#qr-modal-display canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'trustlabel-product-qr.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+        }
+
+        // Form handlers
+        document.getElementById('validate-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Simulate validation
+            setTimeout(() => {
+                document.getElementById('validation-result').classList.remove('hidden');
+            }, 1500);
+        });
+
+        document.getElementById('qr-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Generate QR
+            const qrContainer = document.getElementById('qr-modal-display');
+            qrContainer.innerHTML = '';
+            const canvas = document.createElement('canvas');
+            QRCode.toCanvas(canvas, 'https://trustlabel.com/v/product-' + Date.now(), {
+                width: 200,
+                margin: 2
+            }, function(error) {
+                if (!error) {
+                    qrContainer.appendChild(canvas);
+                    document.getElementById('qr-result').classList.remove('hidden');
+                }
+            });
+        });
+
+        // Close modals on outside click
+        document.querySelectorAll('.fixed').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

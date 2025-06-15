@@ -14,7 +14,7 @@ True Label is a transparent CPG (Consumer Packaged Goods) validation platform th
 npm run install:all
 
 # Start both frontend and backend servers
-npm run dev  # Frontend: http://localhost:3001, Backend: http://localhost:3000
+npm run dev  # Frontend: http://localhost:9101, Backend: http://localhost:9100
 
 # Run tests
 npm test  # Runs all tests (frontend + backend)
@@ -90,13 +90,13 @@ npm run migrate     # Apply pending migrations
 ```bash
 # Required environment variables
 # Frontend (.env in /client)
-VITE_API_BASE_URL=http://localhost:3000/api/v1
-VITE_QR_BASE_URL=http://localhost:3001
+VITE_API_BASE_URL=http://localhost:9100/api/v1
+VITE_QR_BASE_URL=http://localhost:9101
 
 # Backend (.env in /server)
 DATABASE_URL="file:./dev.db"
 JWT_SECRET=your-secret-key
-PORT=3000
+PORT=9100
 ```
 
 ## Test Credentials

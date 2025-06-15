@@ -1,0 +1,40 @@
+{
+  "name": "truelabel-route-management",
+  "version": "1.0.0",
+  "description": "True Label API Route Management System",
+  "main": "api-route-manager.js",
+  "scripts": {
+    "audit": "node api-route-manager.js audit",
+    "validate": "node api-route-manager.js validate",
+    "generate": "node api-route-manager.js generate",
+    "sync": "node api-route-manager.js sync",
+    "status": "node api-route-manager.js status",
+    "fix": "node api-route-manager.js fix",
+    "compliance": "./check-compliance.sh",
+    "start-backend": "./start-backend-managed.sh",
+    "cleanup": "./cleanup-deprecated.sh"
+  },
+  "dependencies": {
+    "axios": "^1.10.0"
+  },
+  "keywords": [
+    "api",
+    "routes",
+    "management",
+    "truelabel",
+    "validation"
+  ],
+  "author": "True Label Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/decomontenegro/truelabel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/decomontenegro/truelabel/issues"
+  },
+  "homepage": "https://github.com/decomontenegro/truelabel#readme"
+}
