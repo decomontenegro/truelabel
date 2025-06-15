@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "True Label API for Vercel deployment",
   "main": "index.js",
-  "dependencies": {
-    "node-fetch": "^2.6.7"
-  },
+  "dependencies": {},
   "engines": {
     "node": ">=18.0.0"
   }
