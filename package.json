@@ -13,9 +13,9 @@
     "compliance": "./check-compliance.sh",
     "start-backend": "./start-backend-managed.sh",
     "cleanup": "./cleanup-deprecated.sh",
-    "build:railway": "cd server && npm install",
-    "start:railway": "cd server && npm start",
-    "dev:railway": "cd server && npm run dev"
+    "build": "cd server && npm install",
+    "start": "cd server && node src/index-managed.js",
+    "dev": "cd server && npm run dev"
   },
   "dependencies": {
     "axios": "^1.10.0"
