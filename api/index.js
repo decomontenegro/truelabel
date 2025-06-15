@@ -1,5 +1,12 @@
 // True Label API - Vercel Proxy to Railway
 // Automatically configured by configure-railway-integration.sh
+
+// Polyfill fetch for Node.js environments
+if (!globalThis.fetch) {
+  const { default: fetch } = require('node-fetch');
+  globalThis.fetch = fetch;
+}
+
 module.exports = async (req, res) => {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
