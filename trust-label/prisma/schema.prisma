@@ -1,0 +1,423 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User and Authentication
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  brand        Brand?
+  laboratory   Laboratory?
+  prescriber   Prescriber?
+  sessions     Session[]
+  activities   ActivityLog[]
+}
+
+enum UserRole {
+  ADMIN
+  BRAND
+  LABORATORY
+  PRESCRIBER
+  CONSUMER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// Brand Management
+model Brand {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  name        String
+  cnpj        String   @unique
+  logo        String?
+  website     String?
+  description String?
+  status      BrandStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id])
+  products   Product[]
+  contracts  Contract[]
+}
+
+enum BrandStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+// Product Management
+model Product {
+  id          String   @id @default(cuid())
+  brandId     String
+  name        String
+  description String?
+  barcode     String   @unique
+  sku         String   @unique
+  category    String
+  images      Json     // Array of image URLs
+  status      ProductStatus @default(DRAFT)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand       Brand        @relation(fields: [brandId], references: [id])
+  claims      Claim[]
+  validations Validation[]
+  qrCodes     QRCode[]
+}
+
+enum ProductStatus {
+  DRAFT
+  PENDING_VALIDATION
+  VALIDATED
+  EXPIRED
+  SUSPENDED
+}
+
+// Claims and Validations
+model Claim {
+  id          String   @id @default(cuid())
+  productId   String
+  type        ClaimType
+  category    String
+  value       String
+  unit        String?
+  description String?
+  createdAt   DateTime @default(now())
+
+  product     Product      @relation(fields: [productId], references: [id])
+  validations ValidationClaim[]
+}
+
+enum ClaimType {
+  NUTRITIONAL
+  HEALTH
+  CERTIFICATION
+  ALLERGEN
+  HEAVY_METAL
+  MICROBIOLOGICAL
+  BANNED_SUBSTANCE
+  OTHER
+}
+
+model Validation {
+  id           String   @id @default(cuid())
+  productId    String
+  laboratoryId String
+  reportNumber String   @unique
+  reportUrl    String
+  status       ValidationStatus @default(PENDING)
+  validFrom    DateTime
+  validUntil   DateTime
+  metadata     Json     // Additional validation data
+  aiAnalysis   Json?    // AI analysis results
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  product      Product          @relation(fields: [productId], references: [id])
+  laboratory   Laboratory       @relation(fields: [laboratoryId], references: [id])
+  claims       ValidationClaim[]
+  certificates Certificate[]
+}
+
+enum ValidationStatus {
+  PENDING
+  IN_REVIEW
+  VALIDATED
+  VALIDATED_WITH_REMARKS
+  REJECTED
+  EXPIRED
+}
+
+model ValidationClaim {
+  id           String   @id @default(cuid())
+  validationId String
+  claimId      String
+  status       ClaimValidationStatus
+  actualValue  String?
+  remarks      String?
+  confidence   Float    // AI confidence score
+  methodology  String?
+  createdAt    DateTime @default(now())
+
+  validation Validation @relation(fields: [validationId], references: [id])
+  claim      Claim      @relation(fields: [claimId], references: [id])
+
+  @@unique([validationId, claimId])
+}
+
+enum ClaimValidationStatus {
+  VALIDATED
+  VALIDATED_WITH_REMARKS
+  NOT_VALIDATED
+  NOT_APPLICABLE
+}
+
+// Laboratory Management
+model Laboratory {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  name         String
+  cnpj         String   @unique
+  accreditation String[]
+  certifications String[]
+  specialties  String[]
+  status       LaboratoryStatus @default(PENDING)
+  apiEndpoint  String?
+  apiKey       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id])
+  validations  Validation[]
+  certificates Certificate[]
+}
+
+enum LaboratoryStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+// QR Code Management
+model QRCode {
+  id        String   @id @default(cuid())
+  productId String
+  code      String   @unique
+  shortUrl  String   @unique
+  fullUrl   String
+  version   Int      @default(1)
+  isActive  Boolean  @default(true)
+  scans     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product   Product    @relation(fields: [productId], references: [id])
+  scanLogs  ScanLog[]
+}
+
+model ScanLog {
+  id         String   @id @default(cuid())
+  qrCodeId   String
+  ip         String?
+  userAgent  String?
+  location   Json?    // Geolocation data
+  referrer   String?
+  createdAt  DateTime @default(now())
+
+  qrCode QRCode @relation(fields: [qrCodeId], references: [id])
+}
+
+// Prescriber Management
+model Prescriber {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  name         String
+  profession   String
+  license      String   @unique
+  specialties  String[]
+  status       PrescriberStatus @default(PENDING)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User              @relation(fields: [userId], references: [id])
+  prescriptions Prescription[]
+  favorites    PrescriberFavorite[]
+}
+
+enum PrescriberStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+model Prescription {
+  id           String   @id @default(cuid())
+  prescriberId String
+  patientName  String
+  products     Json     // Array of product IDs with notes
+  notes        String?
+  validUntil   DateTime?
+  createdAt    DateTime @default(now())
+
+  prescriber Prescriber @relation(fields: [prescriberId], references: [id])
+}
+
+model PrescriberFavorite {
+  id           String   @id @default(cuid())
+  prescriberId String
+  productId    String
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  prescriber Prescriber @relation(fields: [prescriberId], references: [id])
+
+  @@unique([prescriberId, productId])
+}
+
+// Certificates and Documents
+model Certificate {
+  id           String   @id @default(cuid())
+  validationId String
+  laboratoryId String
+  type         String
+  number       String   @unique
+  issueDate    DateTime
+  expiryDate   DateTime?
+  documentUrl  String
+  hash         String   // Document hash for integrity
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  validation Validation @relation(fields: [validationId], references: [id])
+  laboratory Laboratory @relation(fields: [laboratoryId], references: [id])
+}
+
+// Contracts and Billing
+model Contract {
+  id          String   @id @default(cuid())
+  brandId     String
+  planType    PlanType
+  startDate   DateTime
+  endDate     DateTime?
+  status      ContractStatus @default(ACTIVE)
+  maxProducts Int
+  maxScans    Int
+  price       Float
+  currency    String   @default("BRL")
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand    Brand     @relation(fields: [brandId], references: [id])
+  invoices Invoice[]
+  usage    Usage[]
+}
+
+enum PlanType {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+  CUSTOM
+}
+
+enum ContractStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+  EXPIRED
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  contractId  String
+  amount      Float
+  currency    String   @default("BRL")
+  status      InvoiceStatus @default(PENDING)
+  dueDate     DateTime
+  paidAt      DateTime?
+  invoiceUrl  String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id])
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Usage {
+  id         String   @id @default(cuid())
+  contractId String
+  type       UsageType
+  quantity   Int
+  date       DateTime
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id])
+}
+
+enum UsageType {
+  PRODUCT_CREATED
+  VALIDATION_CREATED
+  QR_SCAN
+  API_CALL
+}
+
+// Activity Logging
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entity     String
+  entityId   String?
+  metadata   Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+}
+
+// AI Analysis Queue
+model AIAnalysisJob {
+  id           String   @id @default(cuid())
+  type         AIJobType
+  status       AIJobStatus @default(PENDING)
+  input        Json
+  output       Json?
+  error        String?
+  attempts     Int      @default(0)
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+enum AIJobType {
+  CLAIM_EXTRACTION
+  REPORT_PARSING
+  VALIDATION_MATCHING
+  ANOMALY_DETECTION
+  CONFIDENCE_SCORING
+}
+
+enum AIJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}

@@ -39,5 +39,10 @@
   "bugs": {
     "url": "https://github.com/decomontenegro/truelabel/issues"
   },
-  "homepage": "https://github.com/decomontenegro/truelabel#readme"
+  "homepage": "https://github.com/decomontenegro/truelabel#readme",
+  "devDependencies": {
+    "@types/node": "^24.0.3",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.3"
+  }
 }

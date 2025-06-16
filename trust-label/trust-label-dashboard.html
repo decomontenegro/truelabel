@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRUST LABEL - Dashboard de Validação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .status-approved { background-color: #10B981; }
+        .status-warning { background-color: #F59E0B; }
+        .status-rejected { background-color: #EF4444; }
+        .shadow-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex items-center">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-8 h-8" viewBox="0 0 40 40" fill="none">
+                                <path d="M8 8h8v24H8V8z" fill="#000"/>
+                                <path d="M16 8h16v8H16V8z" fill="#000"/>
+                                <circle cx="24" cy="24" r="8" fill="#000"/>
+                            </svg>
+                            <span class="text-xl font-bold">trust</span>
+                            <span class="text-xl">label</span>
+                        </div>
+                    </div>
+                </div>
+                <nav class="flex space-x-8">
+                    <a href="#" class="text-gray-700 hover:text-gray-900 font-medium">Dashboard</a>
+                    <a href="#" class="text-gray-700 hover:text-gray-900 font-medium">Produtos</a>
+                    <a href="#" class="text-gray-700 hover:text-gray-900 font-medium">Validações</a>
+                    <a href="#" class="text-gray-700 hover:text-gray-900 font-medium">Relatórios</a>
+                </nav>
+                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                    Nova Validação
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Relatório de Validação</h1>
+            <p class="text-gray-600 mt-2">Análise completa do produto com tecnologia AI</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Summary Card -->
+            <div class="bg-white rounded-xl shadow-card overflow-hidden">
+                <div class="bg-blue-600 text-white p-4">
+                    <h2 class="text-2xl font-bold">2025 <span class="font-normal">Relatório</span></h2>
+                </div>
+                <div class="p-6 space-y-3">
+                    <!-- Perfil Nutricional -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-900">Perfil Nutricional</div>
+                            <div class="text-sm text-gray-600">5 itens</div>
+                        </div>
+                        <span class="px-3 py-1 text-sm font-medium bg-yellow-400 text-gray-900 rounded-full">
+                            Aprovado com Ressalvas
+                        </span>
+                    </div>
+
+                    <!-- Metais Pesados -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-900">Metais Pesados</div>
+                            <div class="text-sm text-gray-600">4 itens</div>
+                        </div>
+                        <span class="px-3 py-1 text-sm font-medium bg-green-500 text-white rounded-full">
+                            Aprovado
+                        </span>
+                    </div>
+
+                    <!-- Alergênicos -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-900">Alergênicos</div>
+                            <div class="text-sm text-gray-600">4 itens</div>
+                        </div>
+                        <span class="px-3 py-1 text-sm font-medium bg-red-500 text-white rounded-full">
+                            Reprovado
+                        </span>
+                    </div>
+
+                    <!-- Pesticidas e Herbicidas -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-900">Pesticidas e Herbicidas</div>
+                            <div class="text-sm text-gray-600">3 itens</div>
+                        </div>
+                        <span class="px-3 py-1 text-sm font-medium bg-green-500 text-white rounded-full">
+                            Aprovado
+                        </span>
+                    </div>
+
+                    <!-- Micróbios e Toxinas -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-900">Micróbios e Toxinas</div>
+                            <div class="text-sm text-gray-600">4 itens</div>
+                        </div>
+                        <span class="px-3 py-1 text-sm font-medium bg-green-500 text-white rounded-full">
+                            Aprovado
+                        </span>
+                    </div>
+
+                    <!-- Substâncias Banidas -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-900">Substâncias Banidas</div>
+                            <div class="text-sm text-gray-600">9 itens</div>
+                        </div>
+                        <span class="px-3 py-1 text-sm font-medium bg-green-500 text-white rounded-full">
+                            Aprovado
+                        </span>
+                    </div>
+
+                    <!-- Solventes Residuais -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-900">Solventes Residuais</div>
+                            <div class="text-sm text-gray-600">3 itens</div>
+                        </div>
+                        <span class="px-3 py-1 text-sm font-medium bg-green-500 text-white rounded-full">
+                            Aprovado
+                        </span>
+                    </div>
+
+                    <!-- Certificações -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-900">Certificações</div>
+                            <div class="text-sm text-gray-600">5 itens</div>
+                        </div>
+                        <span class="px-3 py-1 text-sm font-medium bg-green-500 text-white rounded-full">
+                            Aprovado
+                        </span>
+                    </div>
+
+                    <!-- Microscopia -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-900">Microscopia e Macroscopia</div>
+                        </div>
+                        <button class="px-3 py-1 text-sm font-medium border border-gray-300 text-gray-700 rounded-full hover:bg-gray-100">
+                            Sem análise
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-black text-white p-4 text-center text-sm">
+                    <span class="opacity-60">©2025 trust label</span>
+                    <span class="float-right">trustlabel.com</span>
+                </div>
+            </div>
+
+            <!-- Detail Card -->
+            <div class="bg-white rounded-xl shadow-card overflow-hidden">
+                <div class="bg-blue-600 text-white p-4">
+                    <h2 class="text-2xl font-bold">2025 <span class="font-normal">Relatório</span></h2>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <h3 class="font-semibold text-lg">Perfil Nutricional</h3>
+                        <p class="text-yellow-600 text-sm">5 itens - Aprovado com Ressalvas</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-900 text-white">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-sm font-medium">Critério</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium">Descrição</th>
+                                    <th class="px-4 py-2 text-center text-sm font-medium">Status</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium">Ressalva</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm">Proteínas</td>
+                                    <td class="px-4 py-3 text-sm">Proteínas medidas: 8g (rótulo: 8g)</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="text-yellow-500 text-xl">⚠️</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">Dentro do limite de 20% permitido pela legislação</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm">Carboidratos</td>
+                                    <td class="px-4 py-3 text-sm">Carboidratos medidos: 20g (rótulo: 21g)</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="text-yellow-500 text-xl">⚠️</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">Dentro do limite de 20% permitido pela legislação</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm">Gorduras</td>
+                                    <td class="px-4 py-3 text-sm">Gorduras medidas: 5g (rótulo: 5g)</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="text-green-500 text-xl">✓</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm">Vitaminas</td>
+                                    <td class="px-4 py-3 text-sm">Abrir as vitaminas declaradas</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="text-green-500 text-xl">✓</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 text-sm">Minerais</td>
+                                    <td class="px-4 py-3 text-sm">Abrir as linhas por minerais declarados</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="text-green-500 text-xl">✓</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="bg-black text-white p-4 text-center text-sm">
+                    <span class="opacity-60">©2025 trust label</span>
+                    <span class="float-right">trustlabel.com</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Analysis Section -->
+        <div class="mt-8 bg-white rounded-xl shadow-card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Análise AI</h3>
+                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                    Powered by AI
+                </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-3xl font-bold text-blue-600">95%</div>
+                    <div class="text-sm text-gray-600">Confiança na Validação</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-3xl font-bold text-green-600">0</div>
+                    <div class="text-sm text-gray-600">Anomalias Detectadas</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-3xl font-bold text-purple-600">12</div>
+                    <div class="text-sm text-gray-600">Pontos Analisados</div>
+                </div>
+            </div>
+            <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                <p class="text-sm text-gray-700">
+                    <strong>Recomendação AI:</strong> O produto apresenta conformidade geral com pequenas variações dentro dos limites legais. 
+                    Recomenda-se monitoramento contínuo dos valores nutricionais para manter a consistência.
+                </p>
+            </div>
+        </div>
+
+        <!-- QR Code Section -->
+        <div class="mt-8 bg-white rounded-xl shadow-card p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">QR Code do Produto</h3>
+            <div class="flex items-center space-x-6">
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <svg class="w-32 h-32" viewBox="0 0 128 128" fill="none">
+                        <!-- Simplified QR Code representation -->
+                        <rect width="128" height="128" fill="white"/>
+                        <path d="M8 8h40v40H8z M80 8h40v40H80z M8 80h40v40H8z" fill="black"/>
+                        <path d="M16 16h24v24H16z M88 16h24v24H88z M16 88h24v24H16z" fill="white"/>
+                        <path d="M56 8h16v16H56z M8 56h16v16H8z M56 56h16v16H56z M104 56h16v16h-16z M80 80h16v16H80z M56 104h16v16H56z" fill="black"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-gray-700 mb-2">Escaneie o código para acessar o relatório completo</p>
+                    <p class="text-sm text-gray-500">URL: trustlabel.com/v/ABC123XYZ</p>
+                    <button class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        Baixar QR Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm">© 2025 TRUST LABEL - Transparência através de tecnologia AI</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white">Termos</a>
+                    <a href="#" class="text-gray-400 hover:text-white">Privacidade</a>
+                    <a href="#" class="text-gray-400 hover:text-white">Contato</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simular dados dinâmicos
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('TRUST LABEL Dashboard carregado com sucesso!');
+            
+            // Adicionar interatividade aos cards
+            const cards = document.querySelectorAll('.bg-gray-50');
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    this.classList.toggle('ring-2');
+                    this.classList.toggle('ring-blue-500');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

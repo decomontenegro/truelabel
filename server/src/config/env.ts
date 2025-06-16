@@ -84,13 +84,15 @@ export const config = {
   isTest: env.NODE_ENV === 'test',
   
   // CORS origins
-  corsOrigins: env.CORS_ORIGIN 
+  corsOrigins: env.CORS_ORIGIN
     ? env.CORS_ORIGIN.split(',').map(origin => origin.trim())
     : [
         env.FRONTEND_URL,
         'http://localhost:3000',
         'http://localhost:3001',
         'http://localhost:3002',
+        'http://localhost:5001',
+        'http://localhost:5002',
         'http://localhost:5173',
       ],
   

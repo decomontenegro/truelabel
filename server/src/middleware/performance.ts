@@ -9,7 +9,8 @@ import {
   cacheMisses
 } from '../lib/metrics';
 import { log } from '../lib/logger';
-import { captureException, startTransaction, setUser } from '@sentry/node';
+import { captureException, setUser } from '@sentry/node';
+import { startTransaction } from '../lib/sentry';
 import { AuthRequest } from './auth';
 
 // Middleware para medir tempo de resposta

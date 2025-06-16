@@ -2,8 +2,10 @@ import express from 'express';
 import { authenticateToken, requireAdmin } from '../middleware/auth';
 import { MetricsService } from '../services/metricsService';
 import { createError } from '../middleware/errorHandler';
+import { PrismaClient } from '@prisma/client';
 
 const router = express.Router();
+const prisma = new PrismaClient();
 
 // Get comprehensive business metrics (Admin only)
 router.get('/metrics', authenticateToken, requireAdmin, async (req, res, next) => {
@@ -513,7 +515,5 @@ router.get('/metrics/engagement', authenticateToken, requireAdmin, async (req, r
     next(error);
   }
 });
-
-const prisma = new PrismaClient();
 
 export default router;

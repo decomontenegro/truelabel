@@ -1,0 +1,25 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@trust-label/shared/*": ["packages/shared/src/*"],
+      "@trust-label/web/*": ["packages/web/src/*"],
+      "@trust-label/api/*": ["packages/api/src/*"],
+      "@trust-label/mobile/*": ["packages/mobile/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

@@ -1,0 +1,54 @@
+# Build stage
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY packages/web/package*.json ./packages/web/
+COPY packages/shared/package*.json ./packages/shared/
+
+# Install dependencies
+RUN npm ci --workspace=@trust-label/web --workspace=@trust-label/shared
+
+# Copy source code
+COPY packages/web ./packages/web
+COPY packages/shared ./packages/shared
+COPY tsconfig.base.json ./
+
+# Build shared package first
+RUN npm run build --workspace=@trust-label/shared
+
+# Build web application
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+RUN npm run build --workspace=@trust-label/web
+
+# Production stage
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dumb-init
+RUN apk add --no-cache dumb-init
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+
+# Copy built application
+COPY --from=builder --chown=nodejs:nodejs /app/packages/web/.next/standalone ./
+COPY --from=builder --chown=nodejs:nodejs /app/packages/web/.next/static ./packages/web/.next/static
+COPY --from=builder --chown=nodejs:nodejs /app/packages/web/public ./packages/web/public
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port
+EXPOSE 3000
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application
+CMD ["node", "packages/web/server.js"]

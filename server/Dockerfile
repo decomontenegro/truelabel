@@ -1,35 +1,64 @@
-# Dockerfile para o Backend
-FROM node:18-alpine
+# Build stage
+FROM node:18-alpine AS builder
 
-# Instalar dependências do sistema
-RUN apk add --no-cache \
-    postgresql-client \
-    curl
-
-# Criar diretório da aplicação
 WORKDIR /app
 
-# Copiar arquivos de dependências
+# Copy package files
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Instalar dependências
-RUN npm ci --only=production
+# Install dependencies
+RUN npm ci
 
-# Copiar código fonte
+# Copy source code
 COPY . .
 
-# Gerar cliente Prisma
+# Generate Prisma client
 RUN npx prisma generate
 
-# Compilar TypeScript
+# Build the application
 RUN npm run build
 
-# Criar diretório para uploads
-RUN mkdir -p uploads
+# Production stage
+FROM node:18-alpine
 
-# Expor porta
-EXPOSE 3001
+WORKDIR /app
 
-# Comando de inicialização
-CMD ["npm", "start"]
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init postgresql-client curl
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+
+# Copy package files
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install production dependencies only
+RUN npm ci --only=production && \
+    npx prisma generate && \
+    npm cache clean --force
+
+# Copy built application from builder stage
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+
+# Create necessary directories
+RUN mkdir -p uploads logs && \
+    chown -R nodejs:nodejs uploads logs
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:5000/api/v1/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application
+CMD ["node", "dist/index.js"]

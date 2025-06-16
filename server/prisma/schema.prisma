@@ -9,7 +9,7 @@ generator client {
 // Para executar: npm run seed
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 

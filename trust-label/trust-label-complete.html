@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRUST LABEL - Sistema Completo v3.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .shadow-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen">
+        <!-- Login Screen -->
+        <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-600 to-purple-700">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center space-x-2 mb-4">
+                        <svg class="w-10 h-10" viewBox="0 0 40 40" fill="none">
+                            <path d="M8 8h8v24H8V8z" fill="#000"/>
+                            <path d="M16 8h16v8H16V8z" fill="#000"/>
+                            <circle cx="24" cy="24" r="8" fill="#000"/>
+                        </svg>
+                        <span class="text-2xl font-bold">trust</span>
+                        <span class="text-2xl">label</span>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900">Sistema Completo v3.0</h1>
+                    <p class="text-gray-600 mt-2">Validação inteligente com IA</p>
+                </div>
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="email" value="admin@trustlabel.com" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                        <input type="password" id="password" value="admin123" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                        Entrar
+                    </button>
+                </form>
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg text-sm">
+                    <p class="font-medium text-blue-900 mb-2">Credenciais de Demo:</p>
+                    <p class="text-blue-700">Admin: admin@trustlabel.com / admin123</p>
+                    <p class="text-blue-700">Marca: brand@example.com / senha123</p>
+                    <p class="text-blue-700">Lab: lab@example.com / senha123</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="main-app" class="hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center h-16">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-8 h-8" viewBox="0 0 40 40" fill="none">
+                                <path d="M8 8h8v24H8V8z" fill="#000"/>
+                                <path d="M16 8h16v8H16V8z" fill="#000"/>
+                                <circle cx="24" cy="24" r="8" fill="#000"/>
+                            </svg>
+                            <span class="text-xl font-bold">trust</span>
+                            <span class="text-xl">label</span>
+                        </div>
+                        <nav class="flex space-x-8">
+                            <a href="#" onclick="showSection('dashboard')" class="nav-link text-gray-700 hover:text-gray-900 font-medium">Dashboard</a>
+                            <a href="#" onclick="showSection('products')" class="nav-link text-gray-700 hover:text-gray-900 font-medium">Produtos</a>
+                            <a href="#" onclick="showSection('validations')" class="nav-link text-gray-700 hover:text-gray-900 font-medium">Validações</a>
+                            <a href="#" onclick="showSection('reports')" class="nav-link text-gray-700 hover:text-gray-900 font-medium">Relatórios</a>
+                        </nav>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm text-gray-600" id="user-name">Admin</span>
+                            <button onclick="logout()" class="text-sm text-red-600 hover:text-red-800">
+                                Sair
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="space-y-6">
+                    <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+                    
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Total Produtos</p>
+                                    <p class="text-2xl font-bold" id="stat-products">0</p>
+                                </div>
+                                <i data-lucide="package" class="w-8 h-8 text-blue-500"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Validações</p>
+                                    <p class="text-2xl font-bold" id="stat-validations">0</p>
+                                </div>
+                                <i data-lucide="check-circle" class="w-8 h-8 text-green-500"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">QR Scans</p>
+                                    <p class="text-2xl font-bold" id="stat-scans">0</p>
+                                </div>
+                                <i data-lucide="qr-code" class="w-8 h-8 text-purple-500"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Taxa Aprovação</p>
+                                    <p class="text-2xl font-bold" id="stat-approval">0%</p>
+                                </div>
+                                <i data-lucide="trending-up" class="w-8 h-8 text-yellow-500"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Validações por Mês</h3>
+                            <canvas id="validations-chart"></canvas>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Categorias de Produtos</h3>
+                            <canvas id="categories-chart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Products Section -->
+                <section id="products-section" class="hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-3xl font-bold text-gray-900">Produtos</h1>
+                        <button onclick="showProductForm()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                            Novo Produto
+                        </button>
+                    </div>
+
+                    <div id="products-list" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Validations Section -->
+                <section id="validations-section" class="hidden space-y-6">
+                    <h1 class="text-3xl font-bold text-gray-900">Validações</h1>
+                    <div id="validations-list" class="space-y-4">
+                        <!-- Validations will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Reports Section -->
+                <section id="reports-section" class="hidden space-y-6">
+                    <h1 class="text-3xl font-bold text-gray-900">Relatórios</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Gerar Relatório</h3>
+                            <form id="report-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                        <option value="full">Completo</option>
+                                        <option value="summary">Resumo</option>
+                                        <option value="certificate">Certificado</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Período</label>
+                                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                        <option value="month">Este Mês</option>
+                                        <option value="quarter">Este Trimestre</option>
+                                        <option value="year">Este Ano</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
+                                    Gerar Relatório
+                                </button>
+                            </form>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Relatórios Recentes</h3>
+                            <div id="recent-reports" class="space-y-2">
+                                <!-- Recent reports will be listed here -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Product Form Modal -->
+        <div id="product-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-md w-full">
+                <h2 class="text-2xl font-bold mb-4">Novo Produto</h2>
+                <form id="product-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                        <input type="text" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">EAN</label>
+                        <input type="text" name="ean" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                        <select name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            <option value="">Selecione...</option>
+                            <option value="alimento">Alimento</option>
+                            <option value="bebida">Bebida</option>
+                            <option value="suplemento">Suplemento</option>
+                            <option value="cosmetico">Cosmético</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                            Salvar
+                        </button>
+                        <button type="button" onclick="hideProductForm()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentUser = null;
+        let products = [];
+        let validations = [];
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Simulate authentication
+            currentUser = { email, name: email.split('@')[0], role: 'admin' };
+            document.getElementById('user-name').textContent = currentUser.name;
+            
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            
+            loadDashboard();
+        });
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+        }
+
+        // Navigation
+        function showSection(section) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            
+            // Update nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('text-blue-600', 'font-semibold');
+                link.classList.add('text-gray-700');
+            });
+            event.target.classList.remove('text-gray-700');
+            event.target.classList.add('text-blue-600', 'font-semibold');
+            
+            // Load section data
+            switch(section) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'products':
+                    loadProducts();
+                    break;
+                case 'validations':
+                    loadValidations();
+                    break;
+            }
+        }
+
+        // Load dashboard
+        function loadDashboard() {
+            // Update stats
+            document.getElementById('stat-products').textContent = products.length;
+            document.getElementById('stat-validations').textContent = validations.length;
+            document.getElementById('stat-scans').textContent = Math.floor(Math.random() * 1000);
+            document.getElementById('stat-approval').textContent = '92%';
+            
+            // Create charts
+            createValidationsChart();
+            createCategoriesChart();
+        }
+
+        // Create validations chart
+        function createValidationsChart() {
+            const ctx = document.getElementById('validations-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: 'Validações',
+                        data: [12, 19, 23, 25, 32, 38],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Create categories chart
+        function createCategoriesChart() {
+            const ctx = document.getElementById('categories-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Alimentos', 'Bebidas', 'Suplementos', 'Cosméticos'],
+                    datasets: [{
+                        data: [30, 20, 35, 15],
+                        backgroundColor: [
+                            'rgb(59, 130, 246)',
+                            'rgb(16, 185, 129)',
+                            'rgb(251, 146, 60)',
+                            'rgb(147, 51, 234)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Load products
+        function loadProducts() {
+            const productsHtml = products.map(product => `
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold">${product.name}</h3>
+                    <p class="text-sm text-gray-600 mt-1">EAN: ${product.ean}</p>
+                    <p class="text-sm text-gray-600">Categoria: ${product.category}</p>
+                    <div class="mt-4 flex space-x-2">
+                        <button onclick="validateProduct('${product.id}')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            Validar
+                        </button>
+                        <button onclick="generateQRCode('${product.id}')" class="text-green-600 hover:text-green-800 text-sm font-medium">
+                            QR Code
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('products-list').innerHTML = productsHtml || '<p class="text-gray-500">Nenhum produto cadastrado.</p>';
+        }
+
+        // Show product form
+        function showProductForm() {
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        // Hide product form
+        function hideProductForm() {
+            document.getElementById('product-modal').classList.add('hidden');
+            document.getElementById('product-form').reset();
+        }
+
+        // Add product
+        document.getElementById('product-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const product = {
+                id: Date.now().toString(),
+                name: formData.get('name'),
+                ean: formData.get('ean'),
+                category: formData.get('category'),
+                status: 'pending'
+            };
+            products.push(product);
+            hideProductForm();
+            loadProducts();
+            alert('Produto cadastrado com sucesso!');
+        });
+
+        // Validate product
+        function validateProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                const validation = {
+                    id: Date.now().toString(),
+                    productId: product.id,
+                    productName: product.name,
+                    status: 'validated',
+                    date: new Date().toLocaleDateString('pt-BR'),
+                    confidence: 95
+                };
+                validations.push(validation);
+                product.status = 'validated';
+                alert('Produto validado com sucesso!');
+                loadProducts();
+            }
+        }
+
+        // Generate QR Code
+        function generateQRCode(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                const canvas = document.createElement('canvas');
+                QRCode.toCanvas(canvas, `https://trustlabel.com/v/${product.id}`, {
+                    width: 200,
+                    margin: 2
+                }, (error) => {
+                    if (!error) {
+                        const dataUrl = canvas.toDataURL();
+                        const link = document.createElement('a');
+                        link.download = `qrcode-${product.name}.png`;
+                        link.href = dataUrl;
+                        link.click();
+                    }
+                });
+            }
+        }
+
+        // Load validations
+        function loadValidations() {
+            const validationsHtml = validations.map(validation => `
+                <div class="bg-white rounded-lg shadow p-6 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-semibold">${validation.productName}</h3>
+                        <p class="text-sm text-gray-600">Data: ${validation.date}</p>
+                        <p class="text-sm text-gray-600">Confiança: ${validation.confidence}%</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                            Validado
+                        </span>
+                        <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            Ver Detalhes
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('validations-list').innerHTML = validationsHtml || '<p class="text-gray-500">Nenhuma validação realizada.</p>';
+        }
+
+        // Initialize with sample data
+        products = [
+            { id: '1', name: 'Whey Protein Premium', ean: '7891234567890', category: 'suplemento', status: 'validated' },
+            { id: '2', name: 'BCAA Complex', ean: '7891234567891', category: 'suplemento', status: 'pending' },
+            { id: '3', name: 'Vitamina C 1000mg', ean: '7891234567892', category: 'suplemento', status: 'validated' }
+        ];
+
+        validations = [
+            { id: '1', productId: '1', productName: 'Whey Protein Premium', status: 'validated', date: '14/06/2025', confidence: 95 },
+            { id: '2', productId: '3', productName: 'Vitamina C 1000mg', status: 'validated', date: '13/06/2025', confidence: 98 }
+        ];
+    </script>
+</body>
+</html>

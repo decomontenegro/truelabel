@@ -1,7 +1,7 @@
 import { PrismaClient, Prisma } from '@prisma/client';
-import { createModuleLogger } from '../../trust-label-security/utils/logger';
+import { log } from '../../lib/logger';
 
-const log = createModuleLogger('PrismaOptimizations');
+// Use the log utility directly
 
 // Optimized query builders to prevent N+1 problems
 

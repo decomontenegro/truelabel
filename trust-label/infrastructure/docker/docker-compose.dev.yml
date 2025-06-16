@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: trust-label-postgres
+    environment:
+      POSTGRES_DB: trust_label
+      POSTGRES_USER: trust_user
+      POSTGRES_PASSWORD: trust_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - trust-label-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: trust-label-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - trust-label-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: trust-label-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: trust_admin
+      MINIO_ROOT_PASSWORD: trust_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - trust-label-network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+    container_name: trust-label-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - trust-label-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.3
+    container_name: trust-label-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - trust-label-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  elasticsearch_data:
+
+networks:
+  trust-label-network:
+    driver: bridge

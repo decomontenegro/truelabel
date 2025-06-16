@@ -186,8 +186,9 @@ export function startTransaction(options: {
       finish: () => {}
     };
   }
-  
-  return Sentry.startTransaction(options);
+
+  // Usar a nova API do Sentry v8+
+  return Sentry.startSpan(options, () => {});
 }
 
 // Re-exportar captureException do Sentry

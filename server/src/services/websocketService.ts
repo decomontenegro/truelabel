@@ -49,6 +49,12 @@ class WebSocketService {
    * Initialize WebSocket server
    */
   initialize(server: HTTPServer): void {
+    // Prevent multiple initialization
+    if (this.io) {
+      console.log('WebSocket service already initialized');
+      return;
+    }
+    
     this.io = new SocketIOServer(server, {
       cors: {
         origin: config.corsOrigins,

@@ -29,6 +29,8 @@ import sealRoutes from './routes/seals';
 import certificationRoutes from './routes/certifications';
 import validationQueueRoutes from './routes/validationQueue';
 import monitoringRoutes from './routes/monitoring';
+import privacyRoutes from './routes/privacy';
+import metricsRoutes from './routes/metrics';
 
 // Importar middlewares
 import { errorHandler } from './middleware/errorHandler';
@@ -59,12 +61,12 @@ validateConfig();
 const app = express();
 const server = createServer(app);
 
-// Inicializar Sentry
-initSentry(app);
+// Inicializar Sentry - TEMPORARIAMENTE DESABILITADO
+// initSentry(app);
 
-// Sentry request handler (deve ser o primeiro middleware)
-app.use(sentryRequestHandler());
-app.use(sentryTracingHandler());
+// Sentry request handler (deve ser o primeiro middleware) - TEMPORARIAMENTE DESABILITADO
+// app.use(sentryRequestHandler());
+// app.use(sentryTracingHandler());
 
 // Middlewares de segurança aprimorados
 app.use(securityHeaders);
@@ -153,19 +155,21 @@ app.get('/health', async (req, res) => {
 
 // Rotas da API com rate limiting específico
 app.use('/api', rateLimiters.general);
-app.use('/api/auth', rateLimiters.auth, authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/reports', reportRoutes);
-app.use('/api/validations', validationRoutes);
-app.use('/api/validations', validationQueueRoutes);
-app.use('/api/qr', qrRoutes);
-app.use('/api/laboratories', laboratoryRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api', sealRoutes);
-app.use('/api', certificationRoutes);
-app.use('/api/monitoring', monitoringRoutes);
+app.use('/api/v1/auth', rateLimiters.auth, authRoutes);
+app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/reports', reportRoutes);
+app.use('/api/v1/validations', validationRoutes);
+app.use('/api/v1/validations', validationQueueRoutes);
+app.use('/api/v1/qr', qrRoutes);
+app.use('/api/v1/laboratories', laboratoryRoutes);
+app.use('/api/v1/upload', uploadRoutes);
+app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1', sealRoutes);
+app.use('/api/v1', certificationRoutes);
+app.use('/api/v1/monitoring', monitoringRoutes);
+app.use('/api/v1/privacy', privacyRoutes);
+app.use('/api/v1/metrics', metricsRoutes);
 
 // Rotas públicas (sem prefixo /api para facilitar acesso)
 app.use('/public', publicRoutes);
@@ -173,8 +177,8 @@ app.use('/public', publicRoutes);
 // Middleware de erro 404 aprimorado
 app.use(notFoundHandler);
 
-// Sentry error handler (deve ser antes do errorHandler customizado)
-app.use(sentryErrorHandler());
+// Sentry error handler (deve ser antes do errorHandler customizado) - TEMPORARIAMENTE DESABILITADO
+// app.use(sentryErrorHandler());
 
 // Middleware de tratamento de erros aprimorado
 app.use(enhancedErrorHandler);

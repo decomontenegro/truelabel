@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRUST LABEL - Início Rápido</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-blue-600 mb-2">🛡️ TRUST LABEL</h1>
+                <p class="text-gray-600">Plataforma de Validação CPG com IA</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-blue-50 p-6 rounded-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-blue-800">✅ Frontend Funcionando!</h2>
+                    <p class="text-gray-700 mb-4">
+                        Esta é uma versão simplificada do TRUST LABEL para você começar rapidamente.
+                    </p>
+                    <button onclick="testAPI()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                        Testar API
+                    </button>
+                </div>
+
+                <div class="bg-green-50 p-6 rounded-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-green-800">🚀 Funcionalidades</h2>
+                    <ul class="space-y-2 text-gray-700">
+                        <li>✓ Validação de produtos</li>
+                        <li>✓ QR Codes inteligentes</li>
+                        <li>✓ Análise com IA</li>
+                        <li>✓ Dashboard completo</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="api-result" class="hidden bg-gray-100 p-4 rounded-lg mb-6">
+                <h3 class="font-semibold mb-2">Resultado da API:</h3>
+                <pre id="api-response" class="text-sm bg-white p-3 rounded"></pre>
+            </div>
+
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                <h3 class="font-semibold text-yellow-800 mb-2">⚡ Início Rápido</h3>
+                <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                    <li>Abra este arquivo em seu navegador</li>
+                    <li>Para o backend, crie um servidor simples Node.js</li>
+                    <li>Use os comandos abaixo para configurar</li>
+                </ol>
+            </div>
+
+            <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
+                <p class="mb-2"># Backend simples (salve como server.js):</p>
+                <code>
+const express = require('express');<br>
+const cors = require('cors');<br>
+const app = express();<br>
+<br>
+app.use(cors());<br>
+app.use(express.json());<br>
+<br>
+app.get('/api/health', (req, res) => {<br>
+&nbsp;&nbsp;res.json({ status: 'ok', message: 'TRUST LABEL API rodando!' });<br>
+});<br>
+<br>
+app.listen(3001, () => {<br>
+&nbsp;&nbsp;console.log('Server rodando em http://localhost:3001');<br>
+});<br>
+                </code>
+            </div>
+
+            <div class="mt-6 text-center text-gray-600">
+                <p>Execute: <code class="bg-gray-200 px-2 py-1 rounded">npm install express cors && node server.js</code></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('api-result');
+            const responseDiv = document.getElementById('api-response');
+            
+            resultDiv.classList.remove('hidden');
+            responseDiv.textContent = 'Conectando...';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/health');
+                const data = await response.json();
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.textContent = 'Erro: ' + error.message + '\n\nCertifique-se de que o servidor está rodando em http://localhost:3001';
+            }
+        }
+    </script>
+</body>
+</html>

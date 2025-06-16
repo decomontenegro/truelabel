@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRUST LABEL - Relatório Verificado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .shadow-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Mobile-First Design -->
+    <div class="min-h-screen max-w-4xl mx-auto">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-8 h-8" viewBox="0 0 40 40" fill="none">
+                            <path d="M8 8h8v24H8V8z" fill="#000"/>
+                            <path d="M16 8h16v8H16V8z" fill="#000"/>
+                            <circle cx="24" cy="24" r="8" fill="#000"/>
+                        </svg>
+                        <span class="text-xl font-bold">trust</span>
+                        <span class="text-xl">label</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-600">Verificado</span>
+                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Product Info -->
+        <div class="bg-white px-4 py-6 border-b">
+            <div class="flex items-start space-x-4">
+                <img src="data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='80' rx='8' fill='%23E5E7EB'/%3E%3Cpath d='M40 25v30M25 40h30' stroke='%236B7280' stroke-width='2'/%3E%3C/svg%3E" 
+                     alt="Produto" class="w-20 h-20 rounded-lg">
+                <div class="flex-1">
+                    <h1 class="text-xl font-bold text-gray-900">Whey Protein Premium</h1>
+                    <p class="text-sm text-gray-600 mt-1">Suplemento Alimentar</p>
+                    <div class="flex items-center mt-2 space-x-2">
+                        <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
+                            Validado
+                        </span>
+                        <span class="text-xs text-gray-500">EAN: 7891234567890</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Report Card -->
+        <div class="bg-white rounded-b-xl shadow-card overflow-hidden mb-6">
+            <div class="bg-blue-600 text-white p-4">
+                <h2 class="text-2xl font-bold">2025 <span class="font-normal">Relatório Verificado</span></h2>
+                <p class="text-sm opacity-90 mt-1">Análise completa com inteligência artificial</p>
+            </div>
+
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-3 gap-4 p-4 bg-gray-50">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600">37</div>
+                    <div class="text-xs text-gray-600">Itens Aprovados</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-yellow-600">2</div>
+                    <div class="text-xs text-gray-600">Com Ressalvas</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-red-600">0</div>
+                    <div class="text-xs text-gray-600">Reprovados</div>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="p-4 space-y-3">
+                <h3 class="font-semibold text-gray-900 mb-3">Categorias Validadas</h3>
+                
+                <!-- Perfil Nutricional -->
+                <div class="bg-gray-50 rounded-lg overflow-hidden">
+                    <div class="p-3 flex items-center justify-between cursor-pointer" onclick="toggleDetails('nutricional')">
+                        <div>
+                            <div class="font-medium text-gray-900">Perfil Nutricional</div>
+                            <div class="text-xs text-gray-600">5 itens analisados</div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-1 text-xs font-medium bg-yellow-400 text-gray-900 rounded-full">
+                                Ressalvas
+                            </span>
+                            <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="nutricional-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="nutricional-details" class="hidden border-t border-gray-200 p-3 bg-white">
+                        <table class="w-full text-sm">
+                            <tr class="border-b">
+                                <td class="py-2">Proteínas</td>
+                                <td class="text-right">8g</td>
+                                <td class="text-center px-2">
+                                    <span class="text-yellow-500">⚠️</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2">Carboidratos</td>
+                                <td class="text-right">20g</td>
+                                <td class="text-center px-2">
+                                    <span class="text-yellow-500">⚠️</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2">Gorduras</td>
+                                <td class="text-right">5g</td>
+                                <td class="text-center px-2">
+                                    <span class="text-green-500">✓</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2">Vitaminas</td>
+                                <td class="text-right">Conforme</td>
+                                <td class="text-center px-2">
+                                    <span class="text-green-500">✓</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="py-2">Minerais</td>
+                                <td class="text-right">Conforme</td>
+                                <td class="text-center px-2">
+                                    <span class="text-green-500">✓</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Metais Pesados -->
+                <div class="bg-gray-50 rounded-lg overflow-hidden">
+                    <div class="p-3 flex items-center justify-between cursor-pointer" onclick="toggleDetails('metais')">
+                        <div>
+                            <div class="font-medium text-gray-900">Metais Pesados</div>
+                            <div class="text-xs text-gray-600">4 itens analisados</div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-1 text-xs font-medium bg-green-500 text-white rounded-full">
+                                Aprovado
+                            </span>
+                            <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="metais-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="metais-details" class="hidden border-t border-gray-200 p-3 bg-white">
+                        <table class="w-full text-sm">
+                            <tr class="border-b">
+                                <td class="py-2">Chumbo</td>
+                                <td class="text-right">&lt; 0.01 mg/kg</td>
+                                <td class="text-center px-2">
+                                    <span class="text-green-500">✓</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2">Cádmio</td>
+                                <td class="text-right">&lt; 0.01 mg/kg</td>
+                                <td class="text-center px-2">
+                                    <span class="text-green-500">✓</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2">Mercúrio</td>
+                                <td class="text-right">&lt; 0.001 mg/kg</td>
+                                <td class="text-center px-2">
+                                    <span class="text-green-500">✓</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="py-2">Arsênio</td>
+                                <td class="text-right">&lt; 0.01 mg/kg</td>
+                                <td class="text-center px-2">
+                                    <span class="text-green-500">✓</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Alergênicos -->
+                <div class="bg-gray-50 rounded-lg overflow-hidden">
+                    <div class="p-3 flex items-center justify-between">
+                        <div>
+                            <div class="font-medium text-gray-900">Alergênicos</div>
+                            <div class="text-xs text-gray-600">Contém leite</div>
+                        </div>
+                        <span class="px-2 py-1 text-xs font-medium bg-yellow-500 text-white rounded-full">
+                            Alerta
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Certificações -->
+                <div class="bg-gray-50 rounded-lg overflow-hidden">
+                    <div class="p-3 flex items-center justify-between cursor-pointer" onclick="toggleDetails('certificacoes')">
+                        <div>
+                            <div class="font-medium text-gray-900">Certificações</div>
+                            <div class="text-xs text-gray-600">5 certificados</div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-1 text-xs font-medium bg-green-500 text-white rounded-full">
+                                Aprovado
+                            </span>
+                            <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="certificacoes-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="certificacoes-details" class="hidden border-t border-gray-200 p-3 bg-white">
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between">
+                                <span>ISO 22000</span>
+                                <span class="text-green-500">✓</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>HACCP</span>
+                                <span class="text-green-500">✓</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>GMP</span>
+                                <span class="text-green-500">✓</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Anvisa RDC 27/2010</span>
+                                <span class="text-green-500">✓</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Kosher</span>
+                                <span class="text-green-500">✓</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Laboratory Info -->
+            <div class="border-t border-gray-200 p-4">
+                <h3 class="font-semibold text-gray-900 mb-3">Laboratório Responsável</h3>
+                <div class="bg-gray-50 p-3 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="font-medium">Eurofins Brasil</div>
+                            <div class="text-xs text-gray-600">Acreditado ISO/IEC 17025</div>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            Laudo #2025-001234
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-600">
+                        Emitido em: 10/01/2025 • Válido até: 10/01/2026
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Analysis -->
+            <div class="border-t border-gray-200 p-4 bg-purple-50">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-semibold text-gray-900">Análise AI</h3>
+                    <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                        Powered by AI
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="bg-white p-3 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-purple-600">95%</div>
+                        <div class="text-xs text-gray-600">Confiança</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-green-600">A+</div>
+                        <div class="text-xs text-gray-600">Score Geral</div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-700">
+                    Produto de alta qualidade com pequenas variações nutricionais dentro dos limites regulatórios. 
+                    Certificações em dia e sem contaminantes detectados.
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-black text-white p-4 text-center text-sm">
+                <div class="mb-2">
+                    <span class="opacity-60">Verificado em</span> 
+                    <span class="font-medium">14/06/2025</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="opacity-60">©2025 trust label</span>
+                    <span>trustlabel.com</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="px-4 pb-6 space-y-3">
+            <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition">
+                Compartilhar Relatório
+            </button>
+            <button class="w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition">
+                Baixar PDF
+            </button>
+        </div>
+
+        <!-- Trust Badge -->
+        <div class="text-center pb-8">
+            <p class="text-xs text-gray-500 mb-2">Este relatório foi verificado por</p>
+            <div class="inline-flex items-center space-x-2 bg-white px-4 py-2 rounded-full shadow-sm">
+                <svg class="w-5 h-5" viewBox="0 0 40 40" fill="none">
+                    <path d="M8 8h8v24H8V8z" fill="#000"/>
+                    <path d="M16 8h16v8H16V8z" fill="#000"/>
+                    <circle cx="24" cy="24" r="8" fill="#000"/>
+                </svg>
+                <span class="font-semibold text-sm">TRUST LABEL</span>
+                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleDetails(category) {
+            const details = document.getElementById(category + '-details');
+            const arrow = document.getElementById(category + '-arrow');
+            
+            if (details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                arrow.classList.add('rotate-180');
+            } else {
+                details.classList.add('hidden');
+                arrow.classList.remove('rotate-180');
+            }
+        }
+
+        // Simular scan tracking
+        console.log('QR Code scan registrado:', {
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            referrer: document.referrer || 'direct'
+        });
+    </script>
+</body>
+</html>
