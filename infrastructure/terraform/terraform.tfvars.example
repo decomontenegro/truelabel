@@ -1,0 +1,50 @@
+# Example Terraform Variables File
+# Copy this to terraform.tfvars and fill in your values
+
+# Basic Configuration
+environment = "production"
+aws_region  = "sa-east-1"  # São Paulo region
+domain_name = "yourdomain.com"
+
+# Cloudflare Configuration
+cloudflare_zone_id   = "your-cloudflare-zone-id"
+cloudflare_api_token = "your-cloudflare-api-token"
+
+# VPC Configuration (optional - defaults are usually fine)
+# vpc_cidr = "10.0.0.0/16"
+# public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+# private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
+
+# ECS Configuration
+api_cpu           = 1024  # 1 vCPU
+api_memory        = 2048  # 2 GB
+api_desired_count = 3     # Start with 3 instances
+api_min_count     = 2     # Minimum 2 instances
+api_max_count     = 10    # Maximum 10 instances
+
+# RDS Configuration
+db_instance_class          = "db.t4g.medium"
+db_allocated_storage       = 100
+db_max_allocated_storage   = 500
+db_backup_retention_period = 30
+
+# Redis Configuration
+redis_node_type       = "cache.t4g.small"
+redis_num_cache_nodes = 2  # For high availability
+
+# Security
+allowed_ips = [
+  "YOUR_OFFICE_IP/32",
+  "YOUR_HOME_IP/32"
+]
+enable_waf = true
+
+# Monitoring
+enable_detailed_monitoring = true
+alarm_email               = "devops@yourdomain.com"
+
+# Additional domains (optional)
+# additional_domains = ["app.yourdomain.com", "admin.yourdomain.com"]
+
+# Cost optimization
+enable_spot_instances = false  # Set to true for non-production environments
