@@ -3,7 +3,6 @@ name: Deploy True Label Frontend to GitHub Pages
 on:
   push:
     branches: [ main ]
-    paths: [ 'client/**' ]
   workflow_dispatch:
 
 permissions:
