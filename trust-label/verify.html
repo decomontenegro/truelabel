@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRUST Label - Verificação de Produto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .success-gradient {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        @keyframes checkmark {
+            0% { stroke-dashoffset: 100; }
+            100% { stroke-dashoffset: 0; }
+        }
+        .checkmark-circle {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: checkmark 0.6s ease-in-out forwards;
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Loading State -->
+    <div id="loadingState" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-20 h-20 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-4 mx-auto"></div>
+            <p class="text-gray-600">Verificando produto...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="hidden">
+        <!-- Header -->
+        <header class="gradient-bg text-white shadow-lg">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex items-center justify-center">
+                    <i class="ri-shield-check-fill text-4xl mr-3"></i>
+                    <h1 class="text-3xl font-bold">TRUST Label</h1>
+                </div>
+                <p class="text-center mt-2 text-purple-100">Sistema de Validação Transparente</p>
+            </div>
+        </header>
+
+        <!-- Verification Result -->
+        <main class="container mx-auto px-4 py-8 max-w-4xl">
+            <!-- Success Animation -->
+            <div id="successAnimation" class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-32 h-32 bg-green-100 rounded-full mb-4">
+                    <svg class="w-20 h-20 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path class="checkmark-circle" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Produto Validado!</h2>
+                <p class="text-gray-600">Este produto foi verificado e autenticado pelo sistema TRUST Label</p>
+            </div>
+
+            <!-- Product Info Card -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Product Details -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Informações do Produto</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-sm text-gray-500">Nome do Produto</p>
+                                <p class="font-semibold" id="productName">Óleo de Coco Orgânico Premium</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Marca</p>
+                                <p class="font-semibold" id="brandName">NaturalLife</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Lote</p>
+                                <p class="font-semibold" id="batchNumber">LOT-2024-0156</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Validado em</p>
+                                <p class="font-semibold" id="validationDate">15/01/2024</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trust Score -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Trust Score</h3>
+                        <div class="relative">
+                            <div class="w-32 h-32 mx-auto">
+                                <svg class="transform -rotate-90 w-32 h-32">
+                                    <circle cx="64" cy="64" r="56" stroke="#e5e7eb" stroke-width="8" fill="none"></circle>
+                                    <circle cx="64" cy="64" r="56" stroke="#10b981" stroke-width="8" fill="none"
+                                            stroke-dasharray="351.86" stroke-dashoffset="35" stroke-linecap="round"></circle>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-3xl font-bold text-green-600" id="trustScore">98%</span>
+                                </div>
+                            </div>
+                            <p class="text-center mt-4 text-gray-600">Confiabilidade Excelente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validated Claims -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="ri-checkbox-circle-fill text-green-500 mr-2"></i>
+                    Reivindicações Validadas
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="validatedClaims">
+                    <div class="flex items-start bg-green-50 p-4 rounded-lg">
+                        <i class="ri-check-line text-green-600 mr-3 mt-1"></i>
+                        <div>
+                            <p class="font-semibold">100% Orgânico</p>
+                            <p class="text-sm text-gray-600">Certificado por IBD Orgânicos</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start bg-green-50 p-4 rounded-lg">
+                        <i class="ri-check-line text-green-600 mr-3 mt-1"></i>
+                        <div>
+                            <p class="font-semibold">Prensado a Frio</p>
+                            <p class="text-sm text-gray-600">Processo verificado em laboratório</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start bg-green-50 p-4 rounded-lg">
+                        <i class="ri-check-line text-green-600 mr-3 mt-1"></i>
+                        <div>
+                            <p class="font-semibold">Sem Glúten</p>
+                            <p class="text-sm text-gray-600">Análise: < 20ppm</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start bg-green-50 p-4 rounded-lg">
+                        <i class="ri-check-line text-green-600 mr-3 mt-1"></i>
+                        <div>
+                            <p class="font-semibold">Rico em Ácido Láurico</p>
+                            <p class="text-sm text-gray-600">Teor: 48.5% (acima do padrão)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Laboratory Reports -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="ri-microscope-line text-blue-500 mr-2"></i>
+                    Relatórios Laboratoriais
+                </h3>
+                <div class="space-y-3">
+                    <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold">Análise Físico-Química Completa</p>
+                                <p class="text-sm text-gray-600">Laboratório ABC • 10/01/2024</p>
+                            </div>
+                            <i class="ri-file-pdf-line text-red-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold">Certificado de Produto Orgânico</p>
+                                <p class="text-sm text-gray-600">IBD Certificações • 05/01/2024</p>
+                            </div>
+                            <i class="ri-file-pdf-line text-red-500 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blockchain Verification -->
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-8 mb-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="ri-shield-keyhole-line text-purple-600 mr-2"></i>
+                    Verificação Blockchain
+                </h3>
+                <div class="bg-white rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-600">Status</span>
+                        <span class="text-sm font-semibold text-green-600">
+                            <i class="ri-checkbox-circle-fill mr-1"></i>Verificado
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-600">Rede</span>
+                        <span class="text-sm font-mono">Ethereum Mainnet</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Hash</span>
+                        <span class="text-sm font-mono text-purple-600" id="blockchainHash">0x742d...C4A3</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Share Section -->
+            <div class="text-center">
+                <p class="text-gray-600 mb-4">Compartilhe esta verificação</p>
+                <div class="flex justify-center gap-4">
+                    <button class="bg-green-500 text-white px-6 py-3 rounded-full hover:bg-green-600 transition">
+                        <i class="ri-whatsapp-line mr-2"></i>WhatsApp
+                    </button>
+                    <button class="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition">
+                        <i class="ri-facebook-circle-line mr-2"></i>Facebook
+                    </button>
+                    <button class="bg-gray-700 text-white px-6 py-3 rounded-full hover:bg-gray-800 transition">
+                        <i class="ri-link mr-2"></i>Copiar Link
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white mt-16 py-8">
+            <div class="container mx-auto px-4 text-center">
+                <p class="mb-2">© 2024 TRUST Label - Transparência em cada produto</p>
+                <p class="text-gray-400 text-sm">
+                    Sistema protegido por blockchain e criptografia avançada
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="hidden fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center max-w-md">
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ri-error-warning-line text-red-600 text-4xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">QR Code Inválido</h2>
+            <p class="text-gray-600 mb-6">Este QR code não foi encontrado em nosso sistema ou pode ter expirado.</p>
+            <button onclick="window.location.href='trust-label-enhanced.html'" 
+                    class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700">
+                Voltar ao Sistema
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // API configuration
+        const API_BASE = 'http://localhost:5001/api/v1';
+        
+        // Get QR ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const qrId = urlParams.get('qr');
+
+        // Initialize verification
+        document.addEventListener('DOMContentLoaded', function() {
+            if (qrId) {
+                verifyQRCode(qrId);
+            } else {
+                // If no QR ID, simulate verification for demo
+                setTimeout(() => {
+                    showVerificationResult();
+                }, 2000);
+            }
+            
+            // Track the scan
+            trackScan(qrId);
+        });
+
+        async function verifyQRCode(qrId) {
+            try {
+                const response = await fetch(`${API_BASE}/qr/verify/${qrId}`);
+                
+                if (!response.ok) {
+                    showError();
+                    return;
+                }
+                
+                const data = await response.json();
+                populateVerificationData(data);
+                showVerificationResult();
+                
+            } catch (error) {
+                console.error('Verification error:', error);
+                // For demo, show success even if API fails
+                setTimeout(() => {
+                    showVerificationResult();
+                }, 2000);
+            }
+        }
+
+        async function trackScan(qrId) {
+            if (!qrId) return;
+            
+            try {
+                // Get user location (optional)
+                let locationData = { country: 'BR' };
+                
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            locationData.lat = position.coords.latitude;
+                            locationData.lng = position.coords.longitude;
+                        }
+                    );
+                }
+                
+                // Send tracking data
+                await fetch(`${API_BASE}/qr/track/${qrId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(locationData)
+                });
+                
+            } catch (error) {
+                console.error('Tracking error:', error);
+            }
+        }
+
+        function populateVerificationData(data) {
+            // Populate product info
+            if (data.product) {
+                document.getElementById('productName').textContent = data.product.name;
+                document.getElementById('brandName').textContent = data.product.brand;
+                document.getElementById('validationDate').textContent = 
+                    new Date(data.product.validated_at).toLocaleDateString('pt-BR');
+            }
+            
+            // Update trust score
+            if (data.trust_score) {
+                document.getElementById('trustScore').textContent = `${data.trust_score}%`;
+            }
+            
+            // Update blockchain info
+            if (data.blockchain && data.blockchain.reference) {
+                document.getElementById('blockchainHash').textContent = 
+                    `0x${data.blockchain.reference}...`;
+            }
+        }
+
+        function showVerificationResult() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+        }
+
+        function showError() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+        }
+
+        // Share functions
+        function shareWhatsApp() {
+            const text = `Verifiquei este produto no TRUST Label e ele é autêntico! Trust Score: 98%`;
+            const url = window.location.href;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`);
+        }
+
+        function shareFacebook() {
+            const url = window.location.href;
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`);
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href);
+            alert('Link copiado para a área de transferência!');
+        }
+
+        // Add click handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                if (button.textContent.includes('WhatsApp')) {
+                    button.onclick = shareWhatsApp;
+                } else if (button.textContent.includes('Facebook')) {
+                    button.onclick = shareFacebook;
+                } else if (button.textContent.includes('Copiar Link')) {
+                    button.onclick = copyLink;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

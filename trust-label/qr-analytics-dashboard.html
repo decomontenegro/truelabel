@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRUST Label - QR Code Analytics Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="ri-bar-chart-box-fill text-3xl"></i>
+                    <h1 class="text-2xl font-bold">QR Analytics Dashboard</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="trust-label-enhanced.html" class="hover:text-purple-200">Sistema Principal</a>
+                    <a href="#realtime" class="hover:text-purple-200">Tempo Real</a>
+                    <a href="#reports" class="hover:text-purple-200">Relatórios</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Connection Status -->
+        <div id="connectionStatus" class="mb-4 p-3 rounded-lg bg-yellow-100 text-yellow-800 hidden">
+            <i class="ri-alert-line mr-2"></i>
+            <span id="statusMessage">Conectando ao servidor de analytics...</span>
+        </div>
+
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total QR Codes</p>
+                        <p class="text-3xl font-bold text-gray-800" id="totalQRCodes">0</p>
+                        <p class="text-blue-500 text-sm">Ativos</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="ri-qr-code-line text-blue-500 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Scans Hoje</p>
+                        <p class="text-3xl font-bold text-gray-800" id="scansToday">0</p>
+                        <p class="text-green-500 text-sm" id="todayGrowth">+0%</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="ri-scan-line text-green-500 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Scans Este Mês</p>
+                        <p class="text-3xl font-bold text-gray-800" id="scansMonth">0</p>
+                        <p class="text-purple-500 text-sm" id="monthGrowth">+0%</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="ri-calendar-check-line text-purple-500 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl card-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Média Diária</p>
+                        <p class="text-3xl font-bold text-gray-800" id="avgDaily">0</p>
+                        <p class="text-orange-500 text-sm">Scans/dia</p>
+                    </div>
+                    <div class="bg-orange-100 p-3 rounded-full">
+                        <i class="ri-line-chart-line text-orange-500 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Scan Timeline Chart -->
+            <div class="bg-white p-6 rounded-xl card-shadow">
+                <h3 class="text-lg font-bold mb-4">Timeline de Scans (30 dias)</h3>
+                <div class="chart-container">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Device Breakdown Chart -->
+            <div class="bg-white p-6 rounded-xl card-shadow">
+                <h3 class="text-lg font-bold mb-4">Dispositivos</h3>
+                <div class="chart-container">
+                    <canvas id="deviceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Products -->
+        <div class="bg-white rounded-xl card-shadow p-6 mb-8">
+            <h3 class="text-lg font-bold mb-4">Produtos Mais Escaneados</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-3">Produto</th>
+                            <th class="text-left py-3">Marca</th>
+                            <th class="text-right py-3">Scans</th>
+                            <th class="text-center py-3">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topProductsTable">
+                        <!-- Products will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Real-time Activity -->
+        <div class="bg-white rounded-xl card-shadow p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold">Atividade em Tempo Real</h3>
+                <div class="flex items-center text-sm text-green-600">
+                    <span class="w-2 h-2 bg-green-600 rounded-full mr-2 animate-pulse"></span>
+                    Live
+                </div>
+            </div>
+            <div id="realtimeActivity" class="space-y-2 max-h-96 overflow-y-auto">
+                <!-- Real-time scans will be inserted here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- QR Detail Modal -->
+    <div id="qrDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-6">Detalhes do QR Code</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- QR Info -->
+                <div>
+                    <h3 class="font-bold mb-3">Informações do Produto</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="mb-2"><strong>ID:</strong> <span id="detailQRId"></span></p>
+                        <p class="mb-2"><strong>Produto:</strong> <span id="detailProductName"></span></p>
+                        <p class="mb-2"><strong>Marca:</strong> <span id="detailBrand"></span></p>
+                        <p><strong>Criado em:</strong> <span id="detailCreatedAt"></span></p>
+                    </div>
+                </div>
+
+                <!-- Analytics Summary -->
+                <div>
+                    <h3 class="font-bold mb-3">Resumo de Analytics</h3>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <p class="mb-2"><strong>Total de Scans:</strong> <span id="detailTotalScans"></span></p>
+                        <p class="mb-2"><strong>Visitantes Únicos:</strong> <span id="detailUniqueVisitors"></span></p>
+                        <p><strong>Taxa de Conversão:</strong> <span id="detailConversionRate"></span>%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div>
+                    <h3 class="font-bold mb-3">Navegadores</h3>
+                    <canvas id="browserChart"></canvas>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-3">Localização</h3>
+                    <div id="locationList" class="space-y-2 max-h-64 overflow-y-auto">
+                        <!-- Locations will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Scans -->
+            <div class="mt-6">
+                <h3 class="font-bold mb-3">Scans Recentes</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="text-left py-2">Data/Hora</th>
+                                <th class="text-left py-2">Cidade</th>
+                                <th class="text-left py-2">Dispositivo</th>
+                                <th class="text-left py-2">Navegador</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentScansTable">
+                            <!-- Scans will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <button onclick="closeModal('qrDetailModal')" class="mt-6 bg-gray-300 px-6 py-3 rounded-lg hover:bg-gray-400">
+                Fechar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // API configuration
+        const API_BASE = 'http://localhost:5001/api/v1';
+        let charts = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAPIConnection();
+            loadDashboardData();
+            setupCharts();
+            startRealtimeUpdates();
+        });
+
+        async function checkAPIConnection() {
+            try {
+                const response = await fetch(API_BASE.replace('/api/v1', ''));
+                if (response.ok) {
+                    hideConnectionStatus();
+                } else {
+                    showConnectionStatus('API não está respondendo', 'error');
+                }
+            } catch (error) {
+                showConnectionStatus('Erro ao conectar com a API. Certifique-se que o servidor está rodando na porta 5001', 'error');
+            }
+        }
+
+        function showConnectionStatus(message, type = 'warning') {
+            const status = document.getElementById('connectionStatus');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            status.classList.remove('hidden', 'bg-yellow-100', 'text-yellow-800', 'bg-red-100', 'text-red-800');
+            
+            if (type === 'error') {
+                status.classList.add('bg-red-100', 'text-red-800');
+            } else {
+                status.classList.add('bg-yellow-100', 'text-yellow-800');
+            }
+            
+            statusMessage.textContent = message;
+        }
+
+        function hideConnectionStatus() {
+            document.getElementById('connectionStatus').classList.add('hidden');
+        }
+
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(`${API_BASE}/analytics/dashboard`);
+                const data = await response.json();
+                
+                // Update stats
+                document.getElementById('totalQRCodes').textContent = data.summary.total_qr_codes;
+                document.getElementById('scansToday').textContent = data.summary.scans_today;
+                document.getElementById('scansMonth').textContent = data.summary.scans_this_month;
+                document.getElementById('monthGrowth').textContent = `+${data.summary.growth_rate}%`;
+                document.getElementById('avgDaily').textContent = data.quick_stats.average_daily_scans;
+                
+                // Update top products table
+                updateTopProductsTable(data.top_products);
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showConnectionStatus('Erro ao carregar dados do dashboard', 'error');
+            }
+        }
+
+        function updateTopProductsTable(products) {
+            const tbody = document.getElementById('topProductsTable');
+            
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">Nenhum produto escaneado ainda</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = products.map(product => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3">${product.product_name}</td>
+                    <td class="py-3">${product.brand}</td>
+                    <td class="text-right py-3 font-semibold">${product.scan_count}</td>
+                    <td class="text-center py-3">
+                        <button onclick="viewQRDetails('${product.qr_id}')" 
+                                class="text-blue-600 hover:text-blue-800">
+                            <i class="ri-eye-line"></i> Ver Analytics
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function setupCharts() {
+            // Timeline Chart
+            const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+            charts.timeline = new Chart(timelineCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Scans',
+                        data: [],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Device Chart
+            const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+            charts.device = new Chart(deviceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Mobile', 'Desktop', 'Tablet'],
+                    datasets: [{
+                        data: [60, 30, 10],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(139, 92, 246, 0.8)',
+                            'rgba(236, 72, 153, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        async function viewQRDetails(qrId) {
+            // For demo purposes, show a sample QR detail
+            document.getElementById('qrDetailModal').classList.remove('hidden');
+            
+            // Populate with sample data
+            document.getElementById('detailQRId').textContent = qrId || 'QR-2024-001';
+            document.getElementById('detailProductName').textContent = 'Óleo de Coco Orgânico';
+            document.getElementById('detailBrand').textContent = 'NaturalLife';
+            document.getElementById('detailCreatedAt').textContent = new Date().toLocaleDateString('pt-BR');
+            document.getElementById('detailTotalScans').textContent = '1,234';
+            document.getElementById('detailUniqueVisitors').textContent = '987';
+            document.getElementById('detailConversionRate').textContent = '80.1';
+            
+            // Sample browser chart
+            const browserCtx = document.getElementById('browserChart').getContext('2d');
+            new Chart(browserCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Chrome', 'Safari', 'Firefox', 'Edge'],
+                    datasets: [{
+                        label: 'Scans',
+                        data: [450, 320, 180, 50],
+                        backgroundColor: 'rgba(139, 92, 246, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function startRealtimeUpdates() {
+            // Simulate real-time activity
+            setInterval(() => {
+                addRealtimeActivity();
+            }, 5000);
+        }
+
+        function addRealtimeActivity() {
+            const activities = [
+                { city: 'São Paulo', product: 'Óleo de Coco', device: 'iPhone' },
+                { city: 'Rio de Janeiro', product: 'Whey Protein', device: 'Android' },
+                { city: 'Belo Horizonte', product: 'Creme Facial', device: 'Desktop' },
+                { city: 'Curitiba', product: 'Suplemento B12', device: 'iPad' }
+            ];
+            
+            const activity = activities[Math.floor(Math.random() * activities.length)];
+            const container = document.getElementById('realtimeActivity');
+            
+            const activityHtml = `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg animate-pulse">
+                    <div class="flex items-center">
+                        <i class="ri-scan-2-line text-green-500 mr-3"></i>
+                        <div>
+                            <p class="font-semibold">${activity.product}</p>
+                            <p class="text-sm text-gray-600">${activity.city} • ${activity.device}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-500">Agora</span>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('afterbegin', activityHtml);
+            
+            // Keep only last 10 activities
+            while (container.children.length > 10) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Generate sample timeline data
+        function generateTimelineData() {
+            const labels = [];
+            const data = [];
+            const today = new Date();
+            
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                labels.push(date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
+                data.push(Math.floor(Math.random() * 200) + 50);
+            }
+            
+            charts.timeline.data.labels = labels;
+            charts.timeline.data.datasets[0].data = data;
+            charts.timeline.update();
+        }
+
+        // Initialize with sample data
+        setTimeout(generateTimelineData, 1000);
+    </script>
+</body>
+</html>

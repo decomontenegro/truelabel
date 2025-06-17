@@ -82,6 +82,19 @@ fi
 
 cd ..
 
+# Copy built files to root for Vercel static serving
+echo "📁 Copying built files to root for Vercel..."
+if [ -d "client/dist" ]; then
+    # Create a temporary directory to avoid conflicts
+    mkdir -p .vercel-static
+    cp -r client/dist/* .vercel-static/
+    echo "✅ Files copied to .vercel-static/"
+    ls -la .vercel-static/
+else
+    echo "❌ client/dist directory not found!"
+    exit 1
+fi
+
 echo "✅ True Label build completed successfully!"
 echo "📊 Build Summary:"
 echo "   ✅ Frontend: client/dist/"

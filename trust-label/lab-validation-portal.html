@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRUST Label - Portal de Validação Laboratorial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .lab-card {
+            transition: all 0.3s ease;
+        }
+        .lab-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .trust-score-ring {
+            stroke-dasharray: 314;
+            stroke-dashoffset: 314;
+            animation: fillRing 2s ease-out forwards;
+        }
+        @keyframes fillRing {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="ri-microscope-fill text-3xl"></i>
+                    <h1 class="text-2xl font-bold">Portal de Validação Laboratorial</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#request" class="hover:text-purple-200">Nova Validação</a>
+                    <a href="#marketplace" class="hover:text-purple-200">Marketplace</a>
+                    <a href="#status" class="hover:text-purple-200">Status</a>
+                    <a href="#reports" class="hover:text-purple-200">Relatórios</a>
+                </nav>
+                <button class="bg-white text-purple-700 px-4 py-2 rounded-full font-semibold hover:bg-purple-100">
+                    <i class="ri-building-line mr-2"></i>Marca Demo
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Connection Status -->
+    <div id="connectionStatus" class="hidden">
+        <div class="bg-yellow-100 border-b border-yellow-200 p-3 text-center">
+            <i class="ri-alert-line text-yellow-600 mr-2"></i>
+            <span id="statusMessage" class="text-yellow-800">Conectando ao sistema de validação...</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Validações Ativas</p>
+                        <p class="text-3xl font-bold text-gray-800" id="activeValidations">12</p>
+                        <p class="text-green-500 text-sm">Em andamento</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="ri-flask-fill text-blue-500 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Trust Score Médio</p>
+                        <p class="text-3xl font-bold text-gray-800" id="avgTrustScore">92.5</p>
+                        <p class="text-purple-500 text-sm">Excelente</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="ri-shield-star-fill text-purple-500 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Labs Parceiros</p>
+                        <p class="text-3xl font-bold text-gray-800" id="partnerLabs">15</p>
+                        <p class="text-orange-500 text-sm">Disponíveis</p>
+                    </div>
+                    <div class="bg-orange-100 p-3 rounded-full">
+                        <i class="ri-building-2-fill text-orange-500 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Economia Média</p>
+                        <p class="text-3xl font-bold text-gray-800">23%</p>
+                        <p class="text-green-500 text-sm">vs. Tradicional</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="ri-money-dollar-circle-fill text-green-500 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Validation Request -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8" id="request">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="ri-add-circle-fill text-blue-500 mr-3"></i>
+                Nova Solicitação de Validação
+            </h2>
+            
+            <form id="validationForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Nome do Produto</label>
+                        <input type="text" id="productName" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500" 
+                               placeholder="Ex: Whey Protein Premium" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">ID do Produto (SKU)</label>
+                        <input type="text" id="productId" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500" 
+                               placeholder="Ex: WP-001" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Claims a Validar</label>
+                    <div id="claimsContainer" class="space-y-2">
+                        <div class="flex gap-2">
+                            <input type="text" class="flex-1 p-3 border rounded-lg" placeholder="Ex: 25g de proteína por dose">
+                            <button type="button" onclick="addClaim()" class="bg-blue-500 text-white px-4 rounded-lg hover:bg-blue-600">
+                                <i class="ri-add-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Data Points para Análise</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="data-point" value="proteínas">
+                            <span>Proteínas</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="data-point" value="carboidratos">
+                            <span>Carboidratos</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="data-point" value="gorduras">
+                            <span>Gorduras</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="data-point" value="vitaminas">
+                            <span>Vitaminas</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="data-point" value="minerais">
+                            <span>Minerais</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="data-point" value="contaminantes">
+                            <span>Contaminantes</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="data-point" value="microbiologia">
+                            <span>Microbiologia</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="data-point" value="alergênicos">
+                            <span>Alergênicos</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="data-point" value="metais_pesados">
+                            <span>Metais Pesados</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Prioridade</label>
+                    <select id="priority" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="normal">Normal (7-10 dias)</option>
+                        <option value="urgent">Urgente (3-5 dias) +50%</option>
+                        <option value="express">Express (24-48h) +100%</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition">
+                    <i class="ri-search-line mr-2"></i>Buscar Laboratórios no Marketplace
+                </button>
+            </form>
+        </div>
+
+        <!-- Laboratory Marketplace -->
+        <div class="hidden" id="marketplaceSection">
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="ri-store-2-fill text-purple-500 mr-3"></i>
+                    Marketplace de Laboratórios
+                </h2>
+                
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <i class="ri-information-line mr-2"></i>
+                        Laboratórios ordenados por melhor compatibilidade com sua solicitação. 
+                        Preços e prazos são estimativas baseadas na demanda atual.
+                    </p>
+                </div>
+
+                <div id="labOptions" class="space-y-4">
+                    <!-- Lab options will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Validation Status -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8" id="status">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="ri-clipboard-fill text-green-500 mr-3"></i>
+                Status das Validações
+            </h2>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-3">Produto</th>
+                            <th class="text-left py-3">Laboratório</th>
+                            <th class="text-left py-3">Status</th>
+                            <th class="text-left py-3">Prazo</th>
+                            <th class="text-left py-3">Trust Score</th>
+                            <th class="text-center py-3">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="validationTable">
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3">Óleo de Coco Orgânico</td>
+                            <td class="py-3">Eurofins Brasil</td>
+                            <td class="py-3">
+                                <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                                    <i class="ri-checkbox-circle-fill mr-1"></i>Validado
+                                </span>
+                            </td>
+                            <td class="py-3">Concluído</td>
+                            <td class="py-3">
+                                <span class="font-bold text-green-600">98.5</span>
+                            </td>
+                            <td class="text-center py-3">
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <i class="ri-eye-line"></i> Ver Relatório
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3">Whey Protein Premium</td>
+                            <td class="py-3">SFDK Laboratório</td>
+                            <td class="py-3">
+                                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
+                                    <i class="ri-flask-line mr-1"></i>Em Análise
+                                </span>
+                            </td>
+                            <td class="py-3">3 dias restantes</td>
+                            <td class="py-3">-</td>
+                            <td class="text-center py-3">
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <i class="ri-time-line"></i> Acompanhar
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Trust Score Evolution Chart -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="ri-line-chart-fill text-purple-500 mr-3"></i>
+                Evolução do Trust Score
+            </h2>
+            <div class="h-64">
+                <canvas id="trustScoreChart"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <!-- Lab Selection Modal -->
+    <div id="labModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-6">Confirmar Seleção de Laboratório</h2>
+            
+            <div id="selectedLabDetails" class="mb-6">
+                <!-- Lab details will be inserted here -->
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="confirmLabSelection()" class="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700">
+                    <i class="ri-check-line mr-2"></i>Confirmar e Enviar para Análise
+                </button>
+                <button onclick="closeModal()" class="flex-1 bg-gray-300 py-3 rounded-lg hover:bg-gray-400">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API configuration
+        const API_BASE = 'http://localhost:5002/api/v1';
+        let currentValidationId = null;
+        let selectedLab = null;
+
+        // Check API connection
+        async function checkAPIConnection() {
+            try {
+                const response = await fetch(API_BASE.replace('/api/v1', ''));
+                if (!response.ok) {
+                    showConnectionError();
+                }
+            } catch (error) {
+                showConnectionError();
+            }
+        }
+
+        function showConnectionError() {
+            document.getElementById('connectionStatus').classList.remove('hidden');
+            document.getElementById('statusMessage').textContent = 
+                'Erro ao conectar com o sistema de validação. Certifique-se que o servidor está rodando na porta 5002';
+        }
+
+        // Form submission
+        document.getElementById('validationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const productName = document.getElementById('productName').value;
+            const productId = document.getElementById('productId').value;
+            const priority = document.getElementById('priority').value;
+            
+            // Collect claims
+            const claimInputs = document.querySelectorAll('#claimsContainer input[type="text"]');
+            const claims = Array.from(claimInputs)
+                .map(input => input.value)
+                .filter(value => value.trim() !== '');
+            
+            // Collect data points
+            const dataPointCheckboxes = document.querySelectorAll('.data-point:checked');
+            const dataPoints = Array.from(dataPointCheckboxes)
+                .map(checkbox => checkbox.value);
+            
+            if (dataPoints.length === 0) {
+                alert('Selecione pelo menos um data point para análise');
+                return;
+            }
+            
+            // Create validation request
+            const requestData = {
+                product_name: productName,
+                product_id: productId,
+                brand_name: 'Marca Demo',
+                brand_id: 'brand-001',
+                claims: claims,
+                data_points: dataPoints,
+                priority: priority
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/validation/request`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentValidationId = data.validation_id;
+                    displayLabOptions(data.lab_options);
+                    document.getElementById('marketplaceSection').classList.remove('hidden');
+                    document.getElementById('marketplaceSection').scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (error) {
+                console.error('Error creating validation request:', error);
+                alert('Erro ao criar solicitação. Usando dados de demonstração.');
+                
+                // Show demo data
+                const demoLabs = [
+                    {
+                        lab_id: 'lab-001',
+                        lab_name: 'Eurofins Brasil',
+                        rating: 4.8,
+                        accreditations: ['ISO 17025', 'ANVISA', 'MAPA'],
+                        match_score: 95,
+                        price: 2500,
+                        estimated_days: 7,
+                        current_load: '45/200',
+                        specialties: ['microbiologia', 'nutricional', 'contaminantes']
+                    },
+                    {
+                        lab_id: 'lab-002',
+                        lab_name: 'SGS do Brasil',
+                        rating: 4.7,
+                        accreditations: ['ISO 17025', 'INMETRO'],
+                        match_score: 88,
+                        price: 2800,
+                        estimated_days: 8,
+                        current_load: '67/150',
+                        specialties: ['alergênicos', 'metais pesados', 'pesticidas']
+                    }
+                ];
+                
+                displayLabOptions(demoLabs);
+                document.getElementById('marketplaceSection').classList.remove('hidden');
+                document.getElementById('marketplaceSection').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        function displayLabOptions(labs) {
+            const container = document.getElementById('labOptions');
+            
+            container.innerHTML = labs.map((lab, index) => `
+                <div class="lab-card border rounded-lg p-6 hover:border-purple-500 cursor-pointer" 
+                     onclick="selectLab(${index})">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold">${lab.lab_name}</h3>
+                            <div class="flex items-center mt-1">
+                                <div class="flex text-yellow-500">
+                                    ${Array(5).fill().map((_, i) => 
+                                        i < Math.floor(lab.rating) 
+                                            ? '<i class="ri-star-fill"></i>' 
+                                            : '<i class="ri-star-line"></i>'
+                                    ).join('')}
+                                </div>
+                                <span class="ml-2 text-gray-600">${lab.rating}</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-green-600">R$ ${lab.price.toLocaleString('pt-BR')}</p>
+                            <p class="text-sm text-gray-600">${lab.estimated_days} dias úteis</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Compatibilidade</p>
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-purple-600 h-2 rounded-full" style="width: ${lab.match_score}%"></div>
+                                </div>
+                                <span class="text-sm font-semibold">${lab.match_score}%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Capacidade</p>
+                            <p class="font-semibold">${lab.current_load}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 mb-1">Acreditações</p>
+                        <div class="flex flex-wrap gap-1">
+                            ${lab.accreditations.map(acc => 
+                                `<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">${acc}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Especialidades</p>
+                        <div class="flex flex-wrap gap-1">
+                            ${lab.specialties.map(spec => 
+                                `<span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">${spec}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    ${index === 0 ? `
+                        <div class="mt-4 p-3 bg-green-50 rounded-lg">
+                            <i class="ri-thumb-up-fill text-green-600 mr-2"></i>
+                            <span class="text-sm text-green-800 font-semibold">Melhor compatibilidade para sua análise</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+            
+            // Store labs data
+            window.labOptions = labs;
+        }
+
+        function selectLab(index) {
+            selectedLab = window.labOptions[index];
+            
+            // Show lab details in modal
+            document.getElementById('selectedLabDetails').innerHTML = `
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-bold mb-3">${selectedLab.lab_name}</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Preço Total</p>
+                            <p class="text-xl font-bold text-green-600">R$ ${selectedLab.price.toLocaleString('pt-BR')}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Prazo de Entrega</p>
+                            <p class="text-xl font-bold">${selectedLab.estimated_days} dias úteis</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-blue-50 rounded">
+                        <p class="text-sm text-blue-800">
+                            <i class="ri-information-line mr-2"></i>
+                            Após confirmação, o laboratório receberá sua solicitação e iniciará o processo de análise.
+                            Você poderá acompanhar o status em tempo real.
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('labModal').classList.remove('hidden');
+        }
+
+        async function confirmLabSelection() {
+            if (!selectedLab || !currentValidationId) return;
+            
+            const assignmentData = {
+                validation_id: currentValidationId,
+                lab_id: selectedLab.lab_id,
+                price: selectedLab.price,
+                estimated_days: selectedLab.estimated_days
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/validation/assign`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(assignmentData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`Laboratório ${selectedLab.lab_name} foi selecionado com sucesso!`);
+                    closeModal();
+                    document.getElementById('marketplaceSection').classList.add('hidden');
+                    document.getElementById('validationForm').reset();
+                    
+                    // Update validation table
+                    addValidationToTable();
+                }
+            } catch (error) {
+                console.error('Error assigning lab:', error);
+                alert('Laboratório selecionado com sucesso! (Demo)');
+                closeModal();
+                document.getElementById('marketplaceSection').classList.add('hidden');
+                document.getElementById('validationForm').reset();
+                addValidationToTable();
+            }
+        }
+
+        function addValidationToTable() {
+            const tbody = document.getElementById('validationTable');
+            const productName = document.getElementById('productName').value;
+            
+            const newRow = document.createElement('tr');
+            newRow.className = 'border-b hover:bg-gray-50';
+            newRow.innerHTML = `
+                <td class="py-3">${productName}</td>
+                <td class="py-3">${selectedLab.lab_name}</td>
+                <td class="py-3">
+                    <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
+                        <i class="ri-flask-line mr-1"></i>Em Análise
+                    </span>
+                </td>
+                <td class="py-3">${selectedLab.estimated_days} dias restantes</td>
+                <td class="py-3">-</td>
+                <td class="text-center py-3">
+                    <button class="text-blue-600 hover:text-blue-800">
+                        <i class="ri-time-line"></i> Acompanhar
+                    </button>
+                </td>
+            `;
+            
+            tbody.insertBefore(newRow, tbody.firstChild);
+        }
+
+        function closeModal() {
+            document.getElementById('labModal').classList.add('hidden');
+        }
+
+        function addClaim() {
+            const container = document.getElementById('claimsContainer');
+            const newClaim = document.createElement('div');
+            newClaim.className = 'flex gap-2';
+            newClaim.innerHTML = `
+                <input type="text" class="flex-1 p-3 border rounded-lg" placeholder="Nova reivindicação">
+                <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-4 rounded-lg hover:bg-red-600">
+                    <i class="ri-subtract-line"></i>
+                </button>
+            `;
+            container.appendChild(newClaim);
+        }
+
+        // Initialize Trust Score chart
+        function initTrustScoreChart() {
+            const ctx = document.getElementById('trustScoreChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: 'Trust Score Médio',
+                        data: [85, 87, 89, 88, 91, 92.5],
+                        borderColor: 'rgb(139, 92, 246)',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 80,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Simulate real-time updates
+        function simulateRealtimeUpdates() {
+            setInterval(() => {
+                // Update active validations count
+                const activeCount = document.getElementById('activeValidations');
+                const current = parseInt(activeCount.textContent);
+                activeCount.textContent = current + Math.floor(Math.random() * 3) - 1;
+                
+                // Occasionally update trust score
+                if (Math.random() > 0.7) {
+                    const trustScore = document.getElementById('avgTrustScore');
+                    const newScore = (90 + Math.random() * 10).toFixed(1);
+                    trustScore.textContent = newScore;
+                }
+            }, 5000);
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAPIConnection();
+            initTrustScoreChart();
+            simulateRealtimeUpdates();
+        });
+    </script>
+</body>
+</html>
