@@ -9,6 +9,7 @@ const response_time_1 = __importDefault(require("response-time"));
 const metrics_1 = require("../lib/metrics");
 const logger_1 = require("../lib/logger");
 const node_1 = require("@sentry/node");
+const sentry_1 = require("../lib/sentry");
 exports.performanceMonitoring = (0, response_time_1.default)((req, res, time) => {
     const route = req.route?.path || req.path || 'unknown';
     const method = req.method;
@@ -49,7 +50,7 @@ const connectionTracking = (req, res, next) => {
 };
 exports.connectionTracking = connectionTracking;
 const sentryPerformance = (req, res, next) => {
-    const transaction = (0, node_1.startTransaction)({
+    const transaction = (0, sentry_1.startTransaction)({
         op: 'http.server',
         name: `${req.method} ${req.route?.path || req.path}`,
         data: {

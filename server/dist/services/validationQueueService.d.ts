@@ -39,9 +39,9 @@ declare class ValidationQueueService extends EventEmitter {
             metadata: any;
             product: {
                 user: {
-                    id: string;
                     email: string;
                     password: string;
+                    id: string;
                     name: string;
                     role: string;
                     createdAt: Date;
@@ -65,18 +65,18 @@ declare class ValidationQueueService extends EventEmitter {
                 qrCode: string | null;
             };
             requestedBy: {
-                id: string;
                 email: string;
                 password: string;
+                id: string;
                 name: string;
                 role: string;
                 createdAt: Date;
                 updatedAt: Date;
             };
             assignedTo: {
-                id: string;
                 email: string;
                 password: string;
+                id: string;
                 name: string;
                 role: string;
                 createdAt: Date;

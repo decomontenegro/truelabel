@@ -22,8 +22,7 @@ const validateProduct = async (req, res) => {
                 user: {
                     select: {
                         name: true,
-                        email: true,
-                        companyName: true
+                        email: true
                     }
                 },
                 validations: {
@@ -36,8 +35,7 @@ const validateProduct = async (req, res) => {
                                 laboratory: {
                                     select: {
                                         name: true,
-                                        accreditation: true,
-                                        website: true
+                                        accreditation: true
                                     }
                                 }
                             }
@@ -102,10 +100,9 @@ const validateProduct = async (req, res) => {
                 },
                 brand: {
                     name: product.user.name,
-                    companyName: product.user.companyName,
                     email: product.user.email
                 },
-                validation: hasValidValidation ? {
+                validation: hasValidValidation && latestValidation.report ? {
                     id: latestValidation.id,
                     status: latestValidation.status,
                     claimsValidated: latestValidation.claimsValidated,
@@ -187,8 +184,7 @@ const getProductsByCategory = async (req, res) => {
             include: {
                 user: {
                     select: {
-                        name: true,
-                        companyName: true
+                        name: true
                     }
                 },
                 validations: {
@@ -219,8 +215,7 @@ const getProductsByCategory = async (req, res) => {
                     imageUrl: product.imageUrl,
                     qrCode: product.qrCode,
                     brand_info: {
-                        name: product.user.name,
-                        companyName: product.user.companyName
+                        name: product.user.name
                     },
                     hasValidation: product.validations.length > 0,
                     trustScore: calculateTrustScore(product)

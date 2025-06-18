@@ -12,6 +12,7 @@ var ValidationQueuePriority;
 (function (ValidationQueuePriority) {
     ValidationQueuePriority["HIGH"] = "HIGH";
     ValidationQueuePriority["MEDIUM"] = "MEDIUM";
+    ValidationQueuePriority["NORMAL"] = "NORMAL";
     ValidationQueuePriority["LOW"] = "LOW";
 })(ValidationQueuePriority || (exports.ValidationQueuePriority = ValidationQueuePriority = {}));
 var UserRole;

@@ -8,6 +8,7 @@ const env_1 = require("../config/env");
 const metrics_1 = require("./metrics");
 const logger_1 = require("./logger");
 const sentry_1 = require("./sentry");
+const prisma_optimizations_1 = require("../utils/database/prisma-optimizations");
 const createPrismaClient = () => {
     return new client_1.PrismaClient({
         log: env_1.isDevelopment
@@ -31,6 +32,7 @@ exports.prisma = global.prisma || createPrismaClient();
 if (!env_1.isProduction) {
     global.prisma = exports.prisma;
 }
+exports.prisma.$use(prisma_optimizations_1.prismaOptimizationMiddleware);
 exports.prisma.$use(async (params, next) => {
     const before = Date.now();
     const model = params.model || 'unknown';

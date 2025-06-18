@@ -62,6 +62,11 @@ const uploadReport = async (req, res) => {
                 error: 'Arquivo é obrigatório'
             });
         }
+        if (!req.user) {
+            return res.status(401).json({
+                error: 'Unauthorized'
+            });
+        }
         let product;
         if (req.user.role === 'LAB' || req.user.role === 'ADMIN') {
             product = await prisma.product.findUnique({
@@ -108,13 +113,14 @@ const uploadReport = async (req, res) => {
             .createHash('sha256')
             .update(fileBuffer)
             .digest('hex');
-        let results = {};
+        let results = '{}';
         if (validatedData.results) {
             try {
-                results = JSON.parse(validatedData.results);
+                JSON.parse(validatedData.results);
+                results = validatedData.results;
             }
             catch (error) {
-                results = { raw: validatedData.results };
+                results = JSON.stringify({ raw: validatedData.results });
             }
         }
         const report = await prisma.report.create({
@@ -125,7 +131,7 @@ const uploadReport = async (req, res) => {
                 fileSize: req.file.size,
                 mimeType: req.file.mimetype,
                 analysisType: validatedData.analysisType || 'GENERAL',
-                results,
+                results: results || '{}',
                 verificationHash,
                 productId: validatedData.productId,
                 laboratoryId: laboratory.id
@@ -180,6 +186,11 @@ exports.uploadReport = uploadReport;
 const getProductReports = async (req, res) => {
     try {
         const { productId } = req.params;
+        if (!req.user) {
+            return res.status(401).json({
+                error: 'Unauthorized'
+            });
+        }
         const product = await prisma.product.findFirst({
             where: {
                 id: productId,
@@ -227,6 +238,11 @@ exports.getProductReports = getProductReports;
 const downloadReport = async (req, res) => {
     try {
         const { reportId } = req.params;
+        if (!req.user) {
+            return res.status(401).json({
+                error: 'Unauthorized'
+            });
+        }
         const report = await prisma.report.findFirst({
             where: {
                 id: reportId,

@@ -31,6 +31,7 @@ import validationQueueRoutes from './routes/validationQueue';
 import monitoringRoutes from './routes/monitoring';
 import privacyRoutes from './routes/privacy';
 import metricsRoutes from './routes/metrics';
+import statusRoutes from './routes/status';
 
 // Importar middlewares
 import { errorHandler } from './middleware/errorHandler';
@@ -170,6 +171,7 @@ app.use('/api/v1', certificationRoutes);
 app.use('/api/v1/monitoring', monitoringRoutes);
 app.use('/api/v1/privacy', privacyRoutes);
 app.use('/api/v1/metrics', metricsRoutes);
+app.use('/api', statusRoutes);
 
 // Rotas públicas (sem prefixo /api para facilitar acesso)
 app.use('/public', publicRoutes);

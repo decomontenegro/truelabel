@@ -21,6 +21,9 @@ export declare function startTransaction(options: {
     name: string;
     op: string;
     data?: Record<string, any>;
-}): any;
+}): {
+    setHttpStatus: (status: number) => void;
+    finish: () => void;
+};
 export { captureException } from '@sentry/node';
 //# sourceMappingURL=sentry.d.ts.map

@@ -73,13 +73,17 @@ class CacheService {
         }
     }
     async set(key, value, ttl) {
-        return await redis_1.cache.set(key, value, ttl);
+        await redis_1.cache.set(key, value, ttl);
+        return true;
     }
     async del(key) {
         return await redis_1.cache.del(key);
     }
     async clearPattern(pattern) {
         return await redis_1.cache.delPattern(pattern);
+    }
+    async delPattern(pattern) {
+        return await this.clearPattern(pattern);
     }
     async invalidateUser(userId) {
         const keys = [

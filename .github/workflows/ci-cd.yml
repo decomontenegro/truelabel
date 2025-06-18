@@ -1,0 +1,371 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18.x'
+  PNPM_VERSION: '8'
+
+jobs:
+  # Code Quality Checks
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+    
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+    
+    - name: Setup pnpm cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+    
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    
+    - name: Run ESLint
+      run: pnpm lint
+    
+    - name: Run TypeScript check
+      run: pnpm type-check
+    
+    - name: Run Prettier check
+      run: pnpm format:check
+
+  # Security Scan
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+    
+    - name: Run npm audit
+      run: |
+        npm audit --audit-level=moderate || true
+
+  # Server Tests
+  test-server:
+    name: Server Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: trustlabel_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        cd server
+        pnpm install --frozen-lockfile
+    
+    - name: Setup test database
+      env:
+        DATABASE_URL: postgresql://testuser:testpass@localhost:5432/trustlabel_test
+      run: |
+        cd server
+        pnpm prisma migrate deploy
+        pnpm prisma db seed
+    
+    - name: Run unit tests
+      env:
+        DATABASE_URL: postgresql://testuser:testpass@localhost:5432/trustlabel_test
+        REDIS_URL: redis://localhost:6379
+        JWT_SECRET: test-jwt-secret
+        NODE_ENV: test
+      run: |
+        cd server
+        pnpm test:unit
+    
+    - name: Run integration tests
+      env:
+        DATABASE_URL: postgresql://testuser:testpass@localhost:5432/trustlabel_test
+        REDIS_URL: redis://localhost:6379
+        JWT_SECRET: test-jwt-secret
+        NODE_ENV: test
+      run: |
+        cd server
+        pnpm test:integration
+    
+    - name: Generate coverage report
+      run: |
+        cd server
+        pnpm test:coverage
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        directory: ./server/coverage
+        flags: server
+        fail_ci_if_error: true
+
+  # Client Tests
+  test-client:
+    name: Client Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        cd client
+        pnpm install --frozen-lockfile
+    
+    - name: Run unit tests
+      run: |
+        cd client
+        pnpm test:unit
+    
+    - name: Run component tests
+      run: |
+        cd client
+        pnpm test:components
+    
+    - name: Generate coverage report
+      run: |
+        cd client
+        pnpm test:coverage
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        directory: ./client/coverage
+        flags: client
+        fail_ci_if_error: true
+
+  # E2E Tests
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [test-server, test-client]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+    
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    
+    - name: Install Playwright browsers
+      run: |
+        cd client
+        pnpm exec playwright install --with-deps
+    
+    - name: Run E2E tests
+      run: |
+        cd client
+        pnpm test:e2e
+    
+    - name: Upload Playwright report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: playwright-report
+        path: client/playwright-report/
+        retention-days: 30
+
+  # Build
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [quality, security, test-server, test-client]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+    
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    
+    - name: Build server
+      run: |
+        cd server
+        pnpm build
+    
+    - name: Build client
+      run: |
+        cd client
+        pnpm build
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: |
+          server/dist/
+          client/dist/
+        retention-days: 7
+
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, e2e]
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
+    
+    - name: Deploy to Vercel (Staging)
+      run: |
+        npm i -g vercel
+        vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --scope=${{ secrets.VERCEL_SCOPE }}
+      env:
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  # Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, e2e]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
+    
+    - name: Deploy to Vercel (Production)
+      run: |
+        npm i -g vercel
+        vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --scope=${{ secrets.VERCEL_SCOPE }}
+      env:
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    
+    - name: Notify deployment
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: 'Production deployment completed!'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: always()
+
+  # Performance Tests
+  performance:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Lighthouse CI
+      uses: treosh/lighthouse-ci-action@v10
+      with:
+        urls: |
+          https://staging.trustlabel.com
+          https://staging.trustlabel.com/products
+          https://staging.trustlabel.com/analytics
+        uploadArtifacts: true
+        temporaryPublicStorage: true

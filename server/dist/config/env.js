@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logConfig = exports.validateConfig = exports.config = void 0;
+exports.isTest = exports.isProduction = exports.isDevelopment = exports.logConfig = exports.validateConfig = exports.config = void 0;
 const zod_1 = require("zod");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -25,6 +25,8 @@ const envSchema = zod_1.z.object({
     SMTP_PORT: zod_1.z.string().transform(val => parseInt(val, 10)).optional(),
     SMTP_USER: zod_1.z.string().optional(),
     SMTP_PASS: zod_1.z.string().optional(),
+    REDIS_ENABLED: zod_1.z.string().transform(val => val === 'true').default('false'),
+    REDIS_URL: zod_1.z.string().optional(),
     SENTRY_DSN: zod_1.z.string().optional(),
     LOG_LEVEL: zod_1.z.enum(['error', 'warn', 'info', 'debug']).default('info'),
 });
@@ -55,6 +57,8 @@ exports.config = {
             'http://localhost:3000',
             'http://localhost:3001',
             'http://localhost:3002',
+            'http://localhost:5001',
+            'http://localhost:5002',
             'http://localhost:5173',
         ],
     database: {
@@ -105,6 +109,10 @@ exports.config = {
         user: env.SMTP_USER,
         pass: env.SMTP_PASS,
     } : null,
+    redis: {
+        enabled: env.REDIS_ENABLED,
+        url: env.REDIS_URL,
+    },
     monitoring: {
         sentryDsn: env.SENTRY_DSN,
         logLevel: env.LOG_LEVEL,
@@ -148,5 +156,6 @@ const logConfig = () => {
     console.log(`  - Monitoring: ${exports.config.monitoring.sentryDsn ? 'Configurado' : 'Não configurado'}`);
 };
 exports.logConfig = logConfig;
+exports.isDevelopment = exports.config.isDevelopment, exports.isProduction = exports.config.isProduction, exports.isTest = exports.config.isTest;
 exports.default = exports.config;
 //# sourceMappingURL=env.js.map

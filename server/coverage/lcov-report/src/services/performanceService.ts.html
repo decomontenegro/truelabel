@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">8.24% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/97</span>
+                <span class='fraction'>8/97</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">5.26% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>1/19</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">8.6% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/93</span>
+                <span class='fraction'>8/93</span>
             </div>
         
             
@@ -366,12 +366,12 @@
 <a name='L301'></a><a href='#L301'>301</a>
 <a name='L302'></a><a href='#L302'>302</a>
 <a name='L303'></a><a href='#L303'>303</a>
-<a name='L304'></a><a href='#L304'>304</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L304'></a><a href='#L304'>304</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -654,27 +654,27 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { register } from '../lib/metrics';</span>
-<span class="cstat-no" title="statement not covered" >import { log } from '../lib/logger';</span>
-<span class="cstat-no" title="statement not covered" >import { PrismaClient } from '@prisma/client';</span>
-<span class="cstat-no" title="statement not covered" >import os from 'os';</span>
+<span class="cline-any cline-yes">2x</span></td><td class="text"><pre class="prettyprint lang-js">import { register } from '../lib/metrics';
+import { log } from '../lib/logger';
+import { PrismaClient } from '@prisma/client';
+import os from 'os';
 &nbsp;
-const prisma = <span class="cstat-no" title="statement not covered" >new PrismaClient();</span>
+const prisma = new PrismaClient();
 &nbsp;
 /**
  * Serviço para monitoramento de performance e geração de relatórios
@@ -956,8 +956,8 @@ class PerformanceService {
   /**
    * Iniciar monitoramento periódico
    */
-<span class="fstat-no" title="function not covered" >  startPeriodicMonitoring(</span>intervalMinutes = <span class="branch-0 cbranch-no" title="branch not covered" >5)</span> {
-<span class="cstat-no" title="statement not covered" >    setInterval(<span class="fstat-no" title="function not covered" >async </span>() =&gt; {</span>
+  startPeriodicMonitoring(intervalMinutes = <span class="branch-0 cbranch-no" title="branch not covered" >5)</span> {
+    setInterval(<span class="fstat-no" title="function not covered" >async </span>() =&gt; {
 <span class="cstat-no" title="statement not covered" >      try {</span>
         const alerts = <span class="cstat-no" title="statement not covered" >await this.checkPerformanceAlerts();</span>
 <span class="cstat-no" title="statement not covered" >        <span class="missing-if-branch" title="if path not taken" >I</span>if (alerts.length &gt; 0) {</span>
@@ -968,18 +968,18 @@ class PerformanceService {
       }
     }, intervalMinutes * 60 * 1000);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    log.info('Monitoramento periódico iniciado', { intervalMinutes });</span>
+    log.info('Monitoramento periódico iniciado', { intervalMinutes });
   }
 }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export default new PerformanceService();</span></pre></td></tr></table></pre>
+export default new PerformanceService();</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-15T17:42:39.576Z
+                at 2025-06-17T20:10:40.827Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

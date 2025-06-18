@@ -49,6 +49,7 @@ export declare class CacheService {
     set<T>(key: string, value: T, ttl?: number): Promise<boolean>;
     del(key: string | string[]): Promise<number>;
     clearPattern(pattern: string): Promise<number>;
+    delPattern(pattern: string): Promise<number>;
     invalidateUser(userId: string): Promise<void>;
     invalidateProduct(productId: string, brandId?: string): Promise<void>;
     invalidateValidation(validationId: string, code?: string, brandId?: string): Promise<void>;

@@ -53,10 +53,10 @@ function initSentry(app) {
             dsn: env_1.config.monitoring.sentryDsn,
             environment: env_1.config.NODE_ENV,
             integrations: [
-                new Sentry.Integrations.Http({ tracing: true }),
-                new Sentry.Integrations.Express({ app }),
-                new profiling_node_1.ProfilingIntegration(),
-                new Sentry.Integrations.Prisma({ client: true }),
+                Sentry.httpIntegration({ tracing: true }),
+                Sentry.expressIntegration({ app }),
+                (0, profiling_node_1.nodeProfilingIntegration)(),
+                Sentry.prismaIntegration(),
             ],
             tracesSampleRate: env_1.config.isDevelopment ? 1.0 : 0.1,
             profilesSampleRate: env_1.config.isDevelopment ? 1.0 : 0.1,
@@ -162,7 +162,23 @@ function startTransaction(options) {
             finish: () => { }
         };
     }
-    return Sentry.startTransaction(options);
+    const transaction = Sentry.startInactiveSpan({
+        name: options.name,
+        op: options.op,
+        ...options.data
+    });
+    return {
+        setHttpStatus: (status) => {
+            if (transaction) {
+                transaction.setAttribute('http.status_code', status);
+            }
+        },
+        finish: () => {
+            if (transaction) {
+                transaction.end();
+            }
+        }
+    };
 }
 var node_1 = require("@sentry/node");
 Object.defineProperty(exports, "captureException", { enumerable: true, get: function () { return node_1.captureException; } });

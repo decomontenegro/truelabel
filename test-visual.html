@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Label - Visual Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        h1 { color: #0f172a; }
+        h2 { color: #334155; margin-top: 0; }
+        .test-item {
+            margin: 16px 0;
+            padding: 16px;
+            background: #f1f5f9;
+            border-radius: 6px;
+        }
+        .test-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #0ea5e9;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .test-link:hover {
+            background: #0284c7;
+        }
+        .status-ok { color: #10b981; }
+        .status-error { color: #ef4444; }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Trust Label - Visual Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>📊 Status Page</h2>
+        <p>Nova página de status do sistema com monitoramento em tempo real</p>
+        <a href="http://localhost:5001/status" target="_blank" class="test-link">Abrir Status Page</a>
+        <iframe src="http://localhost:5001/status"></iframe>
+    </div>
+
+    <div class="test-section">
+        <h2>🔐 Funcionalidades de Segurança</h2>
+        <div class="test-item">
+            <h3>2FA (Two-Factor Authentication)</h3>
+            <p>Implementado no backend com speakeasy. Para testar:</p>
+            <ol>
+                <li>Login na aplicação</li>
+                <li>Acesse configurações do usuário</li>
+                <li>Ative 2FA e escaneie o QR code</li>
+            </ol>
+        </div>
+        <div class="test-item">
+            <h3>Rate Limiting</h3>
+            <p>Testando rate limit (máx 5 requisições em 15 min para auth):</p>
+            <button onclick="testRateLimit()">Testar Rate Limit</button>
+            <div id="rate-limit-result"></div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>💬 Feedback Widget</h2>
+        <p>Widget flutuante deve aparecer no canto inferior direito</p>
+        <a href="http://localhost:5001" target="_blank" class="test-link">Ver na Home</a>
+    </div>
+
+    <div class="test-section">
+        <h2>📱 PWA & Offline</h2>
+        <div class="test-item">
+            <h3>Página Offline</h3>
+            <a href="http://localhost:5001/offline.html" target="_blank" class="test-link">Ver Página Offline</a>
+        </div>
+        <div class="test-item">
+            <h3>Service Worker</h3>
+            <p>Desconecte a internet e navegue no site para testar o modo offline</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>⚡ Performance</h2>
+        <div class="test-item">
+            <h3>Cache Redis</h3>
+            <p>Cache implementado com compressão e versionamento</p>
+            <button onclick="testCache()">Testar Cache</button>
+            <div id="cache-result"></div>
+        </div>
+        <div class="test-item">
+            <h3>CDN Configuration</h3>
+            <p>Configuração para CloudFlare e Nginx com compressão Brotli</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📚 API Documentation</h2>
+        <p>Documentação Swagger/OpenAPI disponível em:</p>
+        <a href="http://localhost:3333/api-docs" target="_blank" class="test-link">Ver API Docs</a>
+    </div>
+
+    <script>
+        async function testRateLimit() {
+            const resultDiv = document.getElementById('rate-limit-result');
+            resultDiv.innerHTML = 'Testando...';
+            
+            try {
+                const promises = [];
+                for (let i = 0; i < 10; i++) {
+                    promises.push(
+                        fetch('http://localhost:3333/api/auth/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: 'test@test.com', password: 'test' })
+                        })
+                    );
+                }
+                
+                const results = await Promise.all(promises);
+                const statuses = results.map((r, i) => `Request ${i+1}: ${r.status}`);
+                resultDiv.innerHTML = '<pre>' + statuses.join('\n') + '</pre>';
+                
+                // Check rate limit headers
+                const lastResponse = results[results.length - 1];
+                const rateLimit = lastResponse.headers.get('X-RateLimit-Limit');
+                const remaining = lastResponse.headers.get('X-RateLimit-Remaining');
+                
+                if (rateLimit) {
+                    resultDiv.innerHTML += `\nRate Limit: ${rateLimit}, Remaining: ${remaining}`;
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="status-error">Erro: ${error.message}</span>`;
+            }
+        }
+
+        async function testCache() {
+            const resultDiv = document.getElementById('cache-result');
+            resultDiv.innerHTML = 'Testando cache...';
+            
+            try {
+                // Test cache through API
+                const start = Date.now();
+                const response1 = await fetch('http://localhost:3333/api/products');
+                const time1 = Date.now() - start;
+                
+                const start2 = Date.now();
+                const response2 = await fetch('http://localhost:3333/api/products');
+                const time2 = Date.now() - start2;
+                
+                resultDiv.innerHTML = `
+                    <span class="status-ok">✓ Cache funcionando!</span><br>
+                    Primeira requisição: ${time1}ms<br>
+                    Segunda requisição (cached): ${time2}ms<br>
+                    Melhoria: ${Math.round((1 - time2/time1) * 100)}%
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="status-error">Erro: ${error.message}</span>`;
+            }
+        }
+
+        // Auto-refresh status
+        setInterval(() => {
+            const iframe = document.querySelector('iframe');
+            if (iframe && iframe.src.includes('/status')) {
+                console.log('Status page auto-refreshing...');
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

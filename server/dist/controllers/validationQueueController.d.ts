@@ -9,6 +9,7 @@ declare class ValidationQueueController {
     getQueueEntry(req: AuthRequest, res: Response): Promise<Response>;
     getQueueHistory(req: AuthRequest, res: Response): Promise<Response>;
     cancelQueueEntry(req: AuthRequest, res: Response): Promise<Response>;
+    getQueueMetrics(req: AuthRequest, res: Response): Promise<Response>;
 }
 declare const _default: ValidationQueueController;
 export default _default;

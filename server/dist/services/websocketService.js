@@ -19,6 +19,10 @@ class WebSocketService {
         };
     }
     initialize(server) {
+        if (this.io) {
+            console.log('WebSocket service already initialized');
+            return;
+        }
         this.io = new socket_io_1.Server(server, {
             cors: {
                 origin: env_1.config.corsOrigins,

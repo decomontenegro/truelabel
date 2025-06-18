@@ -99,7 +99,8 @@ class RedisClient {
         if (!this.isAvailable())
             return 0;
         try {
-            return await this.client.del(key);
+            const keys = Array.isArray(key) ? key : [key];
+            return await this.client.del(...keys);
         }
         catch (error) {
             console.error('Redis DEL error:', error);
@@ -262,6 +263,26 @@ class CacheService {
         const value = await fetcher();
         await this.set(key, value, ttlSeconds);
         return value;
+    }
+    async del(keys) {
+        const keysArray = Array.isArray(keys) ? keys : [keys];
+        const redisDeleted = await exports.redis.del(keys);
+        keysArray.forEach(key => this.memoryCache.delete(key));
+        return redisDeleted;
+    }
+    async delPattern(pattern) {
+        const redisDeleted = await exports.redis.clearPattern(pattern);
+        const keysToDelete = [];
+        this.memoryCache.forEach((_, key) => {
+            if (key.includes(pattern.replace('*', ''))) {
+                keysToDelete.push(key);
+            }
+        });
+        keysToDelete.forEach(key => this.memoryCache.delete(key));
+        return redisDeleted;
+    }
+    async zadd(key, score, member) {
+        return await exports.redis.zadd(key, score, member);
     }
     cleanupMemoryCache() {
         const now = Date.now();

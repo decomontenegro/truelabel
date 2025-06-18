@@ -1,43 +1,16 @@
 {
-  "buildCommand": "./vercel-build-fixed.sh",
+  "buildCommand": "cd client && npm ci && npm run build",
   "outputDirectory": "client/dist",
   "builds": [
-    {
-      "src": "client/dist/**",
-      "use": "@vercel/static"
-    },
     {
       "src": "api/index.js",
       "use": "@vercel/node"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/index.js"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/client/dist/assets/$1"
-    },
-    {
-      "src": "/js/(.*)",
-      "dest": "/client/dist/js/$1"
-    },
-    {
-      "src": "/favicon.svg",
-      "dest": "/client/dist/favicon.svg"
-    },
-    {
-      "src": "/manifest.json",
-      "dest": "/client/dist/manifest.json"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/client/dist/index.html"
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-// import { ProfilingIntegration } from '@sentry/profiling-node'; // Temporariamente desabilitado para Mac ARM64
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import { config, isProduction } from '../config/env';
 import type { Express, Request, Response, NextFunction } from 'express';
 
@@ -19,13 +19,11 @@ export function initSentry(app: Express) {
       environment: config.NODE_ENV,
       integrations: [
         // HTTP tracing
-        new Sentry.Integrations.Http({ tracing: true }),
+        Sentry.httpIntegration({ tracing: true }),
         // Express
-        new Sentry.Integrations.Express({ app }),
-        // Profiling - Temporariamente desabilitado para Mac ARM64
-        // new ProfilingIntegration(),
-        // Prisma
-        new Sentry.Integrations.Prisma({ client: true }),
+        Sentry.expressIntegration({ app }),
+        // Profiling
+        nodeProfilingIntegration()
       ],
       // Taxa de amostragem
       tracesSampleRate: config.isDevelopment ? 1.0 : 0.1, // 100% dev, 10% prod
@@ -138,7 +136,7 @@ export function captureError(error: Error, context?: Record<string, any>) {
 export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info') {
   if (!isProduction || !config.monitoring.sentryDsn) return;
   
-  Sentry.captureMessage(message, level);
+  Sentry.captureMessage(message, level as any);
 }
 
 /**
@@ -187,8 +185,25 @@ export function startTransaction(options: {
     };
   }
 
-  // Usar a nova API do Sentry v8+
-  return Sentry.startSpan(options, () => {});
+  // Usar a nova API do Sentry v9
+  const span = Sentry.startInactiveSpan({
+    name: options.name,
+    op: options.op,
+    attributes: options.data
+  });
+  
+  return {
+    setHttpStatus: (status: number) => {
+      if (span) {
+        span.setAttribute('http.status_code', status);
+      }
+    },
+    finish: () => {
+      if (span) {
+        span.end();
+      }
+    }
+  };
 }
 
 // Re-exportar captureException do Sentry

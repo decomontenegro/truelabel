@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/14</span>
+                <span class='fraction'>14/14</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/14</span>
+                <span class='fraction'>14/14</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -108,83 +108,83 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * Validation Queue Routes
  * 
  * Purpose: Handle validation queue API endpoints
  * Dependencies: Express Router, Validation Queue Controller, Auth Middleware
  */
 &nbsp;
-<span class="cstat-no" title="statement not covered" >import { Router } from 'express';</span>
-<span class="cstat-no" title="statement not covered" >import validationQueueController from '../controllers/validationQueueController';</span>
-<span class="cstat-no" title="statement not covered" >import { authenticateToken } from '../middleware/auth';</span>
-<span class="cstat-no" title="statement not covered" >import { requireRole } from '../middleware/requireRole';</span>
+import { Router } from 'express';
+import validationQueueController from '../controllers/validationQueueController';
+import { authenticateToken } from '../middleware/auth';
+import { requireRole } from '../middleware/requireRole';
 &nbsp;
-const router = <span class="cstat-no" title="statement not covered" >Router();</span>
+const router = Router();
 &nbsp;
 // Middleware de autenticação para todas as rotas
-<span class="cstat-no" title="statement not covered" >router.use(authenticateToken);</span>
+router.use(authenticateToken);
 &nbsp;
 // Get validation queue with filters
-<span class="cstat-no" title="statement not covered" >router.get('/', validationQueueController.getQueue.bind(validationQueueController));</span>
+router.get('/', validationQueueController.getQueue.bind(validationQueueController));
 &nbsp;
 // Get queue metrics
-<span class="cstat-no" title="statement not covered" >router.get('/metrics', requireRole('ADMIN'), validationQueueController.getQueueMetrics.bind(validationQueueController));</span>
+router.get('/metrics', requireRole('ADMIN'), validationQueueController.getQueueMetrics.bind(validationQueueController));
 &nbsp;
 // Create new queue entry
-<span class="cstat-no" title="statement not covered" >router.post('/', validationQueueController.createQueueEntry.bind(validationQueueController));</span>
+router.post('/', validationQueueController.createQueueEntry.bind(validationQueueController));
 &nbsp;
 // Get specific queue entry
-<span class="cstat-no" title="statement not covered" >router.get('/:id', validationQueueController.getQueueEntry.bind(validationQueueController));</span>
+router.get('/:id', validationQueueController.getQueueEntry.bind(validationQueueController));
 &nbsp;
 // Assign validation to validator
-<span class="cstat-no" title="statement not covered" >router.post('/:id/assign', requireRole('ADMIN'), validationQueueController.assignValidation.bind(validationQueueController));</span>
+router.post('/:id/assign', requireRole('ADMIN'), validationQueueController.assignValidation.bind(validationQueueController));
 &nbsp;
 // Update queue entry status
-<span class="cstat-no" title="statement not covered" >router.patch('/:id/status', validationQueueController.updateStatus.bind(validationQueueController));</span>
+router.patch('/:id/status', validationQueueController.updateStatus.bind(validationQueueController));
 &nbsp;
 // Cancel queue entry
-<span class="cstat-no" title="statement not covered" >router.delete('/:id', validationQueueController.cancelQueueEntry.bind(validationQueueController));</span>
+router.delete('/:id', validationQueueController.cancelQueueEntry.bind(validationQueueController));
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export default router;</span></pre></td></tr></table></pre>
+export default router;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-15T17:42:39.664Z
+                at 2025-06-17T20:10:41.134Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

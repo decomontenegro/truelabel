@@ -7,6 +7,7 @@ export declare enum ValidationQueueStatus {
 export declare enum ValidationQueuePriority {
     HIGH = "HIGH",
     MEDIUM = "MEDIUM",
+    NORMAL = "NORMAL",
     LOW = "LOW"
 }
 export declare enum UserRole {

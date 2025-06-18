@@ -145,8 +145,7 @@ const validateQRCode = async (req, res) => {
                 nutritionalInfo: product.nutritionalInfo,
                 imageUrl: product.imageUrl,
                 status: product.status,
-                batchNumber: product.batchNumber,
-                manufacturer: product.manufacturer
+                batchNumber: product.batchNumber
             },
             brand: {
                 name: product.user.name,

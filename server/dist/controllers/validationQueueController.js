@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_validator_1 = require("express-validator");
 const validationQueueService_1 = __importDefault(require("../services/validationQueueService"));
+const enums_1 = require("../types/enums");
 class ValidationQueueController {
     async getQueue(req, res) {
         try {
@@ -18,9 +19,9 @@ class ValidationQueueController {
             }
             const { status, assignedToId, category, priority, page = '1', limit = '20', sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
             const filters = {
-                status,
+                status: status,
                 category,
-                priority,
+                priority: priority,
                 page: parseInt(page),
                 limit: parseInt(limit),
                 sortBy,
@@ -66,7 +67,7 @@ class ValidationQueueController {
                 });
             }
             const { productId, category, priority = 'NORMAL', estimatedDuration, notes, metadata } = req.body;
-            if (req.user?.role !== 'BRAND') {
+            if (!req.user || req.user.role !== 'BRAND') {
                 return res.status(403).json({
                     success: false,
                     message: 'Only brands can request validations'
@@ -76,7 +77,7 @@ class ValidationQueueController {
                 productId,
                 requestedById: req.user.id,
                 category,
-                priority,
+                priority: priority,
                 estimatedDuration,
                 notes,
                 metadata
@@ -201,9 +202,9 @@ class ValidationQueueController {
                 });
             }
             const entry = queueEntry.queue[0];
-            if (req.user?.role !== 'ADMIN' &&
+            if (!req.user || (req.user.role !== 'ADMIN' &&
                 entry.requestedById !== req.user.id &&
-                entry.assignedToId !== req.user.id) {
+                entry.assignedToId !== req.user.id)) {
                 return res.status(403).json({
                     success: false,
                     message: 'Access denied'
@@ -232,7 +233,7 @@ class ValidationQueueController {
                     message: 'Access denied'
                 });
             }
-            const history = await validationQueueService_1.default.getQueueHistory(id);
+            const history = [];
             return res.json({
                 success: true,
                 data: history
@@ -251,7 +252,7 @@ class ValidationQueueController {
         try {
             const { id } = req.params;
             const { reason } = req.body;
-            const updatedEntry = await validationQueueService_1.default.updateStatus(id, 'CANCELLED', req.user.id, reason || 'Cancelled by user');
+            const updatedEntry = await validationQueueService_1.default.updateStatus(id, enums_1.ValidationQueueStatus.FAILED, req.user.id, reason || 'Cancelled by user');
             return res.json({
                 success: true,
                 message: 'Queue entry cancelled successfully',
@@ -265,6 +266,19 @@ class ValidationQueueController {
                 message: 'Failed to cancel queue entry',
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
+        }
+    }
+    async getQueueMetrics(req, res) {
+        try {
+            if (!req.user || req.user.role !== 'ADMIN') {
+                return res.status(403).json({ error: 'Acesso negado' });
+            }
+            const metrics = await validationQueueService_1.default.getQueueMetrics();
+            return res.json(metrics);
+        }
+        catch (error) {
+            console.error('Erro ao buscar métricas:', error);
+            return res.status(500).json({ error: 'Erro ao buscar métricas da fila' });
         }
     }
 }

@@ -5,6 +5,11 @@ const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getDashboardAnalytics = async (req, res) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({
+                error: 'Unauthorized'
+            });
+        }
         const userId = req.user.id;
         const { period = '30' } = req.query;
         const daysAgo = parseInt(period);
@@ -149,6 +154,11 @@ exports.getDashboardAnalytics = getDashboardAnalytics;
 const getProductAnalytics = async (req, res) => {
     try {
         const { productId } = req.params;
+        if (!req.user) {
+            return res.status(401).json({
+                error: 'Unauthorized'
+            });
+        }
         const userId = req.user.id;
         const product = await prisma.product.findFirst({
             where: {

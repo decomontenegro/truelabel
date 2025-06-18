@@ -27,6 +27,9 @@ declare class CacheService {
     set(key: string, value: any, ttlSeconds?: number): Promise<void>;
     invalidate(pattern: string): Promise<void>;
     getOrSet<T>(key: string, fetcher: () => Promise<T>, ttlSeconds?: number): Promise<T>;
+    del(keys: string | string[]): Promise<number>;
+    delPattern(pattern: string): Promise<number>;
+    zadd(key: string, score: number, member: string): Promise<boolean>;
     private cleanupMemoryCache;
 }
 export declare const cache: CacheService;
