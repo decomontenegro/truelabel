@@ -1,31 +1,17 @@
 import nodemailer from 'nodemailer';
-import { PrismaClient } from '@prisma/client';
+import sgMail from '@sendgrid/mail';
+import { prisma } from '../lib/prisma';
+import emailConfig, { validateEmailConfig, emailRateLimits } from '../config/email.config';
+import logger from '../utils/logger';
+import cacheService from './cacheService';
 
-const prisma = new PrismaClient();
+// Validate configuration on startup
+validateEmailConfig();
 
-// Configuração do transporter de email
-const createTransporter = () => {
-  // Em produção, usar serviços como SendGrid, AWS SES, etc.
-  if (process.env.NODE_ENV === 'production') {
-    return nodemailer.createTransporter({
-      service: 'gmail', // ou outro serviço
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-  } else {
-    // Para desenvolvimento, usar Ethereal Email (teste)
-    return nodemailer.createTransporter({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      auth: {
-        user: process.env.ETHEREAL_USER || 'ethereal.user@ethereal.email',
-        pass: process.env.ETHEREAL_PASS || 'ethereal.pass'
-      }
-    });
-  }
-};
+// Configure SendGrid if enabled
+if (emailConfig.provider === 'sendgrid' && emailConfig.sendgrid?.apiKey) {
+  sgMail.setApiKey(emailConfig.sendgrid.apiKey);
+}
 
 // Templates de email
 const emailTemplates = {
@@ -148,36 +134,181 @@ const emailTemplates = {
   })
 };
 
-// Serviço de email
+// Enhanced Email Service with multiple provider support
 export class EmailService {
-  private transporter: any;
+  private transporter: nodemailer.Transporter | null = null;
 
   constructor() {
-    this.transporter = createTransporter();
+    this.initializeTransporter();
   }
 
-  // Enviar email genérico
-  async sendEmail(to: string, subject: string, html: string) {
-    try {
-      const info = await this.transporter.sendMail({
-        from: `"True Label" <${process.env.EMAIL_FROM || 'noreply@truelabel.com'}>`,
-        to,
-        subject,
-        html
-      });
+  private async initializeTransporter() {
+    if (emailConfig.provider === 'smtp' && emailConfig.smtp) {
+      this.transporter = nodemailer.createTransporter(emailConfig.smtp);
+    } else if (emailConfig.provider === 'console') {
+      // Console provider for development
+      this.transporter = null;
+    }
+  }
 
-      console.log('Email enviado:', info.messageId);
-      
-      // Em desenvolvimento, mostrar preview URL
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
+  /**
+   * Check rate limits before sending email
+   */
+  private async checkRateLimit(to: string, type: string = 'general'): Promise<boolean> {
+    const userKey = `email:ratelimit:user:${to}:${type}`;
+    const globalKey = `email:ratelimit:global:${new Date().getHours()}`;
+
+    // Check user rate limit
+    const userCount = await cacheService.get<number>('ratelimit', userKey) || 0;
+    if (userCount >= emailRateLimits.perUserPerHour) {
+      logger.warn('Email rate limit exceeded for user', { to, type });
+      return false;
+    }
+
+    // Check global rate limit
+    const globalCount = await cacheService.get<number>('ratelimit', globalKey) || 0;
+    if (globalCount >= emailRateLimits.globalPerHour) {
+      logger.warn('Global email rate limit exceeded');
+      return false;
+    }
+
+    // Increment counters
+    await cacheService.set('ratelimit', userKey, userCount + 1, { ttl: 3600 });
+    await cacheService.set('ratelimit', globalKey, globalCount + 1, { ttl: 3600 });
+
+    return true;
+  }
+
+  /**
+   * Send email using configured provider
+   */
+  async sendEmail(to: string | string[], subject: string, html: string, options?: {
+    text?: string;
+    attachments?: any[];
+    cc?: string[];
+    bcc?: string[];
+    replyTo?: string;
+    type?: string;
+  }) {
+    try {
+      // Check if email is enabled
+      if (!emailConfig.enabled) {
+        logger.info('Email service is disabled, logging to console instead');
+        console.log('\n📧 EMAIL (Console Mode)\n' +
+          `To: ${Array.isArray(to) ? to.join(', ') : to}\n` +
+          `Subject: ${subject}\n` +
+          `Type: ${options?.type || 'general'}\n` +
+          '---\n');
+        return { success: true, messageId: 'console-' + Date.now() };
       }
 
-      return { success: true, messageId: info.messageId };
+      // Check rate limits
+      const primaryRecipient = Array.isArray(to) ? to[0] : to;
+      const canSend = await this.checkRateLimit(primaryRecipient, options?.type);
+      if (!canSend) {
+        throw new Error('Rate limit exceeded');
+      }
+
+      // Send based on provider
+      let result: any;
+      
+      switch (emailConfig.provider) {
+        case 'sendgrid':
+          result = await this.sendViaSendGrid(to, subject, html, options);
+          break;
+          
+        case 'smtp':
+          result = await this.sendViaSMTP(to, subject, html, options);
+          break;
+          
+        case 'console':
+          console.log('\n📧 EMAIL (Console Mode)\n' +
+            `To: ${Array.isArray(to) ? to.join(', ') : to}\n` +
+            `Subject: ${subject}\n` +
+            '---\n' +
+            html.replace(/<[^>]*>/g, '') + '\n');
+          result = { success: true, messageId: 'console-' + Date.now() };
+          break;
+          
+        default:
+          throw new Error(`Unsupported email provider: ${emailConfig.provider}`);
+      }
+
+      logger.info('Email sent successfully', {
+        to,
+        subject,
+        provider: emailConfig.provider,
+        messageId: result.messageId
+      });
+
+      return result;
     } catch (error) {
-      console.error('Erro ao enviar email:', error);
-      return { success: false, error };
+      logger.error('Failed to send email', { error, to, subject });
+      throw error;
     }
+  }
+
+  /**
+   * Send via SendGrid
+   */
+  private async sendViaSendGrid(to: string | string[], subject: string, html: string, options?: any) {
+    const msg = {
+      to,
+      from: {
+        email: emailConfig.from.email,
+        name: emailConfig.from.name
+      },
+      subject,
+      html,
+      text: options?.text || html.replace(/<[^>]*>/g, ''),
+      cc: options?.cc,
+      bcc: options?.bcc,
+      replyTo: options?.replyTo || emailConfig.replyTo,
+      attachments: options?.attachments,
+      sandboxMode: {
+        enable: emailConfig.sendgrid?.sandboxMode || false
+      }
+    };
+
+    const response = await sgMail.send(msg);
+    return {
+      success: true,
+      messageId: response[0].headers['x-message-id'],
+      response
+    };
+  }
+
+  /**
+   * Send via SMTP
+   */
+  private async sendViaSMTP(to: string | string[], subject: string, html: string, options?: any) {
+    if (!this.transporter) {
+      throw new Error('SMTP transporter not initialized');
+    }
+
+    const info = await this.transporter.sendMail({
+      from: `"${emailConfig.from.name}" <${emailConfig.from.email}>`,
+      to: Array.isArray(to) ? to.join(', ') : to,
+      subject,
+      html,
+      text: options?.text || html.replace(/<[^>]*>/g, ''),
+      cc: options?.cc?.join(', '),
+      bcc: options?.bcc?.join(', '),
+      replyTo: options?.replyTo || emailConfig.replyTo,
+      attachments: options?.attachments
+    });
+
+    // Show preview URL in development
+    if (process.env.NODE_ENV === 'development' && emailConfig.smtp?.host === 'smtp.ethereal.email') {
+      const previewUrl = nodemailer.getTestMessageUrl(info);
+      logger.info('Email preview URL:', previewUrl);
+    }
+
+    return {
+      success: true,
+      messageId: info.messageId,
+      response: info
+    };
   }
 
   // Notificar upload de laudo
@@ -213,7 +344,20 @@ export class EmailService {
         template.html
       );
 
-      // TODO: Enviar para validadores/administradores
+      // Send notification to admins
+      const admins = await prisma.user.findMany({
+        where: { role: 'ADMIN' },
+        select: { email: true }
+      });
+      
+      if (admins.length > 0) {
+        await this.sendEmail(
+          admins.map(a => a.email),
+          template.subject,
+          template.html,
+          { type: 'report_uploaded' }
+        );
+      }
 
     } catch (error) {
       console.error('Erro ao notificar upload de laudo:', error);
