@@ -32,7 +32,7 @@ import monitoringRoutes from './routes/monitoring';
 import privacyRoutes from './routes/privacy';
 import metricsRoutes from './routes/metrics';
 import statusRoutes from './routes/status';
-// import nutritionRoutes from './routes/nutrition'; // TODO: Fix import issue
+import nutritionRoutes from './routes/nutrition';
 
 // Importar middlewares
 import { errorHandler } from './middleware/errorHandler';
@@ -167,12 +167,12 @@ app.use('/api/v1/laboratories', laboratoryRoutes);
 app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
-app.use('/api/v1', sealRoutes);
-app.use('/api/v1', certificationRoutes);
 app.use('/api/v1/monitoring', monitoringRoutes);
 app.use('/api/v1/privacy', privacyRoutes);
 app.use('/api/v1/metrics', metricsRoutes);
-// app.use('/api/v1/nutrition', nutritionRoutes); // TODO: Fix import issue
+app.use('/api/v1/nutrition', nutritionRoutes);
+app.use('/api/v1/seals', sealRoutes);
+app.use('/api/v1/certifications', certificationRoutes);
 app.use('/api', statusRoutes);
 
 // Rotas públicas (sem prefixo /api para facilitar acesso)

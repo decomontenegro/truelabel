@@ -1,8 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../middleware/auth';
-import nutritionController from '../controllers/nutritionController';
+import { authenticateToken } from '../middleware/auth';
 import { validateRequest } from '../middleware/validation';
 import { body, param } from 'express-validator';
+
+// Import the service directly to avoid controller issues
+import { nutritionService } from '../services/nutritionService';
 
 const router = Router();
 
@@ -14,185 +16,176 @@ const router = Router();
  */
 
 /**
- * @swagger
- * /nutrition/daily-values/{country}:
- *   get:
- *     summary: Get daily nutritional values by country
- *     tags: [Nutrition]
- *     parameters:
- *       - in: path
- *         name: country
- *         required: true
- *         schema:
- *           type: string
- *           enum: [BRAZIL, USA, EU, CANADA, MEXICO]
- *         description: Country code for nutritional guidelines
- *     responses:
- *       200:
- *         description: Daily nutritional values for the specified country
- *       404:
- *         description: Country not found
+ * Get daily nutritional values by country
  */
 router.get(
   '/daily-values/:country',
   param('country').isIn(['BRAZIL', 'USA', 'EU', 'CANADA', 'MEXICO']),
   validateRequest,
-  (req: Request, res: Response) => nutritionController.getDailyValues(req, res)
+  async (req: Request, res: Response) => {
+    try {
+      const { country } = req.params;
+      const dailyValues = await nutritionService.getDailyValuesByCountry(country);
+      
+      if (!dailyValues) {
+        return res.status(404).json({
+          success: false,
+          message: 'Daily values not found for this country'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: dailyValues
+      });
+    } catch (error) {
+      console.error('Error getting daily values:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error retrieving daily nutritional values'
+      });
+    }
+  }
 );
 
 /**
- * @swagger
- * /nutrition/calculate-score:
- *   post:
- *     summary: Calculate nutritional score for a product
- *     tags: [Nutrition]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nutritionalInfo:
- *                 type: object
- *                 description: Nutritional information per 100g
- *               servingSize:
- *                 type: number
- *                 description: Serving size in grams
- *               country:
- *                 type: string
- *                 enum: [BRAZIL, USA, EU, CANADA, MEXICO]
- *     responses:
- *       200:
- *         description: Nutritional score and analysis
+ * Calculate nutritional score for a product
  */
 router.post(
   '/calculate-score',
-  authMiddleware,
+  authenticateToken,
   [
     body('nutritionalInfo').isObject(),
     body('servingSize').isNumeric().optional(),
     body('country').isIn(['BRAZIL', 'USA', 'EU', 'CANADA', 'MEXICO']).optional()
   ],
   validateRequest,
-  (req: Request, res: Response) => nutritionController.calculateNutritionalScore(req, res)
+  async (req: Request, res: Response) => {
+    try {
+      const { nutritionalInfo, servingSize, country } = req.body;
+      
+      const score = await nutritionService.calculateScore({
+        nutritionalInfo,
+        servingSize: servingSize || 100,
+        country: country || 'BRAZIL'
+      });
+
+      res.json({
+        success: true,
+        data: score
+      });
+    } catch (error) {
+      console.error('Error calculating nutritional score:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error calculating nutritional score'
+      });
+    }
+  }
 );
 
 /**
- * @swagger
- * /nutrition/analyze:
- *   post:
- *     summary: Analyze nutritional information and provide recommendations
- *     tags: [Nutrition]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nutritionalInfo:
- *                 type: object
- *               category:
- *                 type: string
- *               targetAudience:
- *                 type: string
- *                 enum: [general, children, elderly, athletes]
- *     responses:
- *       200:
- *         description: Nutritional analysis and recommendations
+ * Analyze nutritional information and provide recommendations
  */
 router.post(
   '/analyze',
-  authMiddleware,
+  authenticateToken,
   [
     body('nutritionalInfo').isObject(),
     body('category').isString().optional(),
     body('targetAudience').isIn(['general', 'children', 'elderly', 'athletes']).optional()
   ],
   validateRequest,
-  (req: Request, res: Response) => nutritionController.analyzeNutrition(req, res)
+  async (req: Request, res: Response) => {
+    try {
+      const { nutritionalInfo, category, targetAudience } = req.body;
+      
+      const analysis = await nutritionService.analyzeNutrition({
+        nutritionalInfo,
+        category,
+        targetAudience: targetAudience || 'general'
+      });
+
+      res.json({
+        success: true,
+        data: analysis
+      });
+    } catch (error) {
+      console.error('Error analyzing nutrition:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error analyzing nutritional information'
+      });
+    }
+  }
 );
 
 /**
- * @swagger
- * /nutrition/validate-claims:
- *   post:
- *     summary: Validate nutritional claims against product data
- *     tags: [Nutrition]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nutritionalInfo:
- *                 type: object
- *               claims:
- *                 type: array
- *                 items:
- *                   type: string
- *               country:
- *                 type: string
- *     responses:
- *       200:
- *         description: Claim validation results
+ * Validate nutritional claims against product data
  */
 router.post(
   '/validate-claims',
-  authMiddleware,
+  authenticateToken,
   [
     body('nutritionalInfo').isObject(),
     body('claims').isArray(),
     body('country').isString().optional()
   ],
   validateRequest,
-  (req: Request, res: Response) => nutritionController.validateClaims(req, res)
+  async (req: Request, res: Response) => {
+    try {
+      const { nutritionalInfo, claims, country } = req.body;
+      
+      const validationResults = await nutritionService.validateClaims({
+        nutritionalInfo,
+        claims,
+        country: country || 'BRAZIL'
+      });
+
+      res.json({
+        success: true,
+        data: validationResults
+      });
+    } catch (error) {
+      console.error('Error validating claims:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error validating nutritional claims'
+      });
+    }
+  }
 );
 
 /**
- * @swagger
- * /nutrition/compare:
- *   post:
- *     summary: Compare nutritional profiles of multiple products
- *     tags: [Nutrition]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               products:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     nutritionalInfo:
- *                       type: object
- *     responses:
- *       200:
- *         description: Nutritional comparison results
+ * Compare nutritional profiles of multiple products
  */
 router.post(
   '/compare',
-  authMiddleware,
+  authenticateToken,
   [
     body('products').isArray().withMessage('Products array is required'),
     body('products.*.id').isString(),
     body('products.*.nutritionalInfo').isObject()
   ],
   validateRequest,
-  (req: Request, res: Response) => nutritionController.compareProducts(req, res)
+  async (req: Request, res: Response) => {
+    try {
+      const { products } = req.body;
+      
+      const comparison = await nutritionService.compareProducts(products);
+
+      res.json({
+        success: true,
+        data: comparison
+      });
+    } catch (error) {
+      console.error('Error comparing products:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error comparing nutritional profiles'
+      });
+    }
+  }
 );
 
 export default router;
