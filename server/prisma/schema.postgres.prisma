@@ -1,0 +1,277 @@
+// This is your Prisma schema file for PostgreSQL
+// For production use
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(USER)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  brand          Brand?
+  laboratory     Laboratory?
+  products       Product[]
+  validations    Validation[]
+  notifications  Notification[]
+  refreshTokens  RefreshToken[]
+  auditLogs      AuditLog[]
+  
+  @@index([email])
+  @@index([role])
+}
+
+model Brand {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  name        String
+  cnpj        String   @unique
+  logo        String?
+  website     String?
+  description String?
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
+  products    Product[]
+  
+  @@index([cnpj])
+  @@index([name])
+}
+
+model Laboratory {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  name          String
+  cnpj          String   @unique
+  accreditation String[]
+  specialties   String[]
+  verified      Boolean  @default(false)
+  rating        Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  user          User     @relation(fields: [userId], references: [id])
+  validations   Validation[]
+  
+  @@index([cnpj])
+  @@index([name])
+}
+
+model Product {
+  id                String            @id @default(uuid())
+  brandId           String
+  name              String
+  description       String?
+  ean               String?           @unique
+  sku               String?
+  category          String
+  subcategory       String?
+  status            ProductStatus     @default(DRAFT)
+  qrCode            String            @unique
+  images            Json              @default("[]")
+  nutritionalInfo   Json?
+  ingredients       Json?
+  validatedAt       DateTime?
+  validatedUntil    DateTime?
+  certificationLevel String?
+  trustScore        Float?
+  blockchainTx      String?
+  blockchainStatus  String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  // Relations
+  brand             Brand             @relation(fields: [brandId], references: [id])
+  createdBy         User              @relation(fields: [createdById], references: [id])
+  createdById       String
+  validations       Validation[]
+  scans             ProductScan[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  
+  @@index([brandId])
+  @@index([qrCode])
+  @@index([ean])
+  @@index([category])
+  @@index([status])
+}
+
+model Validation {
+  id                String            @id @default(uuid())
+  productId         String
+  laboratoryId      String
+  type              ValidationType
+  status            ValidationStatus  @default(PENDING)
+  priority          Priority          @default(NORMAL)
+  requestedAt       DateTime          @default(now())
+  startedAt         DateTime?
+  completedAt       DateTime?
+  expiresAt         DateTime?
+  results           Json?
+  conclusion        String?
+  documents         Json              @default("[]")
+  laboratorySignature String?
+  blockchainTx      String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  // Relations
+  product           Product           @relation(fields: [productId], references: [id])
+  laboratory        Laboratory        @relation(fields: [laboratoryId], references: [id])
+  requestedBy       User              @relation(fields: [requestedById], references: [id])
+  requestedById     String
+  
+  @@index([productId])
+  @@index([laboratoryId])
+  @@index([status])
+  @@index([type])
+}
+
+model ProductScan {
+  id            String   @id @default(uuid())
+  productId     String
+  qrCode        String
+  scannedAt     DateTime @default(now())
+  location      Json?
+  device        Json?
+  ipHash        String?
+  isRescan      Boolean  @default(false)
+  
+  // Relations
+  product       Product  @relation(fields: [productId], references: [id])
+  
+  @@index([productId])
+  @@index([qrCode])
+  @@index([scannedAt])
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String
+  type        NotificationType
+  title       String
+  message     String
+  data        Json?
+  read        Boolean  @default(false)
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
+  product     Product? @relation(fields: [productId], references: [id])
+  productId   String?
+  
+  @@index([userId])
+  @@index([type])
+  @@index([read])
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  token       String   @unique
+  userId      String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
+  
+  @@index([token])
+  @@index([userId])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String
+  entityType  String?
+  entityId    String?
+  userId      String?
+  metadata    Json?
+  ip          String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  user        User?    @relation(fields: [userId], references: [id])
+  product     Product? @relation(fields: [productId], references: [id])
+  productId   String?
+  
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Enums
+enum Role {
+  USER
+  BRAND
+  LABORATORY
+  ANALYST
+  ADMIN
+}
+
+enum ProductStatus {
+  DRAFT
+  PENDING_VALIDATION
+  IN_VALIDATION
+  VALIDATED
+  EXPIRED
+  REJECTED
+  RECALLED
+}
+
+enum ValidationType {
+  NUTRITIONAL
+  MICROBIOLOGICAL
+  ALLERGENS
+  HEAVY_METALS
+  PESTICIDES
+  FULL
+  CUSTOM
+}
+
+enum ValidationStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  APPROVED
+  REJECTED
+  EXPIRED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum NotificationType {
+  PRODUCT_CREATED
+  PRODUCT_VALIDATED
+  PRODUCT_EXPIRED
+  VALIDATION_REQUESTED
+  VALIDATION_COMPLETED
+  SCAN_MILESTONE
+  SYSTEM_ALERT
+  MARKETING
+}

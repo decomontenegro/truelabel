@@ -1,63 +1,87 @@
 # 📧 Configuração de Email para True Label
 
-## Opção 1: SendGrid (Recomendado)
+## Opção 1: SendGrid (Recomendado - 100 emails/dia grátis)
 
 ### 1. Criar Conta no SendGrid
 1. Acesse [sendgrid.com](https://sendgrid.com)
-2. Clique em "Start for Free"
+2. Clique em "Start For Free"
 3. Preencha o formulário:
-   - Use email corporativo (não Gmail/Hotmail)
-   - Seja honesto sobre o uso (transactional emails)
+   - **Email**: Use um email profissional
+   - **Password**: Senha forte
+   - **Company**: Nome da sua empresa
 
 ### 2. Verificar Conta
 1. Confirme seu email
-2. Complete o processo de verificação
-3. Aguarde aprovação (pode levar algumas horas)
+2. Complete o onboarding:
+   - **How will you send?**: API
+   - **What are you building?**: Web Application
+   - **How many emails?**: 1-100/day
 
-### 3. Configurar Sender
+### 3. Criar API Key
+1. Vá em Settings → API Keys
+2. Clique em "Create API Key"
+3. Configure:
+   - **Name**: `true-label-production`
+   - **Permissions**: Full Access
+4. **IMPORTANTE**: Copie a API Key (só aparece uma vez!)
+
+### 4. Configurar Sender Identity
 1. Vá em Settings → Sender Authentication
 2. Escolha "Single Sender Verification" (mais rápido)
 3. Adicione:
-   - **From Email**: noreply@seudominio.com
+   - **From Email**: noreply@suaempresa.com
    - **From Name**: True Label
-   - **Reply To**: suporte@seudominio.com
+   - **Reply To**: suporte@suaempresa.com
+4. Verifique o email enviado
 
-### 4. Criar API Key
-1. Vá em Settings → API Keys
-2. Clique em "Create API Key"
-3. Nome: `true-label-production`
-4. Permissões: Full Access
-5. **COPIE A KEY!** (só aparece uma vez)
-
-### 5. Configurar no True Label
-Adicione ao `.env`:
+### 5. Atualizar .env
 ```env
+# Email Configuration
 EMAIL_ENABLED=true
 EMAIL_PROVIDER=sendgrid
-SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxx
-EMAIL_FROM=noreply@seudominio.com
-EMAIL_FROM_NAME=True Label
-EMAIL_REPLY_TO=suporte@seudominio.com
+
+# SendGrid
+SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxx
+SENDGRID_FROM_EMAIL=noreply@suaempresa.com
+SENDGRID_FROM_NAME=True Label
+
+# Templates (opcional)
+SENDGRID_WELCOME_TEMPLATE_ID=
+SENDGRID_VALIDATION_TEMPLATE_ID=
+SENDGRID_NOTIFICATION_TEMPLATE_ID=
 ```
 
-## Opção 2: SMTP (Gmail)
+## Opção 2: SMTP (Gmail/Outlook)
 
-### 1. Configurar Gmail
-1. Ative 2FA na sua conta Google
-2. Vá em [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-3. Gere uma senha de app para "Mail"
-
-### 2. Configurar no True Label
+### Gmail (Menos seguro, não recomendado para produção)
+1. Ative "Senhas de app" na conta Google
+2. Gere uma senha específica
+3. Configure:
 ```env
 EMAIL_ENABLED=true
 EMAIL_PROVIDER=smtp
+
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=seuemail@gmail.com
-SMTP_PASS=sua-senha-de-app
-EMAIL_FROM=seuemail@gmail.com
-EMAIL_FROM_NAME=True Label
+SMTP_PASS=senha-de-app-gerada
+SMTP_FROM_EMAIL=seuemail@gmail.com
+SMTP_FROM_NAME=True Label
+```
+
+### Outlook/Office365
+```env
+EMAIL_ENABLED=true
+EMAIL_PROVIDER=smtp
+
+SMTP_HOST=smtp.office365.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=seuemail@outlook.com
+SMTP_PASS=sua-senha
+SMTP_FROM_EMAIL=seuemail@outlook.com
+SMTP_FROM_NAME=True Label
 ```
 
 ## Opção 3: Desenvolvimento (Console)
@@ -72,87 +96,140 @@ Emails serão logados no console ao invés de enviados.
 
 ## 📝 Templates de Email
 
-O True Label já tem templates para:
-- ✅ Boas-vindas
-- ✅ Reset de senha
-- ✅ Validação aprovada
-- ✅ Validação rejeitada
-- ✅ Novo relatório
-- ✅ QR Code gerado
+### 1. Criar Templates no SendGrid (Recomendado)
+1. Vá em Email API → Dynamic Templates
+2. Clique em "Create a Dynamic Template"
+3. Crie templates para:
+   - **Welcome**: Boas-vindas ao usuário
+   - **Product Validation**: Notificação de validação
+   - **Scan Notification**: Alerta de scan
+
+### 2. Estrutura dos Templates
+
+#### Welcome Email
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container { max-width: 600px; margin: 0 auto; }
+        .header { background: #4F46E5; color: white; padding: 20px; }
+        .content { padding: 20px; }
+        .button { 
+            background: #4F46E5; 
+            color: white; 
+            padding: 12px 24px; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bem-vindo ao True Label!</h1>
+        </div>
+        <div class="content">
+            <p>Olá {{name}},</p>
+            <p>Sua conta foi criada com sucesso!</p>
+            <a href="{{loginUrl}}" class="button">Acessar Plataforma</a>
+        </div>
+    </div>
+</body>
+</html>
+```
 
 ## 🧪 Testar Envio
 
-### 1. Teste manual via API:
-```bash
-curl -X POST http://localhost:9100/api/v1/auth/test-email \
-  -H "Content-Type: application/json" \
-  -d '{"email": "seu@email.com"}'
-```
-
-### 2. Teste no código:
-```javascript
-// server/src/test-email.js
-import { emailService } from './services/emailService';
+### 1. Script de Teste
+Crie `server/scripts/test-email.ts`:
+```typescript
+import { emailService } from '../src/services/emailService';
 
 async function testEmail() {
   try {
-    const result = await emailService.sendEmail(
-      'teste@email.com',
-      'Teste True Label',
-      '<h1>Email funcionando!</h1>',
-      { type: 'test' }
-    );
-    console.log('Email enviado:', result);
+    await emailService.sendEmail({
+      to: 'seu-email@exemplo.com',
+      subject: 'Teste True Label',
+      html: '<h1>Email de teste</h1><p>Se você recebeu este email, a configuração está funcionando!</p>'
+    });
+    console.log('✅ Email enviado com sucesso!');
   } catch (error) {
-    console.error('Erro:', error);
+    console.error('❌ Erro ao enviar email:', error);
   }
 }
 
 testEmail();
 ```
 
-## 🚨 Limites Gratuitos
+### 2. Executar Teste
+```bash
+cd server
+npx ts-node scripts/test-email.ts
+```
+
+## ⚠️ Limites e Quotas
 
 ### SendGrid Free
 - 100 emails/dia
-- Total: 3.000/mês
+- Sem suporte
+- Sem IP dedicado
 
 ### Gmail SMTP
 - 500 emails/dia
-- Pode ser bloqueado se parecer spam
+- Pode ser bloqueado como spam
 
-## ⚠️ Boas Práticas
+### Para Alto Volume
+- SendGrid Pro: 40k emails/mês por $19.95
+- AWS SES: $0.10 por 1000 emails
+- Mailgun: 5k emails/mês grátis
 
-1. **Sempre use templates** ao invés de HTML inline
-2. **Monitore bounces** e remova emails inválidos
-3. **Implemente unsubscribe** para marketing emails
-4. **Use rate limiting** para evitar spam
-5. **Teste em desenvolvimento** antes de produção
+## 🔧 Troubleshooting
+
+### Erro: "Unauthorized"
+- Verifique a API Key
+- Confirme que copiou corretamente
+- Verifique permissões da key
+
+### Erro: "Sender not verified"
+- Complete a verificação do sender
+- Use o email verificado no FROM
+
+### Emails indo para Spam
+- Configure SPF/DKIM
+- Use domínio próprio
+- Evite palavras spam no assunto
+
+### Rate Limiting
+O sistema já tem proteção contra rate limit:
+```typescript
+// Max 10 emails por minuto por usuário
+// Max 100 emails por hora total
+```
 
 ## 📊 Monitoramento
 
 ### SendGrid Dashboard
-- Taxa de entrega
-- Bounces e spam reports
-- Engagement (opens/clicks)
+- **Activity Feed**: Veja emails enviados em tempo real
+- **Stats**: Métricas de entrega, abertura, cliques
+- **Suppressions**: Gerenciar bounces e unsubscribes
 
-### Logs do True Label
-```bash
-# Ver logs de email
-grep "Email" server/logs/app.log
+### Logs Locais
+O sistema registra todos os envios em:
+- Console (desenvolvimento)
+- Arquivo de log (produção)
+- Webhook para falhas (opcional)
 
-# Ver erros
-grep "Email.*error" server/logs/error.log
-```
+## 📝 Checklist
 
-## ✅ Checklist
-
-- [ ] Conta criada no provedor
-- [ ] Sender verificado
-- [ ] API Key gerada
-- [ ] Variáveis de ambiente configuradas
-- [ ] Email de teste enviado com sucesso
-- [ ] Templates funcionando
+- [ ] Conta criada no SendGrid
+- [ ] API Key gerada e salva
+- [ ] Sender identity verificado
+- [ ] .env atualizado com credenciais
+- [ ] Teste de envio bem-sucedido
+- [ ] Templates criados (opcional)
+- [ ] Monitoramento configurado
 
 ## 🎯 Próximo Passo
 

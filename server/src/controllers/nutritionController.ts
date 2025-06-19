@@ -132,4 +132,5 @@ class NutritionController {
   }
 }
 
-export const nutritionController = new NutritionController();
+const nutritionController = new NutritionController();
+export default nutritionController;

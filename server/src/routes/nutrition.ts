@@ -1,6 +1,6 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
-import { nutritionController } from '../controllers/nutritionController';
+import nutritionController from '../controllers/nutritionController';
 import { validateRequest } from '../middleware/validation';
 import { body, param } from 'express-validator';
 
@@ -37,7 +37,7 @@ router.get(
   '/daily-values/:country',
   param('country').isIn(['BRAZIL', 'USA', 'EU', 'CANADA', 'MEXICO']),
   validateRequest,
-  nutritionController.getDailyValues
+  (req: Request, res: Response) => nutritionController.getDailyValues(req, res)
 );
 
 /**
@@ -75,7 +75,7 @@ router.post(
     body('country').isIn(['BRAZIL', 'USA', 'EU', 'CANADA', 'MEXICO']).optional()
   ],
   validateRequest,
-  nutritionController.calculateNutritionalScore
+  (req: Request, res: Response) => nutritionController.calculateNutritionalScore(req, res)
 );
 
 /**
@@ -113,7 +113,7 @@ router.post(
     body('targetAudience').isIn(['general', 'children', 'elderly', 'athletes']).optional()
   ],
   validateRequest,
-  nutritionController.analyzeNutrition
+  (req: Request, res: Response) => nutritionController.analyzeNutrition(req, res)
 );
 
 /**
@@ -152,7 +152,7 @@ router.post(
     body('country').isString().optional()
   ],
   validateRequest,
-  nutritionController.validateClaims
+  (req: Request, res: Response) => nutritionController.validateClaims(req, res)
 );
 
 /**
@@ -192,7 +192,7 @@ router.post(
     body('products.*.nutritionalInfo').isObject()
   ],
   validateRequest,
-  nutritionController.compareProducts
+  (req: Request, res: Response) => nutritionController.compareProducts(req, res)
 );
 
 export default router;
