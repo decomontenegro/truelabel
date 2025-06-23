@@ -1,0 +1,35 @@
+RELATÓRIO DE ANÁLISE - TRUE LABEL
+================================
+
+Data: 06/10/2025
+Laboratório: Laboratório de Análises True Label
+Produto: Produto Teste 001
+Lote: LT2025001
+
+RESULTADOS DA ANÁLISE:
+---------------------
+
+1. Análise Nutricional
+   - Proteínas: 25g/100g
+   - Carboidratos: 45g/100g
+   - Gorduras Totais: 15g/100g
+   - Fibras: 5g/100g
+   - Sódio: 200mg/100g
+
+2. Análise Microbiológica
+   - Coliformes Totais: Ausente
+   - E. coli: Ausente
+   - Salmonella: Ausente
+   - Contagem Total: < 10 UFC/g
+
+3. Contaminantes
+   - Chumbo: < 0.1 mg/kg
+   - Cádmio: < 0.05 mg/kg
+   - Mercúrio: < 0.01 mg/kg
+
+CONCLUSÃO: Produto dentro dos padrões estabelecidos.
+
+_____________________________
+Dr. João Silva
+CRQ: 12345
+Responsável Técnico

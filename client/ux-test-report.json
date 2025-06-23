@@ -1,0 +1,65 @@
+{
+  "timestamp": "2025-06-10T23:39:24.278Z",
+  "url": "http://localhost:3001",
+  "issues": {
+    "navigation": [],
+    "responsiveness": [
+      "Sobreposição em Desktop HD: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e BUTTON.fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50",
+      "Sobreposição em Desktop HD: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e svg.[object SVGAnimatedString]",
+      "Sobreposição em Desktop HD: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e path.[object SVGAnimatedString]",
+      "Sobreposição em Desktop HD: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e DIV",
+      "Sobreposição em Desktop HD: DIV.sm:mx-auto sm:w-full sm:max-w-md e DIV",
+      "Sobreposição em Desktop: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e BUTTON.fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50",
+      "Sobreposição em Desktop: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e svg.[object SVGAnimatedString]",
+      "Sobreposição em Desktop: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e path.[object SVGAnimatedString]",
+      "Sobreposição em Desktop: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e DIV",
+      "Sobreposição em Desktop: DIV.sm:mx-auto sm:w-full sm:max-w-md e DIV",
+      "Sobreposição em Tablet: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e BUTTON.fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50",
+      "Sobreposição em Tablet: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e svg.[object SVGAnimatedString]",
+      "Sobreposição em Tablet: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e path.[object SVGAnimatedString]",
+      "Sobreposição em Tablet: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e DIV",
+      "Sobreposição em Tablet: DIV.sm:mx-auto sm:w-full sm:max-w-md e DIV",
+      "Menu móvel não encontrado em Mobile",
+      "Sobreposição em Mobile: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e BUTTON.fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50",
+      "Sobreposição em Mobile: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e svg.[object SVGAnimatedString]",
+      "Sobreposição em Mobile: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e path.[object SVGAnimatedString]",
+      "Sobreposição em Mobile: DIV.min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 e DIV",
+      "Sobreposição em Mobile: DIV.sm:mx-auto sm:w-full sm:max-w-md e DIV"
+    ],
+    "visual": [
+      "sidebar não encontrado",
+      "header não encontrado",
+      "main não encontrado",
+      "Nenhum card de estatística encontrado",
+      "Nenhum elemento de notificação encontrado"
+    ],
+    "functionality": [
+      "Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "Nenhum campo de busca encontrado"
+    ],
+    "performance": [],
+    "suggestions": [
+      "Acessibilidade: 2 campos de formulário sem label",
+      "Acessibilidade: Possíveis problemas de contraste em 57 elementos",
+      "Revisar CSS para melhor suporte mobile-first",
+      "Criar um design system para maior consistência visual"
+    ]
+  },
+  "metrics": {
+    "performance": {
+      "loadTime": 0,
+      "domContentLoaded": 0,
+      "resources": 54
+    },
+    "visual": {
+      "colorCount": 3,
+      "fontCount": 2,
+      "buttonStyleCount": 3,
+      "inconsistencies": []
+    },
+    "navigation": {
+      "totalLinks": 0,
+      "testedLinks": 0
+    }
+  }
+}

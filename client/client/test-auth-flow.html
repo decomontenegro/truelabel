@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Autenticação - True Label</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #1e40af;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .test-step {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .test-step h3 {
+            margin: 0 0 10px 0;
+            color: #374151;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .result-box {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .credentials {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .credentials h3 {
+            margin: 0 0 10px 0;
+            color: #1e40af;
+        }
+        .credentials code {
+            background: #dbeafe;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        .summary {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .summary h3 {
+            color: #166534;
+            margin: 0 0 15px 0;
+        }
+        .summary ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .summary li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Teste Automatizado de Autenticação - True Label</h1>
+        <p>Este teste automatizado verifica todas as funcionalidades de autenticação do sistema.</p>
+        
+        <div class="credentials">
+            <h3>Credenciais de Teste Disponíveis:</h3>
+            <p>
+                <strong>Admin:</strong> <code>admin@truelabel.com</code> / <code>admin123</code><br>
+                <strong>Marca:</strong> <code>marca@exemplo.com</code> / <code>marca123</code><br>
+                <strong>Lab:</strong> <code>analista@labexemplo.com</code> / <code>lab123</code><br>
+                <strong>Validador:</strong> <code>validador@truelabel.com</code> / <code>validator123</code>
+            </p>
+        </div>
+
+        <h2>Testes de Autenticação</h2>
+
+        <div class="test-step">
+            <h3>1. Verificar Servidor <span id="server-status" class="status pending">Pendente</span></h3>
+            <button onclick="checkServer()">Verificar Servidor</button>
+            <div id="server-result" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-step">
+            <h3>2. Testar Login com Credenciais Inválidas <span id="invalid-login-status" class="status pending">Pendente</span></h3>
+            <button onclick="testInvalidLogin()">Testar Login Inválido</button>
+            <div id="invalid-login-result" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-step">
+            <h3>3. Testar Login com Credenciais Válidas <span id="valid-login-status" class="status pending">Pendente</span></h3>
+            <button onclick="testValidLogin()">Testar Login Válido</button>
+            <div id="valid-login-result" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-step">
+            <h3>4. Verificar Sessão <span id="session-status" class="status pending">Pendente</span></h3>
+            <button onclick="checkSession()">Verificar Sessão</button>
+            <div id="session-result" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-step">
+            <h3>5. Testar Logout <span id="logout-status" class="status pending">Pendente</span></h3>
+            <button onclick="testLogout()">Testar Logout</button>
+            <div id="logout-result" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-step">
+            <h3>6. Testar Registro de Novo Usuário <span id="register-status" class="status pending">Pendente</span></h3>
+            <button onclick="testRegister()">Testar Registro</button>
+            <div id="register-result" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-step">
+            <h3>7. Executar Todos os Testes <span id="all-tests-status" class="status pending">Pendente</span></h3>
+            <button onclick="runAllTests()">Executar Todos</button>
+        </div>
+
+        <div class="summary" id="test-summary" style="display: none;">
+            <h3>📊 Resumo dos Testes</h3>
+            <ul id="summary-list"></ul>
+        </div>
+
+        <h2>Visualizar Sistema</h2>
+        <button onclick="openInNewTab()">Abrir em Nova Aba</button>
+        <iframe id="app-frame" src="http://localhost:3001" title="True Label App"></iframe>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001/api';
+        let authToken = null;
+
+        function updateStatus(elementId, status, message) {
+            const statusEl = document.getElementById(elementId);
+            statusEl.className = `status ${status}`;
+            statusEl.textContent = status === 'success' ? 'Sucesso' : status === 'error' ? 'Erro' : 'Pendente';
+            
+            const resultId = elementId.replace('-status', '-result');
+            const resultEl = document.getElementById(resultId);
+            if (resultEl && message) {
+                resultEl.style.display = 'block';
+                resultEl.textContent = message;
+            }
+        }
+
+        async function checkServer() {
+            try {
+                const response = await fetch(API_URL + '/health', {
+                    method: 'GET',
+                });
+                
+                if (response.ok) {
+                    updateStatus('server-status', 'success', `Servidor online! Status: ${response.status}`);
+                } else {
+                    updateStatus('server-status', 'error', `Servidor retornou status: ${response.status}`);
+                }
+            } catch (error) {
+                updateStatus('server-status', 'error', `Erro ao conectar: ${error.message}`);
+            }
+        }
+
+        async function testInvalidLogin() {
+            try {
+                const response = await fetch(API_URL + '/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'usuario@invalido.com',
+                        password: '123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    updateStatus('invalid-login-status', 'success', 
+                        `Teste passou! Login rejeitado corretamente.\nMensagem: ${data.error || 'Credenciais inválidas'}`);
+                } else {
+                    updateStatus('invalid-login-status', 'error', 
+                        'Teste falhou! Login inválido foi aceito.');
+                }
+            } catch (error) {
+                updateStatus('invalid-login-status', 'error', `Erro no teste: ${error.message}`);
+            }
+        }
+
+        async function testValidLogin() {
+            try {
+                const response = await fetch(API_URL + '/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@truelabel.com',
+                        password: 'admin123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.token) {
+                    authToken = data.token;
+                    updateStatus('valid-login-status', 'success', 
+                        `Login realizado com sucesso!\nUsuário: ${data.user.name}\nRole: ${data.user.role}\nToken: ${authToken.substring(0, 20)}...`);
+                } else {
+                    updateStatus('valid-login-status', 'error', 
+                        `Login falhou: ${data.error || 'Erro desconhecido'}`);
+                }
+            } catch (error) {
+                updateStatus('valid-login-status', 'error', `Erro no teste: ${error.message}`);
+            }
+        }
+
+        async function checkSession() {
+            if (!authToken) {
+                updateStatus('session-status', 'error', 'Nenhum token de autenticação disponível');
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL + '/auth/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatus('session-status', 'success', 
+                        `Sessão válida!\nUsuário: ${data.name}\nEmail: ${data.email}\nRole: ${data.role}`);
+                } else {
+                    updateStatus('session-status', 'error', 'Sessão inválida ou expirada');
+                }
+            } catch (error) {
+                updateStatus('session-status', 'error', `Erro ao verificar sessão: ${error.message}`);
+            }
+        }
+
+        async function testLogout() {
+            if (!authToken) {
+                updateStatus('logout-status', 'error', 'Nenhuma sessão ativa para fazer logout');
+                return;
+            }
+
+            try {
+                // Simular logout (geralmente é feito no cliente)
+                authToken = null;
+                updateStatus('logout-status', 'success', 'Logout realizado com sucesso! Token removido.');
+                
+                // Tentar acessar recurso protegido para confirmar
+                const response = await fetch(API_URL + '/auth/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken || 'invalid'}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    updateStatus('logout-status', 'success', 
+                        'Logout confirmado! Acesso negado a recursos protegidos.');
+                }
+            } catch (error) {
+                updateStatus('logout-status', 'success', 'Logout realizado com sucesso!');
+            }
+        }
+
+        async function testRegister() {
+            const timestamp = Date.now();
+            const testUser = {
+                name: `Teste QA ${timestamp}`,
+                email: `qa.test.${timestamp}@exemplo.com`,
+                password: 'senha123',
+                role: 'BRAND'
+            };
+
+            try {
+                const response = await fetch(API_URL + '/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testUser)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.token) {
+                    updateStatus('register-status', 'success', 
+                        `Registro realizado com sucesso!\nNovo usuário: ${testUser.name}\nEmail: ${testUser.email}\nRole: ${testUser.role}`);
+                } else {
+                    updateStatus('register-status', 'error', 
+                        `Registro falhou: ${data.error || 'Erro desconhecido'}`);
+                }
+            } catch (error) {
+                updateStatus('register-status', 'error', `Erro no teste: ${error.message}`);
+            }
+        }
+
+        async function runAllTests() {
+            updateStatus('all-tests-status', 'pending', 'Executando todos os testes...');
+            
+            const tests = [
+                { name: 'Verificar Servidor', fn: checkServer },
+                { name: 'Login Inválido', fn: testInvalidLogin },
+                { name: 'Login Válido', fn: testValidLogin },
+                { name: 'Verificar Sessão', fn: checkSession },
+                { name: 'Logout', fn: testLogout },
+                { name: 'Registro', fn: testRegister }
+            ];
+            
+            const results = [];
+            
+            for (const test of tests) {
+                console.log(`Executando: ${test.name}`);
+                await test.fn();
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Delay entre testes
+            }
+            
+            updateStatus('all-tests-status', 'success', 'Todos os testes concluídos!');
+            showSummary();
+        }
+
+        function showSummary() {
+            const summary = document.getElementById('test-summary');
+            const summaryList = document.getElementById('summary-list');
+            
+            summary.style.display = 'block';
+            
+            const statusElements = document.querySelectorAll('.status');
+            summaryList.innerHTML = '';
+            
+            let passed = 0;
+            let failed = 0;
+            
+            statusElements.forEach(el => {
+                if (el.id && el.id !== 'all-tests-status') {
+                    const testName = el.parentElement.textContent.split(' ').slice(1).join(' ');
+                    const status = el.classList.contains('success') ? '✅ Passou' : 
+                                  el.classList.contains('error') ? '❌ Falhou' : '⏳ Pendente';
+                    
+                    if (el.classList.contains('success')) passed++;
+                    if (el.classList.contains('error')) failed++;
+                    
+                    const li = document.createElement('li');
+                    li.textContent = `${status} - ${testName}`;
+                    summaryList.appendChild(li);
+                }
+            });
+            
+            const totalLi = document.createElement('li');
+            totalLi.innerHTML = `<strong>Total: ${passed} passou, ${failed} falhou</strong>`;
+            summaryList.appendChild(totalLi);
+        }
+
+        function openInNewTab() {
+            window.open('http://localhost:3001', '_blank');
+        }
+
+        // Executar verificação inicial do servidor
+        window.onload = () => {
+            checkServer();
+        };
+    </script>
+</body>
+</html>

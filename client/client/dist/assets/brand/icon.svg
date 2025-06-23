@@ -1,0 +1,18 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- True Label Icon Only -->
+  <defs>
+    <style>
+      .icon { fill: #2563eb; }
+    </style>
+  </defs>
+  
+  <!-- "t" Icon centered and scaled -->
+  <g class="icon">
+    <!-- Vertical line of "t" -->
+    <rect x="28" y="12" width="8" height="40" rx="4"/>
+    <!-- Horizontal line of "t" -->
+    <rect x="18" y="18" width="28" height="8" rx="4"/>
+    <!-- Curved bottom part -->
+    <path d="M28 52 Q28 58 34 58 L38 58 Q44 58 44 52" stroke="#2563eb" stroke-width="8" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

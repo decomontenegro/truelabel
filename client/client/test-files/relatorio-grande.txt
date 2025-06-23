@@ -1,0 +1,8 @@
+RELATÓRIO EXTENSO DE ANÁLISE - TRUE LABEL
+=========================================
+
+Este é um relatório de teste com conteúdo extenso para verificar limites de tamanho.
+
+${"=".repeat(100) + "\n" + "Linha de teste ".repeat(10) + "\n"}${Array(1000).fill("Esta é uma linha de dados para criar um arquivo maior. ").join("\n")}
+
+FIM DO RELATÓRIO

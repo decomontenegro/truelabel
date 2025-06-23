@@ -1,0 +1,183 @@
+{
+  "timestamp": "2025-06-11T00:09:58.907Z",
+  "url": "http://localhost:3001",
+  "summary": {
+    "totalIssues": 24,
+    "criticalIssues": 9,
+    "performanceScore": "Bom",
+    "accessibilityScore": "Precisa melhorar"
+  },
+  "issues": {
+    "timestamp": "2025-06-11T00:09:58.907Z",
+    "navigation": [
+      "Link não encontrado para: Produtos",
+      "Link não encontrado para: Relatórios",
+      "Link não encontrado para: QR Codes",
+      "Link não encontrado para: Validações",
+      "Link não encontrado para: Laboratórios"
+    ],
+    "responsiveness": [
+      "mobile: Menu hambúrguer não encontrado"
+    ],
+    "visual": [
+      "Sidebar não encontrada",
+      "Header não encontrado",
+      "Área principal de conteúdo não encontrada"
+    ],
+    "functionality": [
+      "Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "Redirecionamento incorreto após login: http://localhost:3001/auth/login",
+      "Campo de busca não encontrado",
+      "Sistema de notificações não encontrado"
+    ],
+    "performance": [],
+    "accessibility": [
+      "Botão sem texto ou aria-label",
+      "Botão sem texto ou aria-label",
+      "16 elementos com possível baixo contraste"
+    ],
+    "suggestions": [
+      "Revisar links quebrados e implementar testes de navegação automatizados",
+      "Implementar design mobile-first e testar em dispositivos reais",
+      "Criar e documentar um design system unificado",
+      "Adicionar testes de integração para funcionalidades críticas",
+      "Realizar auditoria completa de acessibilidade (WCAG 2.1)",
+      "Implementar navegação lateral consistente",
+      "Adicionar mais métricas e KPIs no dashboard principal",
+      "Incluir visualizações de dados para melhor compreensão"
+    ]
+  },
+  "metrics": {
+    "performance": {
+      "loadTime": 0,
+      "domContentLoaded": 0.10000002384185791,
+      "totalResources": 54,
+      "resourcesByType": {
+        "http://localhost:3001/@vite/client": {
+          "count": 1,
+          "totalSize": 300
+        },
+        "com/css2": {
+          "count": 1,
+          "totalSize": 0
+        },
+        "tsx": {
+          "count": 17,
+          "totalSize": 5100
+        },
+        "http://localhost:3001/@react-refresh": {
+          "count": 1,
+          "totalSize": 300
+        },
+        "js": {
+          "count": 20,
+          "totalSize": 0
+        },
+        "css": {
+          "count": 1,
+          "totalSize": 300
+        },
+        "ts": {
+          "count": 11,
+          "totalSize": 3300
+        },
+        "mjs": {
+          "count": 1,
+          "totalSize": 300
+        },
+        "json": {
+          "count": 1,
+          "totalSize": 300
+        }
+      },
+      "largestResources": [
+        {
+          "name": "client",
+          "size": 300
+        },
+        {
+          "name": "main.tsx?t=1749599345820",
+          "size": 300
+        },
+        {
+          "name": "@react-refresh",
+          "size": 300
+        },
+        {
+          "name": "App.tsx?t=1749599345820",
+          "size": 300
+        },
+        {
+          "name": "index.css?t=1749599345820",
+          "size": 300
+        }
+      ]
+    },
+    "visual": {
+      "uniqueColors": 14,
+      "topColors": [
+        [
+          "rgb(229, 231, 235)",
+          92
+        ],
+        [
+          "rgb(17, 24, 39)",
+          34
+        ],
+        [
+          "rgb(0, 0, 0)",
+          27
+        ],
+        [
+          "rgb(255, 255, 255)",
+          12
+        ],
+        [
+          "rgb(75, 85, 99)",
+          10
+        ]
+      ],
+      "uniqueFonts": 2,
+      "fonts": [
+        "Inter, system-ui, -apple-system, sans-serif",
+        "Inter, system-ui, sans-serif"
+      ],
+      "uniqueButtonStyles": 3,
+      "uniqueSpacings": 17
+    },
+    "structure": {
+      "sidebar": null,
+      "header": null,
+      "mainContent": null,
+      "navigation": [
+        {
+          "text": "criar uma nova conta",
+          "href": "http://localhost:3001/auth/register",
+          "inSidebar": false
+        },
+        {
+          "text": "Esqueceu a senha?",
+          "href": "http://localhost:3001/auth/forgot-password",
+          "inSidebar": false
+        },
+        {
+          "text": "Criar conta",
+          "href": "http://localhost:3001/auth/register",
+          "inSidebar": false
+        },
+        {
+          "text": "Termos de Uso",
+          "href": "http://localhost:3001/terms",
+          "inSidebar": false
+        },
+        {
+          "text": "Política de Privacidade",
+          "href": "http://localhost:3001/privacy",
+          "inSidebar": false
+        }
+      ],
+      "stats": [],
+      "charts": []
+    }
+  }
+}

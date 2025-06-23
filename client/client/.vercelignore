@@ -1,0 +1,8 @@
+# Force Vercel to ignore cache and rebuild completely
+# Version 2.0.0 - NO RECHARTS - DRASTIC CHANGES
+node_modules/.cache
+.vite
+dist/assets/charts-*.js
+*.old
+*.backup
+# Force rebuild timestamp: 2024-12-19 15:35

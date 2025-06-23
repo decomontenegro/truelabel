@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/truelabel/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="True Label - Plataforma de Validação Transparente CPG. Conectando claims de produtos a laudos laboratoriais acreditados." />
+    <meta name="theme-color" content="#2563eb" />
+
+    <!-- PWA Meta Tags -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/truelabel/manifest.json" />
+
+    <!-- Preconnect to API -->
+    <link rel="preconnect" href="http://localhost:3001" />
+
+    <title>True Label - Plataforma de Validação Transparente</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/truelabel/js/index-D7IercYq.js"></script>
+    <link rel="modulepreload" crossorigin href="/truelabel/js/vendor-BcMaAnXF.js">
+    <link rel="modulepreload" crossorigin href="/truelabel/js/state-QrSTFgAv.js">
+    <link rel="modulepreload" crossorigin href="/truelabel/js/react-dom-BslC4xag.js">
+    <link rel="modulepreload" crossorigin href="/truelabel/js/react-core-XCdXHkeW.js">
+    <link rel="modulepreload" crossorigin href="/truelabel/js/react-router-G9IXNjIc.js">
+    <link rel="modulepreload" crossorigin href="/truelabel/js/utils-BtzqxagS.js">
+    <link rel="modulepreload" crossorigin href="/truelabel/js/forms-Bk6aQ3xQ.js">
+    <link rel="stylesheet" crossorigin href="/truelabel/assets/index-Czjormd2.css">
+  
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="dns-prefetch" href="https://api.yourdomain.com">
+        <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
+      
+        <style>
+          /* Critical CSS for above-the-fold content */
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+          .loading { display: flex; align-items: center; justify-content: center; height: 100vh; }
+          .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; }
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+      </head>
+  <body>
+    <div id="root">
+        <div id="app-loading" class="loading">
+          <div class="spinner"></div>
+        </div>
+        <script>
+          window.addEventListener('DOMContentLoaded', () => {
+            const loader = document.getElementById('app-loading');
+            if (loader) setTimeout(() => loader.style.display = 'none', 100);
+          });
+        </script>
+      </div>
+  </body>
+</html>

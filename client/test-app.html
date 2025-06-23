@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>True Label App Test</title>
+</head>
+<body>
+    <h1>True Label App Test</h1>
+    <p>This page tests the React app and API connectivity.</p>
+    
+    <h2>Test Results:</h2>
+    <div id="results"></div>
+    
+    <script>
+        const resultsDiv = document.getElementById('results');
+        
+        async function runTests() {
+            let results = [];
+            
+            // Test 1: Check if React app is accessible
+            try {
+                const reactResponse = await fetch('http://localhost:4173/');
+                results.push(`✅ React App (port 4173): ${reactResponse.status} ${reactResponse.statusText}`);
+                
+                const reactHtml = await reactResponse.text();
+                if (reactHtml.includes('True Label')) {
+                    results.push('✅ React app contains "True Label" branding');
+                }
+                if (reactHtml.includes('id="root"')) {
+                    results.push('✅ React root element found');
+                }
+                if (reactHtml.includes('/assets/index-')) {
+                    results.push('✅ React assets loading correctly');
+                }
+            } catch (err) {
+                results.push(`❌ React App Error: ${err.message}`);
+            }
+            
+            // Test 2: Check API endpoint
+            try {
+                const apiResponse = await fetch('http://localhost:3001/api/health');
+                results.push(`\n🔍 API Health Check (port 3001): ${apiResponse.status} ${apiResponse.statusText}`);
+            } catch (err) {
+                results.push(`\n⚠️  API Health endpoint not found (this might be normal)`);
+            }
+            
+            // Test 3: Check if API responds to products endpoint
+            try {
+                const productsResponse = await fetch('http://localhost:3001/api/products');
+                results.push(`🔍 API Products endpoint: ${productsResponse.status} ${productsResponse.statusText}`);
+            } catch (err) {
+                results.push(`⚠️  API Products endpoint error: ${err.message}`);
+            }
+            
+            // Display results
+            resultsDiv.innerHTML = results.map(r => `<p>${r}</p>`).join('');
+            
+            // Additional info
+            resultsDiv.innerHTML += `
+                <h3>Next Steps:</h3>
+                <ul>
+                    <li>Open <a href="http://localhost:4173/" target="_blank">http://localhost:4173/</a> in your browser</li>
+                    <li>Open Developer Tools (F12) and check the Console tab for errors</li>
+                    <li>Check the Network tab to see if API calls are being made</li>
+                    <li>Verify that the backend API is running on the correct port</li>
+                </ul>
+                
+                <h3>Note:</h3>
+                <p>It appears that port 3001 is running a different application (FUSEtech App). 
+                   You may need to check if the True Label backend is running on a different port
+                   or if there's a port conflict.</p>
+            `;
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Force Vercel Rebuild v1.0.2
+# Recharts completely removed from package.json
+# Build timestamp: 2024-12-19 15:16
+# Modules: 3802 (reduced from 4394)
+# No more charts-rwzwH6n_.js causing initialization errors
+# Version: 1.0.2

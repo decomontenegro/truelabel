@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-06-11T00:11:57.621Z",
+  "url": "http://localhost:3001",
+  "currentPage": "http://localhost:3001/dashboard",
+  "totalIssues": 11,
+  "report": {
+    "timestamp": "2025-06-11T00:11:57.621Z",
+    "issues": [],
+    "navigation": [],
+    "responsiveness": [
+      "mobile: Menu mobile não encontrado"
+    ],
+    "visual": [
+      "Sidebar não encontrada"
+    ],
+    "functionality": [
+      "Campo de busca não encontrado",
+      "Sistema de notificações não encontrado"
+    ],
+    "accessibility": [
+      "Botão sem texto ou aria-label encontrado",
+      "Botão sem texto ou aria-label encontrado",
+      "Botão sem texto ou aria-label encontrado",
+      "Botão sem texto ou aria-label encontrado"
+    ],
+    "performance": [],
+    "suggestions": [
+      "Implementar design system consistente",
+      "Otimizar para dispositivos móveis",
+      "Melhorar acessibilidade seguindo WCAG 2.1"
+    ]
+  }
+}

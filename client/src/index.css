@@ -1,0 +1,543 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Animation utilities for enhanced user feedback */
+@layer utilities {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes shake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+      transform: translateX(-2px);
+    }
+    20%, 40%, 60%, 80% {
+      transform: translateX(2px);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slideIn {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Button Base with Enhanced Interactive States */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 ease-in-out
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
+           disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed
+           transform active:scale-[0.98];
+  }
+
+  /* Primary Button States */
+  .btn-primary {
+    @apply btn bg-primary-600 text-white shadow-sm
+           hover:bg-primary-700 hover:shadow-md hover:-translate-y-0.5
+           active:bg-primary-800 active:shadow-sm active:translate-y-0
+           focus-visible:ring-primary-500
+           h-10 py-2 px-4;
+  }
+
+  /* Secondary Button States */
+  .btn-secondary {
+    @apply btn bg-neutral-100 text-neutral-900 shadow-sm
+           hover:bg-neutral-200 hover:shadow-md hover:text-neutral-900
+           active:bg-neutral-300 active:shadow-sm
+           focus-visible:ring-neutral-500
+           h-10 py-2 px-4;
+  }
+
+  /* Outline Button States */
+  .btn-outline {
+    @apply btn border border-neutral-300 bg-transparent
+           hover:bg-neutral-50 hover:border-neutral-400 hover:shadow-sm
+           active:bg-neutral-100 active:border-neutral-500
+           focus-visible:ring-primary-500
+           h-10 py-2 px-4;
+  }
+
+  /* Ghost Button States */
+  .btn-ghost {
+    @apply btn bg-transparent
+           hover:bg-neutral-100 hover:text-neutral-900
+           active:bg-neutral-200
+           focus-visible:ring-primary-500
+           h-10 py-2 px-4;
+  }
+
+  /* Danger Button States */
+  .btn-danger {
+    @apply btn bg-error-600 text-white shadow-sm
+           hover:bg-error-700 hover:shadow-md hover:-translate-y-0.5
+           active:bg-error-800 active:shadow-sm active:translate-y-0
+           focus-visible:ring-error-500
+           h-10 py-2 px-4;
+  }
+
+  /* Success Button States */
+  .btn-success {
+    @apply btn bg-success-600 text-white shadow-sm
+           hover:bg-success-700 hover:shadow-md hover:-translate-y-0.5
+           active:bg-success-800 active:shadow-sm active:translate-y-0
+           focus-visible:ring-success-500
+           h-10 py-2 px-4;
+  }
+
+  /* Button Size Variants */
+  .btn-sm {
+    @apply h-9 px-3 text-xs;
+  }
+
+  .btn-lg {
+    @apply h-11 px-8;
+  }
+
+  /* Input Field with Enhanced States */
+  .input {
+    @apply flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm
+           transition-all duration-200 ease-in-out
+           placeholder:text-neutral-500
+           hover:border-neutral-400
+           focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20
+           disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-neutral-50
+           file:border-0 file:bg-transparent file:text-sm file:font-medium;
+  }
+
+  /* Input Error State */
+  .input-error {
+    @apply border-error-500 hover:border-error-600
+           focus:border-error-500 focus:ring-error-500/20;
+  }
+
+  /* Input Success State */
+  .input-success {
+    @apply border-success-500 hover:border-success-600
+           focus:border-success-500 focus:ring-success-500/20;
+  }
+
+  /* Textarea with Enhanced States */
+  .textarea {
+    @apply flex min-h-[80px] w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm
+           transition-all duration-200 ease-in-out
+           placeholder:text-neutral-500
+           hover:border-neutral-400
+           focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20
+           disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-neutral-50;
+  }
+
+  /* Card with Interactive States */
+  .card {
+    @apply rounded-lg border border-neutral-200 bg-white text-neutral-900 shadow-sm
+           transition-all duration-200 ease-in-out;
+  }
+
+  /* Hoverable Card */
+  .card-hover {
+    @apply hover:shadow-md hover:border-neutral-300 hover:-translate-y-0.5
+           active:shadow-sm active:translate-y-0 cursor-pointer;
+  }
+
+  /* Clickable Card */
+  .card-clickable {
+    @apply card-hover active:scale-[0.99] cursor-pointer;
+  }
+
+  .card-header {
+    @apply flex flex-col space-y-1.5 p-6;
+  }
+
+  .card-content {
+    @apply p-6 pt-0;
+  }
+
+  .card-footer {
+    @apply flex items-center p-6 pt-0;
+  }
+
+  /* Badge with Enhanced States */
+  .badge {
+    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold
+           transition-all duration-200 ease-in-out
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+  }
+
+  .badge-success {
+    @apply badge border-transparent bg-success-100 text-success-800
+           hover:bg-success-200 focus-visible:ring-success-500;
+  }
+
+  .badge-warning {
+    @apply badge border-transparent bg-warning-100 text-warning-800
+           hover:bg-warning-200 focus-visible:ring-warning-500;
+  }
+
+  .badge-error {
+    @apply badge border-transparent bg-error-100 text-error-800
+           hover:bg-error-200 focus-visible:ring-error-500;
+  }
+
+  .badge-info {
+    @apply badge border-transparent bg-info-100 text-info-800
+           hover:bg-info-200 focus-visible:ring-info-500;
+  }
+
+  .badge-neutral {
+    @apply badge border-transparent bg-neutral-100 text-neutral-800
+           hover:bg-neutral-200 focus-visible:ring-neutral-500;
+  }
+
+  /* Link States */
+  .link {
+    @apply text-primary-600 underline decoration-primary-600/30
+           transition-all duration-200 ease-in-out
+           hover:text-primary-700 hover:decoration-primary-700/50
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:rounded;
+  }
+
+  /* Navigation Link States */
+  .nav-link {
+    @apply relative px-3 py-2 text-sm font-medium text-neutral-700 rounded-md
+           transition-all duration-200 ease-in-out
+           hover:bg-neutral-100 hover:text-neutral-900
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2;
+  }
+
+  .nav-link-active {
+    @apply bg-primary-50 text-primary-700 hover:bg-primary-100;
+  }
+
+  /* Tab States */
+  .tab {
+    @apply relative px-4 py-2 text-sm font-medium text-neutral-600 border-b-2 border-transparent
+           transition-all duration-200 ease-in-out
+           hover:text-neutral-900 hover:border-neutral-300
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:rounded;
+  }
+
+  .tab-active {
+    @apply text-primary-600 border-primary-600 hover:text-primary-700 hover:border-primary-700;
+  }
+
+  /* Checkbox and Radio Enhanced States */
+  .checkbox, .radio {
+    @apply w-4 h-4 text-primary-600 border-neutral-300 rounded
+           transition-all duration-200 ease-in-out
+           hover:border-primary-500
+           focus:ring-2 focus:ring-primary-500/20 focus:ring-offset-0
+           checked:bg-primary-600 checked:border-primary-600
+           checked:hover:bg-primary-700 checked:hover:border-primary-700
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .radio {
+    @apply rounded-full;
+  }
+
+  /* Switch/Toggle States */
+  .switch {
+    @apply relative inline-flex h-6 w-11 items-center rounded-full
+           bg-neutral-300 transition-colors duration-200 ease-in-out
+           hover:bg-neutral-400
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
+           data-[state=checked]:bg-primary-600 data-[state=checked]:hover:bg-primary-700
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .switch-thumb {
+    @apply inline-block h-5 w-5 transform rounded-full bg-white shadow-sm
+           transition-transform duration-200 ease-in-out
+           translate-x-0.5 data-[state=checked]:translate-x-5;
+  }
+
+  /* Dropdown Item States */
+  .dropdown-item {
+    @apply relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm
+           transition-colors duration-150 ease-in-out
+           hover:bg-neutral-100 hover:text-neutral-900
+           focus:bg-neutral-100 focus:text-neutral-900 focus:outline-none
+           active:bg-neutral-200
+           data-[disabled]:pointer-events-none data-[disabled]:opacity-50;
+  }
+
+  /* Table Row Hover States */
+  .table-row-hover {
+    @apply transition-colors duration-150 ease-in-out
+           hover:bg-neutral-50;
+  }
+
+  /* Icon Button States */
+  .icon-btn {
+    @apply inline-flex items-center justify-center rounded-md p-2
+           transition-all duration-200 ease-in-out
+           hover:bg-neutral-100
+           active:bg-neutral-200 active:scale-95
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
+           disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed;
+  }
+
+  /* Select Enhanced States */
+  .select {
+    @apply flex h-10 w-full items-center justify-between rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm
+           transition-all duration-200 ease-in-out
+           placeholder:text-neutral-500
+           hover:border-neutral-400
+           focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20
+           disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-neutral-50;
+  }
+
+  /* File Upload Area States */
+  .upload-area {
+    @apply relative flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-neutral-300 rounded-lg
+           transition-all duration-200 ease-in-out cursor-pointer
+           hover:border-neutral-400 hover:bg-neutral-50
+           focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20
+           active:bg-neutral-100 active:border-neutral-500;
+  }
+
+  /* Tooltip States */
+  .tooltip {
+    @apply absolute z-tooltip px-2 py-1 text-xs font-medium text-white bg-neutral-900 rounded
+           pointer-events-none opacity-0 transition-opacity duration-200 ease-in-out
+           group-hover:opacity-100;
+  }
+
+  /* Modal Backdrop States */
+  .modal-backdrop {
+    @apply fixed inset-0 z-modal-backdrop bg-black/50
+           transition-opacity duration-300 ease-in-out
+           data-[state=open]:animate-fade-in
+           data-[state=closed]:animate-fade-out;
+  }
+
+  /* Modal Content States */
+  .modal-content {
+    @apply relative z-modal bg-white rounded-lg shadow-xl
+           transition-all duration-300 ease-in-out
+           data-[state=open]:animate-scale-in
+           data-[state=closed]:animate-scale-out;
+  }
+
+  /* Notification/Toast States */
+  .notification {
+    @apply relative flex items-center p-4 rounded-lg shadow-md
+           transition-all duration-300 ease-in-out
+           data-[state=entering]:animate-slide-right
+           data-[state=exiting]:animate-slide-left;
+  }
+
+  /* Progress Bar States */
+  .progress-bar {
+    @apply relative h-2 w-full overflow-hidden rounded-full bg-neutral-200;
+  }
+
+  .progress-bar-fill {
+    @apply h-full bg-primary-600 transition-all duration-500 ease-out
+           hover:bg-primary-700;
+  }
+
+  /* Skeleton Loading States */
+  .skeleton {
+    @apply animate-pulse rounded-md bg-neutral-200;
+  }
+
+  /* Accordion Item States */
+  .accordion-trigger {
+    @apply flex w-full items-center justify-between py-4 text-left
+           transition-all duration-200 ease-in-out
+           hover:text-primary-600
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:rounded;
+  }
+
+  .accordion-content {
+    @apply overflow-hidden transition-all duration-300 ease-in-out
+           data-[state=open]:animate-slide-down
+           data-[state=closed]:animate-slide-up;
+  }
+
+  /* Breadcrumb States */
+  .breadcrumb-item {
+    @apply text-sm text-neutral-600 transition-colors duration-200 ease-in-out
+           hover:text-neutral-900
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:rounded;
+  }
+
+  .breadcrumb-item-active {
+    @apply text-neutral-900 font-medium pointer-events-none;
+  }
+
+  /* Pagination States */
+  .pagination-item {
+    @apply inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md
+           transition-all duration-200 ease-in-out
+           hover:bg-neutral-100
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
+           active:bg-neutral-200 active:scale-95
+           disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed;
+  }
+
+  .pagination-item-active {
+    @apply bg-primary-600 text-white hover:bg-primary-700;
+  }
+
+  /* Chip/Tag States */
+  .chip {
+    @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full
+           transition-all duration-200 ease-in-out
+           hover:shadow-sm
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+  }
+
+  .chip-dismissible {
+    @apply pr-1 hover:pr-2;
+  }
+
+  /* Avatar States */
+  .avatar {
+    @apply relative inline-flex items-center justify-center rounded-full bg-neutral-200
+           transition-all duration-200 ease-in-out
+           ring-2 ring-transparent
+           hover:ring-neutral-300
+           focus:outline-none focus-visible:ring-primary-500;
+  }
+
+  /* List Item States */
+  .list-item {
+    @apply relative flex items-center px-4 py-3
+           transition-all duration-200 ease-in-out
+           hover:bg-neutral-50
+           focus-within:bg-neutral-50
+           active:bg-neutral-100;
+  }
+
+  .list-item-clickable {
+    @apply cursor-pointer hover:bg-neutral-100 active:scale-[0.99];
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Loading animation */
+.loading-spinner {
+  @apply animate-spin rounded-full border-2 border-gray-300 border-t-blue-600;
+}
+
+/* Fade in animation */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* QR Code scanner overlay */
+.qr-scanner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+}
+
+/* Validation status colors */
+.status-validated {
+  @apply bg-green-100 text-green-800 border-green-200;
+}
+
+.status-pending {
+  @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+}
+
+.status-draft {
+  @apply bg-blue-100 text-blue-800 border-blue-200;
+}
+
+.status-rejected {
+  @apply bg-red-100 text-red-800 border-red-200;
+}
+
+.status-expired {
+  @apply bg-gray-100 text-gray-800 border-gray-200;
+}

@@ -1,0 +1,11 @@
+# Force Vercel Rebuild v1.0.2 - FINAL ATTEMPT
+# Recharts completely removed from:
+# - package.json dependencies ✅
+# - vite.config.ts chunk configuration ✅ (lines 80-82 commented out)
+# - All component imports ✅
+# Build timestamp: 2024-12-19 15:26
+# Modules: 3802 (reduced from 4394)
+# Chunk names changed to v2 to force cache break
+# No more charts-rwzwH6n_.js causing initialization errors
+# Version: 1.0.2
+# CRITICAL: vite.config.ts recharts chunk removed!

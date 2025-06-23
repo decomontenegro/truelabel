@@ -1,0 +1,125 @@
+/* Accessibility Utilities for WCAG Compliance */
+
+/* High contrast text colors for better readability */
+.text-high-contrast {
+  color: #1a1a1a; /* Darker than default for better contrast */
+}
+
+.text-high-contrast-inverse {
+  color: #ffffff;
+}
+
+/* Ensure minimum contrast ratios for interactive elements */
+.accessible-primary {
+  background-color: #1d4ed8; /* Darker primary for AA compliance */
+  color: #ffffff;
+}
+
+.accessible-primary:hover {
+  background-color: #1e40af;
+}
+
+.accessible-secondary {
+  background-color: #e2e8f0;
+  color: #1e293b; /* Darker text for better contrast */
+}
+
+.accessible-secondary:hover {
+  background-color: #cbd5e1;
+}
+
+/* Focus indicators for keyboard navigation */
+.accessible-focus:focus {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.accessible-focus-dark:focus {
+  outline: 3px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* Skip to main content link */
+.skip-to-main {
+  position: absolute;
+  left: -9999px;
+  z-index: 999;
+  padding: 1rem;
+  background-color: #1d4ed8;
+  color: white;
+  text-decoration: none;
+  border-radius: 0.375rem;
+}
+
+.skip-to-main:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+/* Accessible badges with proper contrast */
+.badge-accessible-success {
+  background-color: #15803d;
+  color: #ffffff;
+}
+
+.badge-accessible-warning {
+  background-color: #a16207;
+  color: #ffffff;
+}
+
+.badge-accessible-error {
+  background-color: #b91c1c;
+  color: #ffffff;
+}
+
+.badge-accessible-info {
+  background-color: #1d4ed8;
+  color: #ffffff;
+}
+
+/* Ensure form labels are visible */
+.accessible-label {
+  color: #1e293b;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+/* Error messages with proper contrast */
+.accessible-error-text {
+  color: #b91c1c;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus visible only for keyboard users */
+.focus-visible:focus {
+  outline: none;
+}
+
+.focus-visible:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Ensure minimum touch target size (44x44px) */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
