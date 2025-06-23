@@ -20,35 +20,35 @@ import {
 const router = Router();
 
 // Public routes (for verification)
-router.post('/certifications/:id/verify', verifyCertification);
+router.post('/:id/verify', verifyCertification);
 
 // Protected routes
 router.use(authenticateToken);
 
 // Special endpoints (must come before :id routes)
-router.get('/certifications/expiring-soon', getExpiringCertifications);
-router.get('/certifications/statistics', getCertificationStatistics);
-router.get('/certifications/alerts', getCertificationAlerts);
-router.get('/certifications/expiration-alerts', getCertificationAlerts); // Alias for compatibility
+router.get('/expiring-soon', getExpiringCertifications);
+router.get('/statistics', getCertificationStatistics);
+router.get('/alerts', getCertificationAlerts);
+router.get('/expiration-alerts', getCertificationAlerts); // Alias for compatibility
 
 // Certification CRUD
-router.get('/certifications', getCertifications);
-router.get('/certifications/:id', getCertificationById);
-router.post('/certifications', createCertification);
-router.put('/certifications/:id', updateCertification);
-router.delete('/certifications/:id', deleteCertification);
+router.get('/', getCertifications);
+router.get('/:id', getCertificationById);
+router.post('/', createCertification);
+router.put('/:id', updateCertification);
+router.delete('/:id', deleteCertification);
 
 // Product certifications
 router.get('/products/:productId/certifications', getProductCertifications);
 
 // Timeline (after special endpoints)
-router.get('/certifications/:id/timeline', getCertificationTimeline);
+router.get('/:id/timeline', getCertificationTimeline);
 
 // Alert management
-router.put('/certifications/alerts/:alertId/read', markAlertAsRead);
-router.put('/certifications/alerts/settings', configureAlertSettings);
+router.put('/alerts/:alertId/read', markAlertAsRead);
+router.put('/alerts/settings', configureAlertSettings);
 
 // Badge generation
-router.post('/certifications/badges/generate', generateBadge);
+router.post('/badges/generate', generateBadge);
 
 export default router;

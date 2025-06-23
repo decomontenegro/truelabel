@@ -94,18 +94,23 @@ const limiter = rateLimit({
   }
 });
 
-// Middlewares globais
-app.use(helmet());
-app.use(compression());
-app.use(limiter);
-
-// CORS - Permitir múltiplas origens para desenvolvimento
+// CORS - Deve vir ANTES do helmet para funcionar corretamente
 app.use(cors({
   origin: config.corsOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+// Middlewares globais
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: false // Desabilitar em desenvolvimento
+}));
+app.use(compression());
+app.use(limiter);
 
 // Body parsing
 const maxSize = `${Math.floor(config.upload.maxSize / 1024 / 1024)}mb`;

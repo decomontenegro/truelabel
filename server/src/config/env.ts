@@ -94,6 +94,8 @@ export const config = {
         'http://localhost:5001',
         'http://localhost:5002',
         'http://localhost:5173',
+        'http://localhost:9101',
+        'http://localhost:9102',
       ],
   
   // Database

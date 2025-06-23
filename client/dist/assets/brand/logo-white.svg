@@ -1,0 +1,24 @@
+<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- True Label Logo - White Version -->
+  <defs>
+    <style>
+      .logo-text { font-family: 'Inter', system-ui, sans-serif; font-weight: 400; }
+      .logo-icon { fill: #ffffff; }
+      .logo-text-fill { fill: #ffffff; }
+    </style>
+  </defs>
+  
+  <!-- "t" Icon -->
+  <g class="logo-icon">
+    <!-- Vertical line of "t" -->
+    <rect x="15" y="15" width="8" height="50" rx="4"/>
+    <!-- Horizontal line of "t" -->
+    <rect x="8" y="20" width="22" height="8" rx="4"/>
+    <!-- Curved bottom part -->
+    <path d="M15 65 Q15 70 20 70 L25 70 Q30 70 30 65" stroke="#ffffff" stroke-width="8" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- "true label" text -->
+  <text x="50" y="35" class="logo-text logo-text-fill" font-size="16" font-weight="400">true</text>
+  <text x="50" y="55" class="logo-text logo-text-fill" font-size="16" font-weight="400">label</text>
+</svg>

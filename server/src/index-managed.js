@@ -21,16 +21,27 @@ const PORT = process.env.PORT || 3334;
 
 // CORS configuration - Updated for Railway deployment
 app.use(cors({
-  origin: [
-    'http://localhost:3001',
-    'http://localhost:3000',
-    'https://truelabel.vercel.app',
-    'https://*.vercel.app',
-    'https://*.railway.app'
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      'http://localhost:3001',
+      'http://localhost:3000',
+      'https://truelabel.vercel.app'
+    ];
+
+    // Allow any vercel.app subdomain
+    if (origin.includes('.vercel.app') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 }));
 
 app.use(express.json());
@@ -144,16 +155,24 @@ app.post('/auth/login', async (req, res) => {
       return res.status(400).json({ success: false, message: 'password is required' });
     }
     
-    // Mock authentication
-    if (email === 'admin@truelabel.com' && password === 'admin123') {
+    // Mock authentication - Support for 3 demo accounts
+    const testUsers = {
+      'admin@truelabel.com': { password: 'admin123', role: 'ADMIN', name: 'Admin User', id: '1' },
+      'marca@exemplo.com': { password: 'marca123', role: 'BRAND', name: 'Marca Exemplo', id: '2' },
+      'analista@labexemplo.com': { password: 'lab123', role: 'LABORATORY', name: 'Analista Lab', id: '3' }
+    };
+
+    const user = testUsers[email];
+
+    if (user && user.password === password) {
       const response = {
         success: true,
         token: `mock-jwt-token-${Date.now()}`,
         user: {
-          id: '1',
+          id: user.id,
           email,
-          name: 'Admin User',
-          role: 'ADMIN'
+          name: user.name,
+          role: user.role
         }
       };
       res.json(response);
@@ -213,34 +232,54 @@ app.get('/auth/profile', authenticate, async (req, res) => {
 // PRODUCTS ROUTES
 // ==========================================
 
+// In-memory storage for products (persists during server session)
+let productsStorage = [
+  {
+    id: '1',
+    name: 'Produto Exemplo',
+    brand: 'Marca Exemplo',
+    category: 'Alimentos',
+    status: 'VALIDATED',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
+
 // GET /products - List all products
 app.get('/products', authenticate, async (req, res) => {
   try {
     const { page = 1, limit = 10, search } = req.query;
-    
-    const mockProducts = [
-      {
-        id: '1',
-        name: 'Produto Exemplo',
-        brand: 'Marca Exemplo',
-        category: 'Alimentos',
-        status: 'VALIDATED',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
-    
+
+    // Use persistent storage instead of static mock data
+    let filteredProducts = [...productsStorage];
+
+    // Apply search filter if provided
+    if (search) {
+      const searchTerm = search.toLowerCase();
+      filteredProducts = productsStorage.filter(product =>
+        product.name.toLowerCase().includes(searchTerm) ||
+        product.brand.toLowerCase().includes(searchTerm) ||
+        product.category.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // Apply pagination
+    const startIndex = (parseInt(page) - 1) * parseInt(limit);
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
     const response = {
       success: true,
-      products: mockProducts,
+      products: paginatedProducts,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
-        total: mockProducts.length,
-        totalPages: 1
+        total: filteredProducts.length,
+        totalPages: Math.ceil(filteredProducts.length / parseInt(limit))
       }
     };
-    
+
+    console.log(`📦 Products API: Returning ${paginatedProducts.length} products (total: ${filteredProducts.length})`);
     res.json(response);
   } catch (error) {
     console.error('Error in productsList:', error);
@@ -251,8 +290,8 @@ app.get('/products', authenticate, async (req, res) => {
 // POST /products - Create new product
 app.post('/products', authenticate, async (req, res) => {
   try {
-    const { name, brand, category, description, claims } = req.body;
-    
+    const { name, brand, category, description, claims, sku } = req.body;
+
     // Validate required fields
     if (!name) {
       return res.status(400).json({ success: false, message: 'name is required' });
@@ -260,7 +299,7 @@ app.post('/products', authenticate, async (req, res) => {
     if (!brand) {
       return res.status(400).json({ success: false, message: 'brand is required' });
     }
-    
+
     const newProduct = {
       id: Math.random().toString(36).substr(2, 9),
       name,
@@ -268,6 +307,7 @@ app.post('/products', authenticate, async (req, res) => {
       category: category || 'Categoria Geral',
       description: description || '',
       claims: claims || '',
+      sku: sku || `SKU-${Date.now()}`,
       status: 'PENDING',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -275,13 +315,18 @@ app.post('/products', authenticate, async (req, res) => {
       expiresAt: null,
       qrCode: null
     };
-    
+
+    // ✅ SAVE TO PERSISTENT STORAGE
+    productsStorage.push(newProduct);
+    console.log(`✅ Product created and saved: ${newProduct.name} (ID: ${newProduct.id})`);
+    console.log(`📦 Total products in storage: ${productsStorage.length}`);
+
     const response = {
       success: true,
       product: newProduct,
       message: 'Produto criado com sucesso'
     };
-    
+
     res.json(response);
   } catch (error) {
     console.error('Error in productsCreate:', error);
@@ -294,21 +339,22 @@ app.get('/products/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const product = {
-      id,
-      name: 'Produto Exemplo',
-      brand: 'Marca Exemplo',
-      category: 'Alimentos',
-      status: 'VALIDATED',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    // Find product in storage
+    const product = productsStorage.find(p => p.id === id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
 
     const response = {
       success: true,
       product
     };
 
+    console.log(`🔍 Product found: ${product.name} (ID: ${id})`);
     res.json(response);
   } catch (error) {
     console.error('Error in productsGet:', error);

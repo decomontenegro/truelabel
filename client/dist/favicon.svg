@@ -1,0 +1,9 @@
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" fill="#2563eb" rx="6"/>
+  <g fill="white">
+    <!-- Simplified "t" for small sizes -->
+    <rect x="14" y="8" width="4" height="16" rx="2"/>
+    <rect x="10" y="10" width="12" height="3" rx="1.5"/>
+    <path d="M14 24 Q14 26 16 26 L18 26 Q20 26 20 24" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
