@@ -72,12 +72,13 @@ const authenticate = (req, res, next) => {
 
 // Health check - System monitoring
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'healthy', 
+  res.json({
+    status: 'healthy',
     port: PORT,
     timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    managedBy: 'API Route Management System'
+    version: '1.1.0',
+    managedBy: 'API Route Management System',
+    features: ['seals', 'product-seals', 'validations']
   });
 });
 
