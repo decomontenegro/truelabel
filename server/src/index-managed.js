@@ -430,27 +430,226 @@ app.get('/notifications', authenticate, async (req, res) => {
 });
 
 // ==========================================
+// SEALS ROUTES
+// ==========================================
+
+// GET /seals - List available seals
+app.get('/seals', authenticate, async (req, res) => {
+  try {
+    const { isActive } = req.query;
+
+    const mockSeals = [
+      {
+        id: '1',
+        name: 'Orgânico Brasil',
+        type: 'ORGANIC',
+        isActive: true,
+        description: 'Certificação orgânica nacional',
+        requirements: ['Certificado orgânico válido', 'Análise de resíduos'],
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '2',
+        name: 'Livre de Glúten',
+        type: 'GLUTEN_FREE',
+        isActive: true,
+        description: 'Produto livre de glúten',
+        requirements: ['Análise de glúten < 20ppm'],
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '3',
+        name: 'Vegano',
+        type: 'VEGAN',
+        isActive: true,
+        description: 'Produto 100% vegano',
+        requirements: ['Declaração de ingredientes', 'Auditoria de processo'],
+        createdAt: new Date().toISOString()
+      }
+    ];
+
+    let filteredSeals = mockSeals;
+    if (isActive !== undefined) {
+      filteredSeals = mockSeals.filter(seal => seal.isActive === (isActive === 'true'));
+    }
+
+    console.log(`🏷️ Seals API: Returning ${filteredSeals.length} seals`);
+    res.json({
+      success: true,
+      data: filteredSeals,
+      total: filteredSeals.length
+    });
+  } catch (error) {
+    console.error('Error in sealsList:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// ==========================================
+// PRODUCT SEALS ROUTES
+// ==========================================
+
+// GET /product-seals - Get seals for a product
+app.get('/product-seals', authenticate, async (req, res) => {
+  try {
+    const { productId } = req.query;
+
+    // Mock product seals - empty for new products
+    console.log(`🏷️ Product Seals API: Getting seals for product ${productId}`);
+    res.json({
+      success: true,
+      data: [],
+      total: 0
+    });
+  } catch (error) {
+    console.error('Error in productSealsList:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// POST /product-seals - Add seal to product
+app.post('/product-seals', authenticate, async (req, res) => {
+  try {
+    const { productId, sealId } = req.body;
+
+    const newProductSeal = {
+      id: Math.random().toString(36).substr(2, 9),
+      productId,
+      sealId,
+      status: 'PENDING',
+      requestedAt: new Date().toISOString(),
+      validatedAt: null
+    };
+
+    console.log(`🏷️ Product Seal created: ${sealId} for product ${productId}`);
+    res.json({
+      success: true,
+      data: newProductSeal,
+      message: 'Selo adicionado ao produto'
+    });
+  } catch (error) {
+    console.error('Error in productSealsCreate:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// ==========================================
 // VALIDATIONS ROUTES
 // ==========================================
 
 // GET /validations - List validations
 app.get('/validations', authenticate, async (req, res) => {
   try {
-    const now = new Date();
-    const response = {
-      success: true,
-      data: [{
+    const { productId, status, page = 1, limit = 10 } = req.query;
+
+    const mockValidations = [
+      {
         id: '1',
+        productId: productId || '1',
         productName: 'Produto Exemplo',
+        type: 'NUTRITIONAL_ANALYSIS',
         status: 'VALIDATED',
-        validatedAt: now.toISOString(),
-        expiresAt: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString()
-      }],
-      pagination: { page: 1, limit: 100, total: 1, totalPages: 1 }
-    };
-    res.json(response);
+        requestedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        validatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        expiresAt: new Date(Date.now() + 358 * 24 * 60 * 60 * 1000).toISOString(),
+        laboratory: 'Lab Exemplo',
+        validator: 'Analista Responsável'
+      }
+    ];
+
+    let filteredValidations = mockValidations;
+    if (status) {
+      filteredValidations = mockValidations.filter(v => v.status === status);
+    }
+    if (productId) {
+      filteredValidations = filteredValidations.filter(v => v.productId === productId);
+    }
+
+    const startIndex = (parseInt(page) - 1) * parseInt(limit);
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedValidations = filteredValidations.slice(startIndex, endIndex);
+
+    console.log(`✅ Validations API: Returning ${paginatedValidations.length} validations`);
+    res.json({
+      success: true,
+      data: paginatedValidations,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: filteredValidations.length,
+        totalPages: Math.ceil(filteredValidations.length / parseInt(limit))
+      }
+    });
   } catch (error) {
     console.error('Error in validationsList:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// POST /validations - Create new validation request
+app.post('/validations', authenticate, async (req, res) => {
+  try {
+    const { productId, type, claims, nutritionalInfo } = req.body;
+
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        message: 'productId is required'
+      });
+    }
+
+    const newValidation = {
+      id: Math.random().toString(36).substr(2, 9),
+      productId,
+      type: type || 'NUTRITIONAL_ANALYSIS',
+      status: 'PENDING',
+      claims: claims || [],
+      nutritionalInfo: nutritionalInfo || {},
+      requestedAt: new Date().toISOString(),
+      validatedAt: null,
+      expiresAt: null,
+      laboratory: null,
+      validator: null
+    };
+
+    console.log(`✅ Validation created: ${newValidation.type} for product ${productId}`);
+
+    res.json({
+      success: true,
+      data: newValidation,
+      message: 'Solicitação de validação criada com sucesso'
+    });
+  } catch (error) {
+    console.error('Error in validationsCreate:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// PUT /validations/:id - Update validation status
+app.put('/validations/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, validatedAt, expiresAt, laboratory, validator } = req.body;
+
+    const updatedValidation = {
+      id,
+      status: status || 'VALIDATED',
+      validatedAt: validatedAt || new Date().toISOString(),
+      expiresAt: expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+      laboratory: laboratory || 'Lab Exemplo',
+      validator: validator || 'Analista Responsável',
+      updatedAt: new Date().toISOString()
+    };
+
+    console.log(`✅ Validation updated: ${id} -> ${status}`);
+
+    res.json({
+      success: true,
+      data: updatedValidation,
+      message: 'Validação atualizada com sucesso'
+    });
+  } catch (error) {
+    console.error('Error in validationsUpdate:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
