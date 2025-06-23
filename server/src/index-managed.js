@@ -659,10 +659,18 @@ app.put('/validations/:id', authenticate, async (req, res) => {
 
     const validation = validationsStorage[validationIndex];
 
+    // ✅ NORMALIZE STATUS: Convert frontend status to backend status
+    let normalizedStatus = status;
+    if (status === 'APPROVED') {
+      normalizedStatus = 'VALIDATED';
+    } else if (status === 'REJECTED') {
+      normalizedStatus = 'REJECTED';
+    }
+
     // Update validation
     const updatedValidation = {
       ...validation,
-      status: status || 'VALIDATED',
+      status: normalizedStatus || 'VALIDATED',
       validatedAt: validatedAt || new Date().toISOString(),
       expiresAt: expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
       laboratory: laboratory || 'Lab Exemplo',
@@ -674,20 +682,28 @@ app.put('/validations/:id', authenticate, async (req, res) => {
     validationsStorage[validationIndex] = updatedValidation;
 
     // ✅ UPDATE PRODUCT STATUS IF VALIDATION IS APPROVED
-    if (status === 'VALIDATED') {
+    if (normalizedStatus === 'VALIDATED') {
       const productIndex = productsStorage.findIndex(p => p.id === validation.productId);
       if (productIndex !== -1) {
         productsStorage[productIndex].status = 'VALIDATED';
         productsStorage[productIndex].updatedAt = new Date().toISOString();
         console.log(`✅ Product status updated: ${validation.productId} -> VALIDATED`);
       }
+    } else if (normalizedStatus === 'REJECTED') {
+      const productIndex = productsStorage.findIndex(p => p.id === validation.productId);
+      if (productIndex !== -1) {
+        productsStorage[productIndex].status = 'REJECTED';
+        productsStorage[productIndex].updatedAt = new Date().toISOString();
+        console.log(`✅ Product status updated: ${validation.productId} -> REJECTED`);
+      }
     }
 
-    console.log(`✅ Validation updated: ${id} -> ${status}`);
+    console.log(`✅ Validation updated: ${id} -> ${normalizedStatus} (original: ${status})`);
 
     res.json({
       success: true,
       data: updatedValidation,
+      validation: updatedValidation, // ✅ Add both formats for compatibility
       message: 'Validação atualizada com sucesso'
     });
   } catch (error) {
