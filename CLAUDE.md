@@ -102,10 +102,9 @@ PORT=9100
 ## Test Credentials
 
 ```
-Admin: admin@truelabel.com / admin123
-Brand: marca@exemplo.com / marca123
+Admin: admin@cpgvalidation.com / admin123
+Brand: marca@exemplo.com / brand123
 Lab: analista@labexemplo.com / lab123
-Validator: validador@truelabel.com / validator123
 ```
 
 ## Important Notes

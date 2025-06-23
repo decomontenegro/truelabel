@@ -15,7 +15,10 @@
     "cleanup": "./cleanup-deprecated.sh",
     "build": "cd server && npm install",
     "start": "cd server && node src/index-managed.js",
-    "dev": "cd server && npm run dev"
+    "dev": "cd server && npm run dev",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd server && npm run dev",
+    "dev:frontend": "cd client && npm run dev"
   },
   "dependencies": {
     "axios": "^1.10.0"
@@ -42,6 +45,7 @@
   "homepage": "https://github.com/decomontenegro/truelabel#readme",
   "devDependencies": {
     "@types/node": "^24.0.3",
+    "concurrently": "^9.1.2",
     "vite": "^6.3.5",
     "vitest": "^3.2.3"
   }
