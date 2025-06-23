@@ -246,6 +246,25 @@ let productsStorage = [
   }
 ];
 
+// In-memory storage for validations
+let validationsStorage = [
+  {
+    id: '1',
+    productId: '1',
+    productName: 'Produto Exemplo',
+    type: 'NUTRITIONAL_ANALYSIS',
+    status: 'VALIDATED',
+    requestedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    validatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    expiresAt: new Date(Date.now() + 358 * 24 * 60 * 60 * 1000).toISOString(),
+    laboratory: 'Lab Exemplo',
+    validator: 'Analista Responsável'
+  }
+];
+
+// In-memory storage for product seals
+let productSealsStorage = [];
+
 // GET /products - List all products
 app.get('/products', authenticate, async (req, res) => {
   try {
@@ -543,34 +562,23 @@ app.get('/validations', authenticate, async (req, res) => {
   try {
     const { productId, status, page = 1, limit = 10 } = req.query;
 
-    const mockValidations = [
-      {
-        id: '1',
-        productId: productId || '1',
-        productName: 'Produto Exemplo',
-        type: 'NUTRITIONAL_ANALYSIS',
-        status: 'VALIDATED',
-        requestedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        validatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        expiresAt: new Date(Date.now() + 358 * 24 * 60 * 60 * 1000).toISOString(),
-        laboratory: 'Lab Exemplo',
-        validator: 'Analista Responsável'
-      }
-    ];
+    // Use persistent storage instead of static mock data
+    let filteredValidations = [...validationsStorage];
 
-    let filteredValidations = mockValidations;
+    // Apply filters
     if (status) {
-      filteredValidations = mockValidations.filter(v => v.status === status);
+      filteredValidations = filteredValidations.filter(v => v.status === status);
     }
     if (productId) {
       filteredValidations = filteredValidations.filter(v => v.productId === productId);
     }
 
+    // Apply pagination
     const startIndex = (parseInt(page) - 1) * parseInt(limit);
     const endIndex = startIndex + parseInt(limit);
     const paginatedValidations = filteredValidations.slice(startIndex, endIndex);
 
-    console.log(`✅ Validations API: Returning ${paginatedValidations.length} validations`);
+    console.log(`✅ Validations API: Returning ${paginatedValidations.length} validations (total: ${filteredValidations.length})`);
     res.json({
       success: true,
       data: paginatedValidations,
@@ -599,9 +607,14 @@ app.post('/validations', authenticate, async (req, res) => {
       });
     }
 
+    // Find the product to get its name
+    const product = productsStorage.find(p => p.id === productId);
+    const productName = product ? product.name : 'Produto Desconhecido';
+
     const newValidation = {
       id: Math.random().toString(36).substr(2, 9),
       productId,
+      productName,
       type: type || 'NUTRITIONAL_ANALYSIS',
       status: 'PENDING',
       claims: claims || [],
@@ -613,7 +626,10 @@ app.post('/validations', authenticate, async (req, res) => {
       validator: null
     };
 
-    console.log(`✅ Validation created: ${newValidation.type} for product ${productId}`);
+    // ✅ SAVE TO PERSISTENT STORAGE
+    validationsStorage.push(newValidation);
+    console.log(`✅ Validation created and saved: ${newValidation.type} for product ${productName} (ID: ${productId})`);
+    console.log(`📋 Total validations in storage: ${validationsStorage.length}`);
 
     res.json({
       success: true,
@@ -632,8 +648,20 @@ app.put('/validations/:id', authenticate, async (req, res) => {
     const { id } = req.params;
     const { status, validatedAt, expiresAt, laboratory, validator } = req.body;
 
+    // Find validation in storage
+    const validationIndex = validationsStorage.findIndex(v => v.id === id);
+    if (validationIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Validation not found'
+      });
+    }
+
+    const validation = validationsStorage[validationIndex];
+
+    // Update validation
     const updatedValidation = {
-      id,
+      ...validation,
       status: status || 'VALIDATED',
       validatedAt: validatedAt || new Date().toISOString(),
       expiresAt: expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
@@ -641,6 +669,19 @@ app.put('/validations/:id', authenticate, async (req, res) => {
       validator: validator || 'Analista Responsável',
       updatedAt: new Date().toISOString()
     };
+
+    // ✅ UPDATE IN STORAGE
+    validationsStorage[validationIndex] = updatedValidation;
+
+    // ✅ UPDATE PRODUCT STATUS IF VALIDATION IS APPROVED
+    if (status === 'VALIDATED') {
+      const productIndex = productsStorage.findIndex(p => p.id === validation.productId);
+      if (productIndex !== -1) {
+        productsStorage[productIndex].status = 'VALIDATED';
+        productsStorage[productIndex].updatedAt = new Date().toISOString();
+        console.log(`✅ Product status updated: ${validation.productId} -> VALIDATED`);
+      }
+    }
 
     console.log(`✅ Validation updated: ${id} -> ${status}`);
 
