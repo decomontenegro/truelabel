@@ -75,7 +75,7 @@ export const qrService = {
 
   // Obter acessos ao QR Code
   async getQRCodeAccesses(productId: string): Promise<QRCodeAccessStats> {
-    const response = await api.get(`/qr/accesses/${productId}`);
+    const response = await api.get(`/qr/analytics/${productId}`);
     return response.data;
   },
 

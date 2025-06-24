@@ -1,8 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Filter, Package } from 'lucide-react';
 import { productService } from '@/services/productService';
+import { validationService } from '@/services/validationService';
 import { useAuthStore } from '@/stores/authStore';
 import { useQRStore } from '@/stores/qrStore';
 import { debounce } from '@/lib/utils';
@@ -16,6 +17,8 @@ import { toast } from '@/components/ui/Toast';
 const ProductsPage = () => {
   const { user } = useAuthStore();
   const { openModal } = useQRStore();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [category, setCategory] = useState('');
@@ -35,6 +38,59 @@ const ProductsPage = () => {
   const handleQRCodeClick = useCallback((product: any) => {
     openModal(product.id, product.name);
   }, [openModal]);
+
+  const handleValidateClick = useCallback(async (product: any) => {
+    try {
+      // Primeiro, verificar se já existe uma validação para este produto
+      const existingValidations = await validationService.getValidations({
+        productId: product.id,
+        page: 1,
+        limit: 1
+      });
+
+      if (existingValidations.data && existingValidations.data.length > 0) {
+        // Se já existe validação, redirecionar para a página de revisão
+        const existingValidation = existingValidations.data[0];
+        toast.info('Redirecionando para a validação existente...');
+        navigate(`/dashboard/validations/${existingValidation.id}/review`);
+        return;
+      }
+
+      const response = await validationService.createValidation({
+        productId: product.id,
+        type: 'MANUAL',
+        status: 'PENDING',
+        claimsValidated: {},
+        summary: 'Validação manual solicitada',
+        notes: 'Validação solicitada através da interface de produtos'
+      });
+
+      toast.success('Validação solicitada com sucesso!');
+
+      // Invalidar cache para recarregar produtos e atualizar o status
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    } catch (error: any) {
+      console.error('Erro ao solicitar validação:', error);
+
+      // Verificar se é erro de validação duplicada (409)
+      if (error?.response?.status === 409) {
+        const errorData = error.response.data;
+        if (errorData?.message?.includes('already exists')) {
+          toast.error('Este produto já possui uma validação. Acesse a seção "Validações" para visualizar ou atualizar.');
+        } else {
+          toast.error('Validação já existe para este produto');
+        }
+      } else if (error?.response?.status === 400) {
+        const errorData = error.response.data;
+        toast.error(errorData?.message || 'Dados inválidos para validação');
+      } else if (error?.response?.status === 404) {
+        toast.error('Produto não encontrado');
+      } else {
+        const errorMessage = error?.response?.data?.message || error?.message || 'Erro ao solicitar validação';
+        toast.error(errorMessage);
+      }
+    }
+  }, [queryClient, navigate]);
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -76,7 +132,6 @@ const ProductsPage = () => {
   // Dados derivados
   const products = productsData?.data || [];
   const pagination = productsData?.pagination;
-  const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
@@ -198,6 +253,7 @@ const ProductsPage = () => {
                     product={product}
                     userRole={user?.role}
                     onQRCodeClick={handleQRCodeClick}
+                    onValidateClick={handleValidateClick}
                   />
                 ))}
               </tbody>
@@ -212,6 +268,7 @@ const ProductsPage = () => {
                 product={product}
                 userRole={user?.role}
                 onQRCodeClick={handleQRCodeClick}
+                onValidateClick={handleValidateClick}
               />
             ))}
           </div>

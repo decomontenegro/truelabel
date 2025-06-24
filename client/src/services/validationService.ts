@@ -67,8 +67,8 @@ export const validationService = {
 
       const response = await api.get(`/validations?${params.toString()}`);
 
-      // Adaptar resposta da API real
-      const validations = response.data.validations || [];
+      // Adaptar resposta da API real - verificar ambos os formatos
+      const validations = response.data.data || response.data.validations || [];
       return {
         data: validations,
         pagination: response.data.pagination || {

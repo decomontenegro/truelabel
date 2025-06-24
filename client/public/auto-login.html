@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Login - True Label</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        pre { background: #f8f9fa; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Auto Login - True Label</h1>
+    <div id="results"></div>
+    <button onclick="performLogin()">🚀 Fazer Login</button>
+    <button onclick="checkAuthStatus()">🔍 Verificar Status</button>
+    <button onclick="clearAuth()">🗑️ Limpar Auth</button>
+
+    <script>
+        const API_URL = 'https://truelabel-production.up.railway.app';
+        const results = document.getElementById('results');
+        
+        function addResult(title, content, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<h3>${title}</h3><pre>${content}</pre>`;
+            results.appendChild(div);
+        }
+        
+        async function performLogin() {
+            try {
+                // Simular login
+                const mockUser = {
+                    id: 'user-123',
+                    name: 'Usuário Teste',
+                    email: 'teste@truelabel.com',
+                    role: 'BRAND'
+                };
+                
+                const mockToken = 'mock-jwt-token-123';
+                
+                // Salvar no localStorage (formato do Zustand)
+                const authData = {
+                    state: {
+                        user: mockUser,
+                        token: mockToken,
+                        isAuthenticated: true
+                    },
+                    version: 0
+                };
+                
+                localStorage.setItem('auth-storage', JSON.stringify(authData));
+                
+                addResult('✅ Login Realizado', `Usuário: ${mockUser.name}\nToken: ${mockToken}\nSalvo no localStorage`, 'success');
+                
+                // Testar API com token
+                const response = await fetch(`${API_URL}/products`, {
+                    headers: {
+                        'Authorization': `Bearer ${mockToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                addResult('🔍 Teste API com Token', `Status: ${response.status}\n${JSON.stringify(data, null, 2)}`, response.ok ? 'success' : 'error');
+                
+            } catch (error) {
+                addResult('❌ Erro no Login', error.message, 'error');
+            }
+        }
+        
+        function checkAuthStatus() {
+            const authData = localStorage.getItem('auth-storage');
+            if (authData) {
+                const parsed = JSON.parse(authData);
+                addResult('🔍 Status de Autenticação', JSON.stringify(parsed, null, 2), 'success');
+            } else {
+                addResult('⚠️ Não Autenticado', 'Nenhum dado de autenticação encontrado', 'error');
+            }
+        }
+        
+        function clearAuth() {
+            localStorage.removeItem('auth-storage');
+            addResult('🗑️ Auth Limpo', 'Dados de autenticação removidos', 'success');
+        }
+        
+        // Verificar status inicial
+        checkAuthStatus();
+    </script>
+</body>
+</html>

@@ -370,9 +370,9 @@ export const ValidationsPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
-                      onClick={() => navigate(`/admin/validations/${validation.id}/review`)}
+                      onClick={() => navigate(`/dashboard/validations/${validation.id}/review`)}
                       className="text-blue-600 hover:text-blue-900"
-                      title="Ver detalhes"
+                      title="Revisar Validação"
                     >
                       <Eye className="w-4 h-4" />
                     </button>

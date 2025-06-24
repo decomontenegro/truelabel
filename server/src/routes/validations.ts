@@ -70,8 +70,17 @@ router.get('/', authenticateToken, async (req: AuthRequest, res, next) => {
       prisma.validation.count({ where })
     ]);
 
+    // Convert status back to frontend format before sending response
+    const normalizedValidations = validations.map(validation => {
+      const normalized = { ...validation };
+      if (normalized.status === 'VALIDATED') {
+        normalized.status = 'APPROVED';
+      }
+      return normalized;
+    });
+    
     res.json({
-      validations,
+      validations: normalizedValidations,
       pagination: {
         page: parseInt(page as string),
         limit: parseInt(limit as string),
@@ -134,7 +143,13 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res, next) => {
       CacheTTL.medium
     );
 
-    res.json({ validation });
+    // Convert status back to frontend format before sending response
+    const responseValidation = { ...validation };
+    if (responseValidation.status === 'VALIDATED') {
+      responseValidation.status = 'APPROVED';
+    }
+    
+    res.json({ validation: responseValidation });
   } catch (error) {
     next(error);
   }
@@ -249,9 +264,15 @@ router.post('/', authenticateToken, requireBrandOrAdmin, async (req: AuthRequest
       await cache.zadd(CacheKeys.validationQueue(), Date.now(), validation.id);
     }
 
+    // Convert status back to frontend format before sending response
+    const responseValidation = { ...validation };
+    if (responseValidation.status === 'VALIDATED') {
+      responseValidation.status = 'APPROVED';
+    }
+    
     res.status(201).json({
       message: 'Validação criada com sucesso',
-      validation
+      validation: responseValidation
     });
   } catch (error) {
     next(error);
@@ -316,9 +337,15 @@ router.put('/:id', authenticateToken, requireAdmin, async (req: AuthRequest, res
     await cache.invalidate(CacheKeys.product(existingValidation.productId));
     await cache.invalidate(CacheKeys.validationQueue());
 
+    // Convert status back to frontend format before sending response
+    const responseValidation = { ...validation };
+    if (responseValidation.status === 'VALIDATED') {
+      responseValidation.status = 'APPROVED';
+    }
+    
     res.json({
       message: 'Validação atualizada com sucesso',
-      validation
+      validation: responseValidation
     });
   } catch (error) {
     next(error);

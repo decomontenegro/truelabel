@@ -1,15 +1,16 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, QrCode, Shield } from 'lucide-react';
+import { Eye, QrCode, Shield, CheckCircle } from 'lucide-react';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
 
 interface ProductCardProps {
   product: any;
   userRole?: string;
   onQRCodeClick: (product: any) => void;
+  onValidateClick?: (product: any) => void;
 }
 
-const ProductCard = memo(({ product, userRole, onQRCodeClick }: ProductCardProps) => {
+const ProductCard = memo(({ product, userRole, onQRCodeClick, onValidateClick }: ProductCardProps) => {
   const canEdit = userRole === 'BRAND' || userRole === 'ADMIN';
 
   return (
@@ -63,6 +64,16 @@ const ProductCard = memo(({ product, userRole, onQRCodeClick }: ProductCardProps
               >
                 <Shield className="h-4 w-4" />
               </Link>
+
+              {product.status !== 'VALIDATED' && onValidateClick && (
+                <button
+                  onClick={() => onValidateClick(product)}
+                  className="icon-btn text-warning-600 hover:text-warning-700"
+                  title="Solicitar Validação"
+                >
+                  <CheckCircle className="h-4 w-4" />
+                </button>
+              )}
             </>
           )}
         </div>

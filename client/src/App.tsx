@@ -8,8 +8,8 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import RouteErrorBoundary from '@/components/RouteErrorBoundary';
 import AuthRedirect from '@/components/auth/AuthRedirect';
-// Temporarily disabled components to fix deployment issues:
-// import GlobalQRModal from '@/components/qr/GlobalQRModal';
+// QR Modal component
+import GlobalQRModal from '@/components/qr/GlobalQRModal';
 // import ErrorBoundaryComponent from '@/components/ErrorBoundary';
 // import ChatWidget from '@/components/support/ChatWidget';
 import { useToast } from '@/components/ui/Toast';
@@ -40,10 +40,10 @@ const LaboratoriesPage = lazy(() => import('@/pages/admin/LaboratoriesPage'));
 const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage'));
 const ValidationsPageAdmin = lazy(() => import('@/pages/admin/ValidationsPage'));
 const ValidationReviewPage = lazy(() => import('@/pages/admin/ValidationReviewPage'));
+const QRAnalyticsPage = lazy(() => import('@/pages/qr/QRAnalyticsPage'));
 const ValidationQueuePage = lazy(() => import('@/pages/admin/ValidationQueuePage'));
 const LifecycleMonitoringPage = lazy(() => import('@/pages/admin/LifecycleMonitoringPage'));
 const QRCodesPage = lazy(() => import('@/pages/brand/QRCodesPage'));
-const QRAnalyticsPage = lazy(() => import('@/pages/analytics/QRAnalyticsPage'));
 const AboutPage = lazy(() => import('@/pages/public/AboutPage'));
 const HowItWorksPage = lazy(() => import('@/pages/public/HowItWorksPage'));
 const ContactPage = lazy(() => import('@/pages/public/ContactPage'));
@@ -65,7 +65,7 @@ const QRImplementationStatus = lazy(() => import('@/pages/test/QRImplementationS
 const DebugSKUTest = lazy(() => import('@/pages/test/DebugSKUTest'));
 const ValidationRulesTestPage = lazy(() => import('@/pages/test/ValidationRulesTestPage'));
 const CertificationsManagementPage = lazy(() => import('@/pages/certifications/CertificationsManagementPage'));
-const TraceabilityPage = lazy(() => import('@/pages/traceability/TraceabilityPage'));
+const TraceabilityPage = lazy(() => import('@/pages/products/SimpleTraceabilityPage'));
 const ReportParserTest = lazy(() => import('@/pages/test/ReportParserTest'));
 const AutomatedValidationTestPage = lazy(() => import('@/pages/test/AutomatedValidationTestPage'));
 const QRLifecycleTest = lazy(() => import('@/pages/test/QRLifecycleTest'));
@@ -191,6 +191,7 @@ function App() {
         <Route path="validations/queue" element={<ValidationQueuePage />} />
         <Route path="validations/:id/review" element={<ValidationReviewPage />} />
         <Route path="validations/:id/feedback" element={<ValidationReviewPage />} />
+        <Route path="qr-analytics/:productId" element={<QRAnalyticsPage />} />
         <Route path="validations/lifecycle" element={<LifecycleMonitoringPage />} />
 
         {/* Laboratórios */}
@@ -248,6 +249,7 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
+      <GlobalQRModal />
       <FeedbackWidget />
     </div>
   );

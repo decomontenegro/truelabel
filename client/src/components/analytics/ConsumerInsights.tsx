@@ -127,27 +127,11 @@ const ConsumerInsights: React.FC<ConsumerInsightsProps> = ({
       {/* Segment Distribution Chart */}
       <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribuição de Segmentos</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={data.segments.map((s, i) => ({ ...s, fill: COLORS[i % COLORS.length] }))}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={(entry) => `${entry.name} (${formatPercent((entry.size / data.segments.reduce((sum, s) => sum + s.size, 0)) * 100)})`}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="size"
-              animationBegin={0}
-              animationDuration={800}
-            >
-              {data.segments.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip formatter={(value: number) => formatNumber(value)} />
-          </PieChart>
-        </ResponsiveContainer>
+        <ChartPlaceholder
+          height={300}
+          title="Gráfico de Pizza - Distribuição de Segmentos"
+          description="Visualização da distribuição dos segmentos de consumidores"
+        />
       </div>
     </div>
   );
@@ -191,21 +175,11 @@ const ConsumerInsights: React.FC<ConsumerInsightsProps> = ({
       {/* Behavior Impact Chart */}
       <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Impacto dos Comportamentos</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.behaviors} layout="horizontal">
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis type="number" tick={{ fontSize: 12 }} tickLine={false} />
-            <YAxis 
-              dataKey="pattern" 
-              type="category" 
-              width={150} 
-              tick={{ fontSize: 12 }}
-              tickLine={false}
-            />
-            <Tooltip formatter={(value: number) => formatNumber(value)} />
-            <Bar dataKey="users" fill="#3B82F6" radius={[0, 8, 8, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <ChartPlaceholder
+          height={300}
+          title="Gráfico de Barras - Impacto dos Comportamentos"
+          description="Visualização do impacto dos diferentes padrões de comportamento"
+        />
       </div>
     </div>
   );
@@ -231,27 +205,11 @@ const ConsumerInsights: React.FC<ConsumerInsightsProps> = ({
       {/* Peak Hours */}
       <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Horários de Pico</h3>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={data.preferences.peakHours}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis 
-              dataKey="hour" 
-              tick={{ fontSize: 12 }}
-              tickLine={false}
-              tickFormatter={(hour) => `${hour}h`}
-            />
-            <YAxis 
-              tick={{ fontSize: 12 }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <Tooltip 
-              formatter={(value: number) => `${formatPercent(value)}`}
-              labelFormatter={(hour) => `${hour}h`}
-            />
-            <Bar dataKey="percentage" fill="#10B981" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <ChartPlaceholder
+          height={200}
+          title="Gráfico de Barras - Horários de Pico"
+          description="Visualização dos horários com maior atividade de usuários"
+        />
       </div>
 
       {/* Top Sections & Products */}
@@ -359,25 +317,11 @@ const ConsumerInsights: React.FC<ConsumerInsightsProps> = ({
       {/* Visit Frequency Distribution */}
       <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribuição de Frequência de Visitas</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.loyaltyMetrics.frequencyDistribution}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis 
-              dataKey="visits" 
-              tick={{ fontSize: 12 }}
-              tickLine={false}
-              label={{ value: 'Número de Visitas', position: 'insideBottom', offset: -5 }}
-            />
-            <YAxis 
-              tick={{ fontSize: 12 }}
-              tickLine={false}
-              axisLine={false}
-              label={{ value: 'Usuários', angle: -90, position: 'insideLeft' }}
-            />
-            <Tooltip formatter={(value: number) => formatNumber(value)} />
-            <Bar dataKey="users" fill="#8B5CF6" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <ChartPlaceholder
+          height={300}
+          title="Gráfico de Barras - Frequência de Visitas"
+          description="Distribuição dos usuários por número de visitas"
+        />
       </div>
     </div>
   );

@@ -15,8 +15,15 @@ import {
 class TraceabilityService {
   // Supply Chain Events
   async getSupplyChainEvents(productId: string): Promise<SupplyChainEvent[]> {
-    const response = await api.get(`/traceability/products/${productId}/events`);
-    return response.data;
+    console.log('🔍 TraceabilityService: Buscando eventos para produto', productId);
+    try {
+      const response = await api.get(`/traceability/products/${productId}/events`);
+      console.log('✅ TraceabilityService: Eventos obtidos com sucesso', response.data);
+      return response.data.data || response.data;
+    } catch (error) {
+      console.error('❌ TraceabilityService: Erro ao buscar eventos', error);
+      throw error;
+    }
   }
 
   async createSupplyChainEvent(data: CreateSupplyChainEventData): Promise<SupplyChainEvent> {
@@ -147,8 +154,15 @@ class TraceabilityService {
   }
 
   async getSupplyChainSummary(productId: string): Promise<SupplyChainSummary> {
-    const response = await api.get(`/traceability/products/${productId}/summary`);
-    return response.data;
+    console.log('🔍 TraceabilityService: Buscando resumo para produto', productId);
+    try {
+      const response = await api.get(`/traceability/products/${productId}/summary`);
+      console.log('✅ TraceabilityService: Resumo obtido com sucesso', response.data);
+      return response.data.data || response.data;
+    } catch (error) {
+      console.error('❌ TraceabilityService: Erro ao buscar resumo', error);
+      throw error;
+    }
   }
 
   async getTraceabilityAnalytics(productId: string): Promise<any> {

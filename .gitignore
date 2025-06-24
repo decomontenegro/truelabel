@@ -3,3 +3,4 @@ backup-*/
 *.log
 api-route-*-report.json
 node_modules
+VITE_API_BASE_URL=https://truelabel-production.up.railway.app

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Frontend API Connection</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        pre { background: #f8f9fa; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Frontend API Connection</h1>
+    <div id="results"></div>
+
+    <script>
+        const API_URL = 'https://truelabel-production.up.railway.app';
+        const TOKEN = 'mock-jwt-token-123';
+        
+        const results = document.getElementById('results');
+        
+        function addResult(title, content, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test ${type}`;
+            div.innerHTML = `<h3>${title}</h3><pre>${content}</pre>`;
+            results.appendChild(div);
+        }
+        
+        async function testAPI() {
+            addResult('🔧 Configuration', `API URL: ${API_URL}\nToken: ${TOKEN}`);
+            
+            // Test 1: Health Check
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                addResult('✅ Health Check', JSON.stringify(data, null, 2), 'success');
+            } catch (error) {
+                addResult('❌ Health Check Failed', error.message, 'error');
+            }
+            
+            // Test 2: Products without auth
+            try {
+                const response = await fetch(`${API_URL}/products`);
+                const data = await response.json();
+                addResult('⚠️ Products (No Auth)', `Status: ${response.status}\n${JSON.stringify(data, null, 2)}`, response.ok ? 'info' : 'error');
+            } catch (error) {
+                addResult('❌ Products (No Auth) Failed', error.message, 'error');
+            }
+            
+            // Test 3: Products with auth
+            try {
+                const response = await fetch(`${API_URL}/products`, {
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                addResult('✅ Products (With Auth)', `Status: ${response.status}\n${JSON.stringify(data, null, 2)}`, response.ok ? 'success' : 'error');
+            } catch (error) {
+                addResult('❌ Products (With Auth) Failed', error.message, 'error');
+            }
+            
+            // Test 4: CORS Test
+            try {
+                const response = await fetch(`${API_URL}/products`, {
+                    method: 'OPTIONS'
+                });
+                addResult('🌐 CORS Preflight', `Status: ${response.status}\nHeaders: ${JSON.stringify(Object.fromEntries(response.headers), null, 2)}`, response.ok ? 'success' : 'error');
+            } catch (error) {
+                addResult('❌ CORS Test Failed', error.message, 'error');
+            }
+            
+            // Test 5: Create Product
+            try {
+                const response = await fetch(`${API_URL}/products`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'Debug Test Product',
+                        brand: 'Debug Brand',
+                        category: 'Alimentos',
+                        description: 'Produto criado via debug'
+                    })
+                });
+                const data = await response.json();
+                addResult('🆕 Create Product', `Status: ${response.status}\n${JSON.stringify(data, null, 2)}`, response.ok ? 'success' : 'error');
+            } catch (error) {
+                addResult('❌ Create Product Failed', error.message, 'error');
+            }
+        }
+        
+        // Run tests
+        testAPI();
+    </script>
+</body>
+</html>

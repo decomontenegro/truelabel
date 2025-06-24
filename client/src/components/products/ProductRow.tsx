@@ -1,15 +1,16 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, Edit, QrCode, Shield, MoreVertical, MapPin } from 'lucide-react';
+import { Eye, Edit, QrCode, Shield, MoreVertical, MapPin, CheckCircle, BarChart3 } from 'lucide-react';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils';
 
 interface ProductRowProps {
   product: any;
   userRole?: string;
   onQRCodeClick: (product: any) => void;
+  onValidateClick?: (product: any) => void;
 }
 
-const ProductRow = memo(({ product, userRole, onQRCodeClick }: ProductRowProps) => {
+const ProductRow = memo(({ product, userRole, onQRCodeClick, onValidateClick }: ProductRowProps) => {
   const canEdit = userRole === 'BRAND' || userRole === 'ADMIN';
 
   return (
@@ -77,6 +78,13 @@ const ProductRow = memo(({ product, userRole, onQRCodeClick }: ProductRowProps) 
                 to={`/dashboard/products/${product.id}/seals`}
                 className="text-blue-600 hover:text-blue-900"
                 title="Gerenciar Selos"
+                onClick={(e) => {
+                  console.log('🔗 Clique no selo detectado:', {
+                    productId: product.id,
+                    productName: product.name,
+                    targetUrl: `/dashboard/products/${product.id}/seals`
+                  });
+                }}
               >
                 <Shield className="h-4 w-4" />
               </Link>
@@ -88,6 +96,26 @@ const ProductRow = memo(({ product, userRole, onQRCodeClick }: ProductRowProps) 
               >
                 <MapPin className="h-4 w-4" />
               </Link>
+
+              {product.status !== 'APPROVED' && product.status !== 'VALIDATED' && onValidateClick && (
+                <button
+                  onClick={() => onValidateClick(product)}
+                  className="text-orange-600 hover:text-orange-900"
+                  title="Solicitar Validação"
+                >
+                  <CheckCircle className="h-4 w-4" />
+                </button>
+              )}
+
+              {product.qrCode && (
+                <Link
+                  to={`/dashboard/qr-analytics/${product.id}`}
+                  className="text-blue-600 hover:text-blue-900"
+                  title="Analytics do QR Code"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                </Link>
+              )}
             </>
           )}
 

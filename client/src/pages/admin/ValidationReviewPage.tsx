@@ -1,110 +1,78 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Bot, Users, Save, Send, Check, X } from 'lucide-react';
-import { Validation, ValidationFeedback as FeedbackType } from '@/types';
+import { ArrowLeft, Check, X, Clock, User } from 'lucide-react';
+import { Validation } from '@/types';
 import { validationService } from '@/services/validationService';
-import { AutomatedValidationStatus } from '@/components/validations/AutomatedValidationStatus';
-import { DataPointsReview } from '@/components/validations/DataPointsReview';
-import { ValidationFeedbackComponent } from '@/components/validations/ValidationFeedback';
 import { toast } from 'react-hot-toast';
-import { useAuthStore } from '@/stores/authStore';
 
-export const ValidationReviewPage: React.FC = () => {
+const ValidationReviewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
   const [validation, setValidation] = useState<Validation | null>(null);
-  const [feedback, setFeedback] = useState<FeedbackType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'data-points' | 'ai-analysis' | 'feedback'>('overview');
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadValidation();
-      loadFeedback();
     }
   }, [id]);
 
   const loadValidation = async () => {
     if (!id) return;
-    
+
     try {
       setLoading(true);
       const response = await validationService.getValidation(id);
       setValidation(response.validation);
     } catch (error) {
+      console.error('Erro ao carregar validação:', error);
       toast.error('Erro ao carregar validação');
-      navigate('/admin/validations');
+      navigate('/dashboard/validations');
     } finally {
       setLoading(false);
     }
   };
 
-  const loadFeedback = async () => {
-    if (!id) return;
-    
-    try {
-      const response = await validationService.getValidationFeedback(id);
-      setFeedback(response.data);
-    } catch (error) {
-      console.error('Erro ao carregar feedback:', error);
-    }
-  };
+  const handleStatusUpdate = async (newStatus: 'APPROVED' | 'REJECTED') => {
+    if (!id || !validation) return;
 
-  const handleDataPointsUpdate = async (dataPoints: any[]) => {
-    if (!id) return;
-    
-    setSaving(true);
+    setUpdating(true);
     try {
-      const response = await validationService.updateValidationDataPoints(id, dataPoints);
-      setValidation(response.data);
-      toast.success('Pontos de dados atualizados!');
-    } catch (error) {
-      toast.error('Erro ao atualizar pontos de dados');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleStatusUpdate = async (newStatus: string) => {
-    if (!id) return;
-    
-    setSaving(true);
-    try {
-      const response = await validationService.updateValidation(id, { status: newStatus as any });
+      const response = await validationService.updateValidation(id, { status: newStatus });
       setValidation(response.validation);
-      toast.success('Status atualizado!');
+      toast.success(`Validação ${newStatus === 'APPROVED' ? 'aprovada' : 'rejeitada'} com sucesso!`);
     } catch (error) {
+      console.error('Erro ao atualizar status:', error);
       toast.error('Erro ao atualizar status');
     } finally {
-      setSaving(false);
+      setUpdating(false);
     }
-  };
-
-  const handleSubmitFeedback = async (feedbackData: Omit<FeedbackType, 'id' | 'createdAt' | 'status'>) => {
-    if (!id) return;
-    
-    const response = await validationService.submitValidationFeedback(id, {
-      ...feedbackData,
-      userId: user?.id || '',
-      userName: user?.name
-    });
-    
-    setFeedback([...feedback, response.data]);
-    await loadFeedback();
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="loading-spinner w-8 h-8"></div>
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Carregando validação...</p>
+        </div>
       </div>
     );
   }
 
   if (!validation) {
-    return null;
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">Validação não encontrada</p>
+        <button
+          onClick={() => navigate('/dashboard/validations')}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Voltar para Validações
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -114,255 +82,206 @@ export const ValidationReviewPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <button
-              onClick={() => navigate('/admin/validations')}
-              className="mr-4 p-2 hover:bg-gray-100 rounded-lg"
+              onClick={() => navigate('/dashboard/validations')}
+              className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Revisar Validação</h1>
               <p className="text-gray-600 mt-1">
-                {validation.product?.name} - {validation.product?.brand}
+                {validation.product?.name || 'Produto'} - {validation.product?.brand || 'Marca'}
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
-            {validation.type === 'AUTOMATED' && (
-              <div className="flex items-center text-blue-600">
-                <Bot className="w-5 h-5 mr-2" />
-                <span className="text-sm font-medium">Validação Automatizada</span>
-              </div>
+            {validation.status !== 'APPROVED' && (
+              <button
+                onClick={() => handleStatusUpdate('APPROVED')}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                disabled={updating}
+              >
+                <Check className="w-4 h-4 mr-1 inline" />
+                Aprovar
+              </button>
             )}
-            {validation.confidence !== undefined && (
-              <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">{validation.confidence}%</p>
-                <p className="text-xs text-gray-600">Confiança</p>
-              </div>
+            {validation.status !== 'REJECTED' && (
+              <button
+                onClick={() => handleStatusUpdate('REJECTED')}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                disabled={updating}
+              >
+                <X className="w-4 h-4 mr-1 inline" />
+                Rejeitar
+              </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'overview'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Visão Geral
-          </button>
-          <button
-            onClick={() => setActiveTab('data-points')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'data-points'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Pontos de Dados
-            {validation.dataPoints && validation.dataPoints.length > 0 && (
-              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                {validation.dataPoints.length}
+      {/* Status Card */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Status da Validação</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <p className="text-sm text-gray-600">Status Atual</p>
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ${
+              validation.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+              validation.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
+              validation.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-blue-100 text-blue-800'
+            }`}>
+              {validation.status === 'APPROVED' ? 'Aprovado' :
+               validation.status === 'REJECTED' ? 'Rejeitado' :
+               validation.status === 'PENDING' ? 'Pendente' : validation.status}
+            </span>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-600">Tipo de Validação</p>
+            <p className="text-gray-900 mt-1">{validation.type || 'MANUAL'}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-600">Data de Criação</p>
+            <p className="text-gray-900 mt-1">
+              {new Date(validation.createdAt).toLocaleDateString('pt-BR')}
+            </p>
+          </div>
+        </div>
+
+        {validation.validatedAt && (
+          <div className="mt-4 p-3 bg-green-50 rounded-lg">
+            <div className="flex items-center">
+              <Check className="w-5 h-5 text-green-600 mr-2" />
+              <span className="text-sm text-green-800">
+                Validado em {new Date(validation.validatedAt).toLocaleDateString('pt-BR')} às {new Date(validation.validatedAt).toLocaleTimeString('pt-BR')}
               </span>
-            )}
-          </button>
-          {(validation.type === 'AUTOMATED' || validation.type === 'HYBRID') && (
-            <button
-              onClick={() => setActiveTab('ai-analysis')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'ai-analysis'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <Bot className="w-4 h-4 inline-block mr-1" />
-              Análise IA
-            </button>
-          )}
-          <button
-            onClick={() => setActiveTab('feedback')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'feedback'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Feedback
-            {feedback.length > 0 && (
-              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                {feedback.length}
-              </span>
-            )}
-          </button>
-        </nav>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Content */}
-      {activeTab === 'overview' && (
-        <div className="space-y-6">
-          {/* Status and Actions */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Status e Ações</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-sm text-gray-600 mb-2">Status Atual</p>
-                <div className="flex items-center gap-3">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                    validation.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                    validation.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                    validation.status === 'PARTIAL' ? 'bg-orange-100 text-orange-800' :
-                    validation.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {validation.status}
-                  </span>
-                  {validation.validatedAt && (
-                    <span className="text-sm text-gray-500">
-                      Validado em {new Date(validation.validatedAt).toLocaleDateString('pt-BR')}
-                    </span>
-                  )}
-                </div>
-              </div>
+      {/* Product Information */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Informações do Produto</h3>
 
-              <div>
-                <p className="text-sm text-gray-600 mb-2">Ações Rápidas</p>
-                <div className="flex gap-2">
-                  {validation.status !== 'APPROVED' && (
-                    <button
-                      onClick={() => handleStatusUpdate('APPROVED')}
-                      className="btn btn-success btn-sm"
-                      disabled={saving}
-                    >
-                      <Check className="w-4 h-4 mr-1" />
-                      Aprovar
-                    </button>
-                  )}
-                  {validation.status !== 'REJECTED' && (
-                    <button
-                      onClick={() => handleStatusUpdate('REJECTED')}
-                      className="btn btn-danger btn-sm"
-                      disabled={saving}
-                    >
-                      <X className="w-4 h-4 mr-1" />
-                      Rejeitar
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {validation.summary && (
-              <div className="mt-6">
-                <p className="text-sm text-gray-600 mb-2">Resumo</p>
-                <p className="text-gray-900">{validation.summary}</p>
-              </div>
-            )}
-
-            {validation.notes && (
-              <div className="mt-4">
-                <p className="text-sm text-gray-600 mb-2">Observações</p>
-                <p className="text-gray-700">{validation.notes}</p>
-              </div>
-            )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm text-gray-600">Nome do Produto</p>
+            <p className="text-gray-900 font-medium">{validation.product?.name || 'N/A'}</p>
           </div>
 
-          {/* Product Info */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Informações do Produto</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-600">Nome</p>
-                <p className="text-gray-900">{validation.product?.name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Marca</p>
-                <p className="text-gray-900">{validation.product?.brand}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">SKU</p>
-                <p className="text-gray-900">{validation.product?.sku}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Categoria</p>
-                <p className="text-gray-900">{validation.product?.category}</p>
-              </div>
-            </div>
-
-            {validation.product?.claims && (
-              <div className="mt-4">
-                <p className="text-sm text-gray-600 mb-2">Claims</p>
-                <div className="flex flex-wrap gap-2">
-                  {validation.product.claims.split(',').map((claim, index) => (
-                    <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {claim.trim()}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+          <div>
+            <p className="text-sm text-gray-600">Marca</p>
+            <p className="text-gray-900 font-medium">{validation.product?.brand || 'N/A'}</p>
           </div>
 
-          {/* Report Info */}
-          {validation.report && (
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Relatório Laboratorial</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Laboratório</p>
-                  <p className="text-gray-900">{validation.report.laboratory?.name}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Acreditação</p>
-                  <p className="text-gray-900">{validation.report.laboratory?.accreditation}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Tipo de Análise</p>
-                  <p className="text-gray-900">{validation.report.analysisType}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Data do Relatório</p>
-                  <p className="text-gray-900">
-                    {new Date(validation.report.createdAt).toLocaleDateString('pt-BR')}
-                  </p>
-                </div>
+          <div>
+            <p className="text-sm text-gray-600">SKU</p>
+            <p className="text-gray-900 font-medium">{validation.product?.sku || 'N/A'}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-600">Categoria</p>
+            <p className="text-gray-900 font-medium">{validation.product?.category || 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Validation Details */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Detalhes da Validação</h3>
+
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm text-gray-600">ID da Validação</p>
+            <p className="text-gray-900 font-mono text-sm">{validation.id}</p>
+          </div>
+
+          {validation.summary && (
+            <div>
+              <p className="text-sm text-gray-600">Resumo</p>
+              <p className="text-gray-900">{validation.summary}</p>
+            </div>
+          )}
+
+          {validation.notes && (
+            <div>
+              <p className="text-sm text-gray-600">Observações</p>
+              <p className="text-gray-700">{validation.notes}</p>
+            </div>
+          )}
+
+          {validation.laboratory && (
+            <div>
+              <p className="text-sm text-gray-600">Laboratório</p>
+              <p className="text-gray-900">{validation.laboratory}</p>
+            </div>
+          )}
+
+          {validation.validator && (
+            <div>
+              <p className="text-sm text-gray-600">Validador</p>
+              <div className="flex items-center mt-1">
+                <User className="w-4 h-4 text-gray-400 mr-2" />
+                <p className="text-gray-900">{validation.validator}</p>
               </div>
             </div>
           )}
         </div>
-      )}
+      </div>
 
-      {activeTab === 'data-points' && validation.dataPoints && (
-        <DataPointsReview
-          dataPoints={validation.dataPoints}
-          onUpdate={handleDataPointsUpdate}
-          readOnly={validation.status === 'APPROVED'}
-        />
-      )}
+      {/* Timeline */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Timeline da Validação</h3>
 
-      {activeTab === 'ai-analysis' && validation.automatedAnalysis && (
-        <AutomatedValidationStatus
-          validation={validation}
-          analysis={validation.automatedAnalysis}
-        />
-      )}
+        <div className="space-y-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <Clock className="w-4 h-4 text-blue-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-900">Validação Criada</p>
+              <p className="text-sm text-gray-600">
+                {new Date(validation.createdAt).toLocaleString('pt-BR')}
+              </p>
+            </div>
+          </div>
 
-      {activeTab === 'feedback' && (
-        <ValidationFeedbackComponent
-          validationId={id!}
-          feedback={feedback}
-          onSubmitFeedback={handleSubmitFeedback}
-          currentUserId={user?.id}
-        />
-      )}
+          {validation.requestedAt && (
+            <div className="flex items-center">
+              <div className="flex-shrink-0 w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                <Clock className="w-4 h-4 text-yellow-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-900">Validação Solicitada</p>
+                <p className="text-sm text-gray-600">
+                  {new Date(validation.requestedAt).toLocaleString('pt-BR')}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {validation.validatedAt && (
+            <div className="flex items-center">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <Check className="w-4 h-4 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-900">Validação Concluída</p>
+                <p className="text-sm text-gray-600">
+                  {new Date(validation.validatedAt).toLocaleString('pt-BR')}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
+
+export default ValidationReviewPage;

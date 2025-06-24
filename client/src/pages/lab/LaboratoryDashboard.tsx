@@ -40,32 +40,38 @@ export default function LaboratoryDashboard() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Buscar estatísticas do laboratório
-      const [reportsRes, validationsRes] = await Promise.all([
-        api.get('/api/reports?limit=5'),
-        api.get('/api/validations/queue')
-      ]);
 
-      const reports = reportsRes.data.reports || [];
-      const validations = validationsRes.data.validations || [];
-      
+      // Buscar estatísticas do laboratório usando endpoints corretos
+      const validationsRes = await api.get('/validations');
+      const validations = validationsRes.data.data || [];
+
       // Calcular estatísticas
       const today = new Date().toDateString();
-      const completedToday = reports.filter((r: any) => 
-        new Date(r.createdAt).toDateString() === today
+      const completedToday = validations.filter((v: any) =>
+        v.status === 'APPROVED' && new Date(v.createdAt).toDateString() === today
       ).length;
-      
+
       const totalValidations = validations.length;
       const rejectedValidations = validations.filter((v: any) => v.status === 'REJECTED').length;
       const rejectionRate = totalValidations > 0 ? (rejectedValidations / totalValidations) * 100 : 0;
 
+      // Simular relatórios recentes baseados nas validações aprovadas
+      const recentReports = validations
+        .filter((v: any) => v.status === 'APPROVED')
+        .slice(0, 5)
+        .map((v: any) => ({
+          id: v.id,
+          product: { name: v.productName },
+          createdAt: v.createdAt,
+          validations: [{ status: v.status }]
+        }));
+
       setStats({
-        totalReports: reportsRes.data.pagination?.total || 0,
+        totalReports: validations.filter((v: any) => v.status === 'APPROVED').length,
         pendingValidations: validations.filter((v: any) => v.status === 'PENDING').length,
         completedToday,
         rejectionRate: Math.round(rejectionRate),
-        recentReports: reports,
+        recentReports,
         pendingTasks: validations.filter((v: any) => v.status === 'PENDING').slice(0, 5)
       });
     } catch (err: any) {
@@ -215,7 +221,7 @@ export default function LaboratoryDashboard() {
                     <Clock className="h-5 w-5 text-yellow-600" />
                     <div>
                       <p className="font-medium text-gray-900">
-                        {task.product?.name || 'Produto'}
+                        {task.productName || task.product?.name || 'Produto'}
                       </p>
                       <p className="text-sm text-gray-600">
                         Solicitado em {formatDate(task.createdAt)}

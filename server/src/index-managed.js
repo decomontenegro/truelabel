@@ -28,6 +28,9 @@ app.use(cors({
     const allowedOrigins = [
       'http://localhost:3001',
       'http://localhost:3000',
+      'http://localhost:9101',
+      'http://localhost:9102',
+      'http://localhost:5173',
       'https://truelabel.vercel.app'
     ];
 
@@ -252,13 +255,34 @@ let validationsStorage = [
     id: '1',
     productId: '1',
     productName: 'Produto Exemplo',
-    type: 'NUTRITIONAL_ANALYSIS',
-    status: 'VALIDATED',
+    product: {
+      id: '1',
+      name: 'Produto Exemplo',
+      brand: 'Marca Exemplo',
+      sku: 'SKU-001',
+      category: 'Alimentos',
+      claims: 'Orgânico, Sem Glúten'
+    },
+    type: 'MANUAL',
+    status: 'VALIDATED', // Backend format
+    claimsValidated: {
+      'Orgânico': { validated: true, notes: 'Certificado válido' },
+      'Sem Glúten': { validated: true, notes: 'Análise confirmada' }
+    },
+    summary: 'Produto validado com sucesso',
+    notes: 'Todos os claims foram verificados',
+    confidence: 95,
+    dataPoints: [],
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     requestedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     validatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     expiresAt: new Date(Date.now() + 358 * 24 * 60 * 60 * 1000).toISOString(),
     laboratory: 'Lab Exemplo',
-    validator: 'Analista Responsável'
+    validator: 'Analista Responsável',
+    user: {
+      id: '1',
+      name: 'Analista Responsável'
+    }
   }
 ];
 
@@ -288,9 +312,21 @@ app.get('/products', authenticate, async (req, res) => {
     const endIndex = startIndex + parseInt(limit);
     const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
+    // Convert backend status to frontend status for response
+    const normalizedProducts = paginatedProducts.map(product => {
+      const normalizedProduct = { ...product };
+
+      // Convert VALIDATED back to APPROVED for frontend compatibility
+      if (product.status === 'VALIDATED') {
+        normalizedProduct.status = 'APPROVED';
+      }
+
+      return normalizedProduct;
+    });
+
     const response = {
       success: true,
-      products: paginatedProducts,
+      products: normalizedProducts,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -369,9 +405,17 @@ app.get('/products/:id', authenticate, async (req, res) => {
       });
     }
 
+    // Convert backend status to frontend status for response
+    const normalizedProduct = { ...product };
+
+    // Convert VALIDATED back to APPROVED for frontend compatibility
+    if (product.status === 'VALIDATED') {
+      normalizedProduct.status = 'APPROVED';
+    }
+
     const response = {
       success: true,
-      product
+      product: normalizedProduct
     };
 
     console.log(`🔍 Product found: ${product.name} (ID: ${id})`);
@@ -557,17 +601,220 @@ app.post('/product-seals', authenticate, async (req, res) => {
 // VALIDATIONS ROUTES
 // ==========================================
 
+// GET /validations/expiring - Get expiring validations (MUST BE BEFORE /validations/:id)
+app.get('/validations/expiring', authenticate, async (req, res) => {
+  try {
+    const { days = 30 } = req.query;
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + parseInt(days));
+
+    // Filter validations that expire within the specified days
+    const expiringValidations = validationsStorage.filter(validation => {
+      if (!validation.expiresAt) return false;
+      const expireDate = new Date(validation.expiresAt);
+      return expireDate <= expirationDate && expireDate > new Date();
+    });
+
+    const response = {
+      success: true,
+      data: expiringValidations.map(validation => ({
+        id: validation.id,
+        productId: validation.productId,
+        productName: validation.productName,
+        expiresAt: validation.expiresAt,
+        daysUntilExpiration: Math.ceil((new Date(validation.expiresAt) - new Date()) / (1000 * 60 * 60 * 24)),
+        status: validation.status,
+        laboratory: validation.laboratory
+      })),
+      count: expiringValidations.length
+    };
+
+    console.log(`📅 Found ${expiringValidations.length} validations expiring in ${days} days`);
+    res.json(response);
+
+  } catch (error) {
+    console.error('Error in getExpiringValidations:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /validations/revalidation-requests - Get revalidation requests (MUST BE BEFORE /validations/:id)
+app.get('/validations/revalidation-requests', authenticate, async (req, res) => {
+  try {
+    // Mock revalidation requests - in real app, these would be stored separately
+    const revalidationRequests = validationsStorage
+      .filter(v => v.status === 'APPROVED')
+      .slice(0, 3)
+      .map(validation => ({
+        id: `revalidation_${validation.id}`,
+        originalValidationId: validation.id,
+        productId: validation.productId,
+        productName: validation.productName,
+        requestedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        reason: 'Formula change detected',
+        priority: Math.random() > 0.5 ? 'high' : 'medium',
+        status: 'pending'
+      }));
+
+    const response = {
+      success: true,
+      data: revalidationRequests,
+      count: revalidationRequests.length
+    };
+
+    console.log(`🔄 Found ${revalidationRequests.length} revalidation requests`);
+    res.json(response);
+
+  } catch (error) {
+    console.error('Error in getRevalidationRequests:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /validations/formula-change-alerts - Get formula change alerts (MUST BE BEFORE /validations/:id)
+app.get('/validations/formula-change-alerts', authenticate, async (req, res) => {
+  try {
+    // Mock formula change alerts - in real app, these would be detected automatically
+    const formulaChangeAlerts = productsStorage
+      .filter(p => p.status === 'VALIDATED')
+      .slice(0, 2)
+      .map(product => ({
+        id: `formula_alert_${product.id}`,
+        productId: product.id,
+        productName: product.name,
+        brand: product.brand,
+        detectedAt: new Date(Date.now() - Math.random() * 3 * 24 * 60 * 60 * 1000).toISOString(),
+        changeType: Math.random() > 0.5 ? 'ingredient_addition' : 'ingredient_removal',
+        severity: Math.random() > 0.7 ? 'high' : 'medium',
+        description: 'Potential formula change detected in product composition',
+        requiresRevalidation: true,
+        status: 'pending_review'
+      }));
+
+    const response = {
+      success: true,
+      data: formulaChangeAlerts,
+      count: formulaChangeAlerts.length
+    };
+
+    console.log(`⚠️ Found ${formulaChangeAlerts.length} formula change alerts`);
+    res.json(response);
+
+  } catch (error) {
+    console.error('Error in getFormulaChangeAlerts:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /validations/lifecycle-metrics - Get validation lifecycle metrics (MUST BE BEFORE /validations/:id)
+app.get('/validations/lifecycle-metrics', authenticate, async (req, res) => {
+  try {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // Calculate metrics
+    const totalValidations = validationsStorage.length;
+    const recentValidations = validationsStorage.filter(v => new Date(v.createdAt) > thirtyDaysAgo);
+    const approvedValidations = validationsStorage.filter(v => v.status === 'APPROVED');
+    const pendingValidations = validationsStorage.filter(v => v.status === 'PENDING');
+    const rejectedValidations = validationsStorage.filter(v => v.status === 'REJECTED');
+
+    // Calculate average processing time (mock data)
+    const avgProcessingTime = 2.5; // days
+
+    // Calculate expiring validations
+    const nextThirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const expiringValidations = validationsStorage.filter(v => {
+      if (!v.expiresAt) return false;
+      const expireDate = new Date(v.expiresAt);
+      return expireDate <= nextThirtyDays && expireDate > now;
+    });
+
+    const metrics = {
+      totalValidations,
+      recentValidations: recentValidations.length,
+      approvedValidations: approvedValidations.length,
+      pendingValidations: pendingValidations.length,
+      rejectedValidations: rejectedValidations.length,
+      approvalRate: totalValidations > 0 ? (approvedValidations.length / totalValidations * 100).toFixed(1) : 0,
+      avgProcessingTime,
+      expiringValidations: expiringValidations.length,
+      monthlyTrend: {
+        validationsCreated: recentValidations.length,
+        validationsApproved: recentValidations.filter(v => v.status === 'APPROVED').length,
+        validationsRejected: recentValidations.filter(v => v.status === 'REJECTED').length
+      }
+    };
+
+    const response = {
+      success: true,
+      data: metrics
+    };
+
+    console.log(`📊 Lifecycle metrics calculated: ${totalValidations} total validations`);
+    res.json(response);
+
+  } catch (error) {
+    console.error('Error in getLifecycleMetrics:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /validations/queue - Get validation queue (MUST BE BEFORE /validations/:id)
+app.get('/validations/queue', authenticate, async (req, res) => {
+  try {
+    const response = {
+      success: true,
+      data: [],
+      total: 0
+    };
+    res.json(response);
+  } catch (error) {
+    console.error('Error in validationsQueue:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /validations/metrics - Get validation metrics (MUST BE BEFORE /validations/:id)
+app.get('/validations/metrics', authenticate, async (req, res) => {
+  try {
+    const response = {
+      success: true,
+      totalValidations: 1,
+      automatedPercentage: 85,
+      averageProcessingTime: 24,
+      accuracyRate: 98.5,
+      revalidationRate: 5.2,
+      byStatus: { VALIDATED: 1, PENDING: 0, REJECTED: 0 },
+      byType: { AUTOMATIC: 1, MANUAL: 0 },
+      trendsLast30Days: []
+    };
+    res.json(response);
+  } catch (error) {
+    console.error('Error in validationsMetrics:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // GET /validations - List validations
 app.get('/validations', authenticate, async (req, res) => {
   try {
     const { productId, status, page = 1, limit = 10 } = req.query;
+    
+    console.log('🔍 GET /validations called with params:', { productId, status, page, limit });
+    console.log('📊 Total validations in storage:', validationsStorage.length);
 
     // Use persistent storage instead of static mock data
     let filteredValidations = [...validationsStorage];
 
-    // Apply filters
+    // Apply filters - NORMALIZE STATUS FOR COMPATIBILITY
     if (status) {
-      filteredValidations = filteredValidations.filter(v => v.status === status);
+      // Convert frontend status to backend status for filtering
+      let filterStatus = status;
+      if (status === 'APPROVED') {
+        filterStatus = 'VALIDATED';
+      }
+      filteredValidations = filteredValidations.filter(v => v.status === filterStatus);
     }
     if (productId) {
       filteredValidations = filteredValidations.filter(v => v.productId === productId);
@@ -578,10 +825,49 @@ app.get('/validations', authenticate, async (req, res) => {
     const endIndex = startIndex + parseInt(limit);
     const paginatedValidations = filteredValidations.slice(startIndex, endIndex);
 
-    console.log(`✅ Validations API: Returning ${paginatedValidations.length} validations (total: ${filteredValidations.length})`);
+    // Convert backend status to frontend status for response
+    const normalizedValidations = paginatedValidations.map(validation => {
+      const normalizedValidation = { ...validation };
+      
+      // Convert VALIDATED back to APPROVED for frontend compatibility
+      if (validation.status === 'VALIDATED') {
+        normalizedValidation.status = 'APPROVED';
+      }
+      
+      // Ensure product object exists
+      if (!normalizedValidation.product && normalizedValidation.productId) {
+        const product = productsStorage.find(p => p.id === normalizedValidation.productId);
+        if (product) {
+          normalizedValidation.product = {
+            id: product.id,
+            name: product.name,
+            brand: product.brand,
+            sku: product.sku,
+            category: product.category,
+            claims: product.claims
+          };
+        }
+      }
+      
+      // Ensure user object exists
+      if (!normalizedValidation.user) {
+        normalizedValidation.user = {
+          id: '1',
+          name: normalizedValidation.validator || 'Sistema'
+        };
+      }
+      
+      return normalizedValidation;
+    });
+
+    console.log(`✅ Validations API: Returning ${normalizedValidations.length} validations (total: ${filteredValidations.length})`);
+    console.log(`   Filter status: ${status} -> ${status === 'APPROVED' ? 'VALIDATED' : status}`);
+    console.log('📋 Validation IDs returned:', normalizedValidations.map(v => `${v.id} (${v.status})`).join(', '));
+    
     res.json({
       success: true,
-      data: paginatedValidations,
+      data: normalizedValidations,
+      validations: normalizedValidations, // Add both formats for compatibility
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -595,10 +881,78 @@ app.get('/validations', authenticate, async (req, res) => {
   }
 });
 
+// GET /validations/:id - Get validation by ID
+app.get('/validations/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const validation = validationsStorage.find(v => v.id === id);
+    if (!validation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Validation not found'
+      });
+    }
+
+    // Normalize validation for frontend
+    const normalizedValidation = { ...validation };
+    
+    // Convert VALIDATED back to APPROVED for frontend compatibility
+    if (validation.status === 'VALIDATED') {
+      normalizedValidation.status = 'APPROVED';
+    }
+    
+    // Ensure product object exists
+    if (!normalizedValidation.product && normalizedValidation.productId) {
+      const product = productsStorage.find(p => p.id === normalizedValidation.productId);
+      if (product) {
+        normalizedValidation.product = {
+          id: product.id,
+          name: product.name,
+          brand: product.brand,
+          sku: product.sku,
+          category: product.category,
+          claims: product.claims
+        };
+      }
+    }
+    
+    // Ensure user object exists
+    if (!normalizedValidation.user) {
+      normalizedValidation.user = {
+        id: '1',
+        name: normalizedValidation.validator || 'Sistema'
+      };
+    }
+
+    console.log(`✅ Validation found: ${id} (status: ${validation.status} -> ${normalizedValidation.status})`);
+    res.json({
+      success: true,
+      data: normalizedValidation,
+      validation: normalizedValidation // Add both formats for compatibility
+    });
+  } catch (error) {
+    console.error('Error in validationsGet:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // POST /validations - Create new validation request
 app.post('/validations', authenticate, async (req, res) => {
   try {
-    const { productId, type, claims, nutritionalInfo } = req.body;
+    const { 
+      productId, 
+      reportId,
+      type, 
+      status,
+      claimsValidated,
+      summary,
+      notes,
+      confidence,
+      dataPoints,
+      claims, 
+      nutritionalInfo 
+    } = req.body;
 
     if (!productId) {
       return res.status(400).json({
@@ -607,34 +961,103 @@ app.post('/validations', authenticate, async (req, res) => {
       });
     }
 
-    // Find the product to get its name
+    // Find the product to get complete info
     const product = productsStorage.find(p => p.id === productId);
-    const productName = product ? product.name : 'Produto Desconhecido';
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    // Check if validation already exists for this product
+    const existingValidation = validationsStorage.find(v => v.productId === productId);
+    if (existingValidation) {
+      return res.status(409).json({
+        success: false,
+        message: 'Validation already exists for this product. Use PUT /validations/:id to update it.',
+        existingValidation: {
+          id: existingValidation.id,
+          status: existingValidation.status,
+          createdAt: existingValidation.createdAt
+        },
+        suggestion: {
+          method: 'PUT',
+          url: `/validations/${existingValidation.id}`,
+          description: 'Update the existing validation instead of creating a new one'
+        }
+      });
+    }
+
+    // Normalize status from frontend to backend format
+    let normalizedStatus = status || 'PENDING';
+    if (status === 'APPROVED') {
+      normalizedStatus = 'VALIDATED';
+    }
 
     const newValidation = {
       id: Math.random().toString(36).substr(2, 9),
       productId,
-      productName,
-      type: type || 'NUTRITIONAL_ANALYSIS',
-      status: 'PENDING',
+      productName: product.name,
+      // Complete product object for frontend
+      product: {
+        id: product.id,
+        name: product.name,
+        brand: product.brand,
+        sku: product.sku,
+        category: product.category,
+        claims: product.claims
+      },
+      reportId: reportId || null,
+      type: type || 'MANUAL',
+      status: normalizedStatus,
+      claimsValidated: claimsValidated || {},
+      summary: summary || '',
+      notes: notes || '',
+      confidence: confidence || null,
+      dataPoints: dataPoints || [],
       claims: claims || [],
       nutritionalInfo: nutritionalInfo || {},
+      createdAt: new Date().toISOString(),
       requestedAt: new Date().toISOString(),
-      validatedAt: null,
-      expiresAt: null,
+      validatedAt: normalizedStatus === 'VALIDATED' ? new Date().toISOString() : null,
+      expiresAt: normalizedStatus === 'VALIDATED' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : null,
       laboratory: null,
-      validator: null
+      validator: req.user.name || 'Sistema',
+      user: {
+        id: req.user.id,
+        name: req.user.name || 'Admin User'
+      }
     };
 
     // ✅ SAVE TO PERSISTENT STORAGE
     validationsStorage.push(newValidation);
-    console.log(`✅ Validation created and saved: ${newValidation.type} for product ${productName} (ID: ${productId})`);
+    
+    // ✅ UPDATE PRODUCT STATUS IF VALIDATION IS APPROVED
+    if (normalizedStatus === 'VALIDATED') {
+      const productIndex = productsStorage.findIndex(p => p.id === productId);
+      if (productIndex !== -1) {
+        productsStorage[productIndex].status = 'VALIDATED';
+        productsStorage[productIndex].validatedAt = new Date().toISOString();
+        productsStorage[productIndex].updatedAt = new Date().toISOString();
+        console.log(`✅ Product status updated on creation: ${productId} -> VALIDATED`);
+      }
+    }
+    
+    console.log(`✅ Validation created and saved: ${newValidation.type} for product ${product.name} (ID: ${productId})`);
     console.log(`📋 Total validations in storage: ${validationsStorage.length}`);
 
+    // Convert status back to frontend format before sending response
+    const responseValidation = { ...newValidation };
+    if (responseValidation.status === 'VALIDATED') {
+      responseValidation.status = 'APPROVED';
+    }
+    
     res.json({
       success: true,
-      data: newValidation,
-      message: 'Solicitação de validação criada com sucesso'
+      data: responseValidation,
+      validation: responseValidation, // Add both formats for compatibility
+      message: 'Validação criada com sucesso'
     });
   } catch (error) {
     console.error('Error in validationsCreate:', error);
@@ -700,14 +1123,55 @@ app.put('/validations/:id', authenticate, async (req, res) => {
 
     console.log(`✅ Validation updated: ${id} -> ${normalizedStatus} (original: ${status})`);
 
+    // Convert status back to frontend format before sending response
+    const responseValidation = { ...updatedValidation };
+    if (responseValidation.status === 'VALIDATED') {
+      responseValidation.status = 'APPROVED';
+    }
+    
     res.json({
       success: true,
-      data: updatedValidation,
-      validation: updatedValidation, // ✅ Add both formats for compatibility
+      data: responseValidation,
+      validation: responseValidation, // ✅ Add both formats for compatibility
       message: 'Validação atualizada com sucesso'
     });
   } catch (error) {
     console.error('Error in validationsUpdate:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// DELETE /validations/:id - Delete validation
+app.delete('/validations/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find validation
+    const validationIndex = validationsStorage.findIndex(v => v.id === id);
+
+    if (validationIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Validation not found'
+      });
+    }
+
+    const validation = validationsStorage[validationIndex];
+
+    // Remove validation
+    validationsStorage.splice(validationIndex, 1);
+
+    console.log(`🗑️ Validation deleted: ${validation.productName} (ID: ${id})`);
+    console.log(`📋 Total validations in storage: ${validationsStorage.length}`);
+
+    res.json({
+      success: true,
+      message: 'Validation deleted successfully',
+      data: validation
+    });
+
+  } catch (error) {
+    console.error('Error in deleteValidation:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
@@ -748,79 +1212,13 @@ app.get('/validations/metrics', authenticate, async (req, res) => {
   }
 });
 
-// GET /validations/expiring - Get expiring validations
-app.get('/validations/expiring', authenticate, async (req, res) => {
-  try {
-    const response = {
-      success: true,
-      data: [],
-      total: 0
-    };
-    res.json(response);
-  } catch (error) {
-    console.error('Error in validationsExpiring:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
 
-// GET /validations/revalidation-requests - Get revalidation requests
-app.get('/validations/revalidation-requests', authenticate, async (req, res) => {
-  try {
-    const response = {
-      success: true,
-      data: [],
-      total: 0
-    };
-    res.json(response);
-  } catch (error) {
-    console.error('Error in validationsRevalidationRequests:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
 
-// GET /validations/formula-change-alerts - Get formula change alerts
-app.get('/validations/formula-change-alerts', authenticate, async (req, res) => {
-  try {
-    const response = {
-      success: true,
-      data: [],
-      total: 0
-    };
-    res.json(response);
-  } catch (error) {
-    console.error('Error in validationsFormulaChangeAlerts:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
 
-// GET /validations/lifecycle-metrics - Get lifecycle metrics
-app.get('/validations/lifecycle-metrics', authenticate, async (req, res) => {
-  try {
-    const response = {
-      success: true,
-      metrics: {
-        activeValidations: 15,
-        expiringValidations: 3,
-        suspendedQRCodes: 1,
-        pendingRevalidations: 2,
-        averageValidityPeriod: 365,
-        revalidationSuccessRate: 94.5,
-        averageRevalidationTime: 7,
-        formulaChangeCount: 2
-      },
-      previousPeriodMetrics: {
-        activeValidations: 12,
-        expiringValidations: 5,
-        suspendedQRCodes: 2,
-        pendingRevalidations: 3
-      }
-    };
-    res.json(response);
-  } catch (error) {
-    console.error('Error in validationsLifecycleMetrics:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
+
+
+
+
 
 // ==========================================
 // CERTIFICATIONS ROUTES
@@ -926,6 +1324,275 @@ app.post('/reports', authenticate, async (req, res) => {
 });
 
 // ==========================================
+// TRACEABILITY ROUTES
+// ==========================================
+
+// GET /traceability/products/:id/events - Get product events
+app.get('/traceability/products/:id/events', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const response = {
+      success: true,
+      data: [
+        {
+          id: '1',
+          type: 'HARVEST',
+          title: 'Colheita dos Ingredientes',
+          description: 'Colheita realizada na fazenda orgânica',
+          timestamp: '2025-06-15T06:00:00.000Z',
+          location: 'Fazenda Vale Verde - MG',
+          temperature: 22,
+          humidity: 65,
+          coordinates: { lat: -19.9167, lng: -43.9345 },
+          metadata: {
+            batchId: 'BATCH001',
+            quantity: '500 kg'
+          }
+        },
+        {
+          id: '2',
+          type: 'PROCESSING',
+          title: 'Processamento Industrial',
+          description: 'Processamento e transformação dos ingredientes',
+          timestamp: '2025-06-20T08:00:00.000Z',
+          location: 'Fábrica Principal - São Paulo, SP',
+          temperature: 18,
+          humidity: 45,
+          coordinates: { lat: -23.5505, lng: -46.6333 },
+          metadata: {
+            batchId: 'BATCH001',
+            quantity: '1000 unidades'
+          }
+        },
+        {
+          id: '3',
+          type: 'PACKAGING',
+          title: 'Embalagem e Rotulagem',
+          description: 'Embalagem final e aplicação de rótulos',
+          timestamp: '2025-06-21T14:30:00.000Z',
+          location: 'Centro de Embalagem - SP',
+          temperature: 20,
+          humidity: 50,
+          coordinates: { lat: -23.5505, lng: -46.6333 },
+          metadata: {
+            testResults: 'Aprovado',
+            certificate: 'QC-2025-001'
+          }
+        },
+        {
+          id: '4',
+          type: 'SHIPPING',
+          title: 'Expedição para Distribuição',
+          description: 'Produto enviado para centros de distribuição',
+          timestamp: '2025-06-22T10:00:00.000Z',
+          location: 'Centro de Distribuição - SP',
+          temperature: 15,
+          humidity: 40,
+          coordinates: { lat: -23.5505, lng: -46.6333 },
+          metadata: {
+            trackingNumber: 'TRK-2025-001',
+            destination: 'Rede de Varejo'
+          }
+        }
+      ],
+      total: 4
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error in traceabilityEvents:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /traceability/products/:id/suppliers - Get product suppliers
+app.get('/traceability/products/:id/suppliers', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const response = {
+      success: true,
+      data: [
+        {
+          id: '1',
+          name: 'Fornecedor Premium Ltda',
+          type: 'INGREDIENT',
+          location: 'Minas Gerais, Brasil',
+          certifications: ['Orgânico', 'Fair Trade'],
+          contact: 'contato@fornecedorpremium.com.br',
+          suppliedItems: ['Ingrediente Principal', 'Aditivos Naturais']
+        }
+      ],
+      total: 1
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error in traceabilitySuppliers:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /traceability/products/:id/origins - Get product origins
+app.get('/traceability/products/:id/origins', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const response = {
+      success: true,
+      data: {
+        primaryOrigin: {
+          country: 'Brasil',
+          region: 'Minas Gerais',
+          farm: 'Fazenda Orgânica Vale Verde',
+          coordinates: { lat: -19.9167, lng: -43.9345 }
+        },
+        ingredients: [
+          {
+            name: 'Ingrediente Principal',
+            origin: 'Minas Gerais, Brasil',
+            percentage: 85,
+            certifications: ['Orgânico']
+          },
+          {
+            name: 'Aditivos Naturais',
+            origin: 'São Paulo, Brasil',
+            percentage: 15,
+            certifications: ['Natural']
+          }
+        ]
+      }
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error in traceabilityOrigins:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /traceability/products/:id/batches - Get product batches
+app.get('/traceability/products/:id/batches', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const response = {
+      success: true,
+      data: [
+        {
+          id: 'BATCH001',
+          productionDate: '2025-06-20T08:00:00.000Z',
+          expiryDate: '2026-06-20T08:00:00.000Z',
+          quantity: 1000,
+          status: 'ACTIVE',
+          location: 'Estoque Principal',
+          qualityScore: 98.5
+        }
+      ],
+      total: 1
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error in traceabilityBatches:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /traceability/products/:id/route - Get product route
+app.get('/traceability/products/:id/route', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const response = {
+      success: true,
+      data: {
+        steps: [
+          {
+            id: '1',
+            type: 'ORIGIN',
+            location: 'Fazenda Vale Verde - MG',
+            timestamp: '2025-06-15T06:00:00.000Z',
+            description: 'Colheita dos ingredientes'
+          },
+          {
+            id: '2',
+            type: 'PROCESSING',
+            location: 'Fábrica Principal - SP',
+            timestamp: '2025-06-20T08:00:00.000Z',
+            description: 'Processamento e embalagem'
+          },
+          {
+            id: '3',
+            type: 'DISTRIBUTION',
+            location: 'Centro de Distribuição - SP',
+            timestamp: '2025-06-22T10:00:00.000Z',
+            description: 'Preparação para distribuição'
+          }
+        ],
+        totalDistance: 450,
+        estimatedDelivery: '2025-06-25T18:00:00.000Z'
+      }
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error in traceabilityRoute:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /traceability/products/:id/summary - Get traceability summary
+app.get('/traceability/products/:id/summary', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const response = {
+      success: true,
+      data: {
+        totalEvents: 4,
+        uniqueLocations: 3,
+        totalDistance: 450,
+        averageTemperature: 18.75,
+        complianceScore: 95,
+        keyMilestones: [
+          {
+            id: '1',
+            type: 'HARVEST',
+            title: 'Colheita dos Ingredientes',
+            description: 'Colheita realizada na fazenda orgânica',
+            timestamp: '2025-06-15T06:00:00.000Z',
+            location: 'Fazenda Vale Verde - MG'
+          },
+          {
+            id: '2',
+            type: 'PROCESSING',
+            title: 'Processamento Industrial',
+            description: 'Processamento e transformação dos ingredientes',
+            timestamp: '2025-06-20T08:00:00.000Z',
+            location: 'Fábrica Principal - São Paulo, SP'
+          },
+          {
+            id: '4',
+            type: 'SHIPPING',
+            title: 'Expedição para Distribuição',
+            description: 'Produto enviado para centros de distribuição',
+            timestamp: '2025-06-22T10:00:00.000Z',
+            location: 'Centro de Distribuição - SP'
+          }
+        ]
+      }
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error in traceabilitySummary:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// ==========================================
 // SUPPORT ROUTES
 // ==========================================
 
@@ -956,6 +1623,29 @@ app.get('/support', authenticate, async (req, res) => {
   } catch (error) {
     console.error('Error in supportInfo:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// ==========================================
+// DEBUG ROUTES (Development only)
+// ==========================================
+
+app.get('/debug/validations', authenticate, async (req, res) => {
+  try {
+    console.log('🐛 Debug: Validations storage content');
+    res.json({
+      success: true,
+      totalValidations: validationsStorage.length,
+      validations: validationsStorage.map(v => ({
+        id: v.id,
+        productId: v.productId,
+        productName: v.productName,
+        status: v.status,
+        createdAt: v.createdAt
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -1329,6 +2019,9 @@ app.patch('/laboratories/:id/status', authenticate, async (req, res) => {
 // QR ROUTES
 // ==========================================
 
+// In-memory storage for QR code analytics
+let qrAnalytics = [];
+
 // POST /qr/generate - Generate QR code
 app.post('/qr/generate', authenticate, async (req, res) => {
   try {
@@ -1338,19 +2031,59 @@ app.post('/qr/generate', authenticate, async (req, res) => {
       return res.status(400).json({ success: false, message: 'productId is required' });
     }
 
-    const qrCode = {
-      id: Math.random().toString(36).substr(2, 9),
-      productId,
-      code: `QR${Date.now()}${Math.random().toString(36).substr(2, 5)}`,
-      data: data || {},
-      url: `http://localhost:3334/qr/validate/QR${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-    };
+    // Find the product in storage
+    const productIndex = productsStorage.findIndex(p => p.id === productId);
+    if (productIndex === -1) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const product = productsStorage[productIndex];
+
+    // Check if product already has a QR code
+    if (product.qrCode) {
+      console.log(`⚠️  QR Code already exists for product ${product.name}: ${product.qrCode}`);
+
+      // Return existing QR code data
+      const validationUrl = `${req.protocol}://${req.get('host')}/validation/${product.qrCode}`;
+      const qrCodeImage = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(validationUrl)}`;
+
+      return res.json({
+        success: true,
+        qrCode: product.qrCode,
+        validationUrl,
+        qrCodeImage,
+        product: {
+          id: product.id,
+          name: product.name,
+          brand: product.brand,
+          sku: product.sku
+        },
+        message: 'QR Code já existe para este produto'
+      });
+    }
+
+    // Generate new QR code
+    const qrCodeString = `QR${Date.now()}${Math.random().toString(36).substr(2, 5)}`;
+    const validationUrl = `${req.protocol}://${req.get('host')}/validation/${qrCodeString}`;
+    const qrCodeImage = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(validationUrl)}`;
+
+    // Update product with QR code
+    productsStorage[productIndex].qrCode = qrCodeString;
+    productsStorage[productIndex].updatedAt = new Date().toISOString();
+
+    console.log(`✅ QR Code generated and saved for product ${product.name}: ${qrCodeString}`);
 
     const response = {
       success: true,
-      qrCode,
+      qrCode: qrCodeString,
+      validationUrl,
+      qrCodeImage,
+      product: {
+        id: product.id,
+        name: product.name,
+        brand: product.brand,
+        sku: product.sku
+      },
       message: 'QR Code gerado com sucesso'
     };
 
@@ -1361,40 +2094,134 @@ app.post('/qr/generate', authenticate, async (req, res) => {
   }
 });
 
-// GET /qr/validate/:code - Validate QR code
+// GET /qr/validate/:code - Validate QR code (PUBLIC ROUTE)
 app.get('/qr/validate/:code', async (req, res) => {
   try {
     const { code } = req.params;
 
-    // Mock validation - in real app, check database
-    const isValid = code.startsWith('QR');
+    console.log(`🔍 QR Code validation request: ${code}`);
 
-    if (isValid) {
-      const response = {
-        success: true,
-        valid: true,
-        product: {
-          id: '1',
-          name: 'Produto Validado',
-          brand: 'Marca Exemplo',
-          status: 'VALIDATED',
-          validatedAt: new Date().toISOString()
-        },
-        message: 'QR Code válido'
-      };
-      res.json(response);
-    } else {
-      res.status(404).json({
+    // Buscar produto pelo QR code
+    const product = productsStorage.find(p => p.qrCode === code);
+
+    if (!product) {
+      console.log(`❌ QR Code not found: ${code}`);
+      return res.status(404).json({
         success: false,
-        valid: false,
-        message: 'QR Code inválido ou expirado'
+        message: 'QR Code não encontrado ou inválido'
       });
     }
+
+    // Buscar validação do produto
+    const validation = validationsStorage.find(v => v.productId === product.id && v.status === 'APPROVED');
+
+    const response = {
+      success: true,
+      product: {
+        id: product.id,
+        name: product.name,
+        brand: product.brand,
+        sku: product.sku,
+        category: product.category,
+        status: product.status,
+        validatedAt: product.validatedAt,
+        expiresAt: product.expiresAt,
+        claims: product.claims,
+        description: product.description
+      },
+      validation: validation ? {
+        id: validation.id,
+        status: validation.status,
+        validatedAt: validation.validatedAt,
+        laboratory: validation.laboratory,
+        validator: validation.validator,
+        confidence: validation.confidence
+      } : null,
+      qrCode: code,
+      scannedAt: new Date().toISOString()
+    };
+
+    // Registrar acesso para analytics
+    const accessRecord = {
+      id: `access_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      qrCode: code,
+      productId: product.id,
+      productName: product.name,
+      timestamp: new Date().toISOString(),
+      userAgent: req.headers['user-agent'] || 'Unknown',
+      ip: req.ip || req.connection.remoteAddress || 'Unknown',
+      referer: req.headers.referer || null
+    };
+    qrAnalytics.push(accessRecord);
+
+    console.log(`✅ QR Code validation successful for product: ${product.name}`);
+    console.log(`📊 Analytics recorded: ${accessRecord.id}`);
+    res.json(response);
+
   } catch (error) {
     console.error('Error in qrValidate:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
+
+// GET /qr/analytics/:productId - Get QR code analytics
+app.get('/qr/analytics/:productId', authenticate, async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    // Filtrar analytics por produto
+    const productAnalytics = qrAnalytics.filter(a => a.productId === productId);
+
+    // Calcular estatísticas
+    const totalScans = productAnalytics.length;
+    const uniqueIPs = new Set(productAnalytics.map(a => a.ip)).size;
+    const lastScan = productAnalytics.length > 0 ?
+      Math.max(...productAnalytics.map(a => new Date(a.timestamp).getTime())) : null;
+
+    // Agrupar por data
+    const scansByDate = productAnalytics.reduce((acc, scan) => {
+      const date = new Date(scan.timestamp).toISOString().split('T')[0];
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Agrupar por hora (últimas 24h)
+    const now = new Date();
+    const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const recentScans = productAnalytics.filter(a => new Date(a.timestamp) > last24h);
+
+    const scansByHour = recentScans.reduce((acc, scan) => {
+      const hour = new Date(scan.timestamp).getHours();
+      acc[hour] = (acc[hour] || 0) + 1;
+      return acc;
+    }, {});
+
+    const response = {
+      success: true,
+      analytics: {
+        totalScans,
+        uniqueIPs,
+        lastScan: lastScan ? new Date(lastScan).toISOString() : null,
+        scansByDate,
+        scansByHour,
+        recentScans: recentScans.slice(-10).map(scan => ({
+          timestamp: scan.timestamp,
+          userAgent: scan.userAgent,
+          ip: scan.ip.replace(/\d+$/, 'xxx') // Mascarar último octeto do IP
+        }))
+      }
+    };
+
+    console.log(`📊 Analytics requested for product ${productId}: ${totalScans} total scans`);
+    res.json(response);
+
+  } catch (error) {
+    console.error('Error in qrAnalytics:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+
 
 // ==========================================
 // ERROR HANDLING
@@ -1415,7 +2242,25 @@ app.use('*', (req, res) => {
       'GET /products',
       'POST /products',
       'GET /products/:id',
-      'GET /notifications'
+      'GET /notifications',
+      'GET /validations',
+      'GET /validations/:id',
+      'POST /validations',
+      'PUT /validations/:id',
+      'DELETE /validations/:id',
+      'GET /validations/expiring',
+      'GET /validations/revalidation-requests',
+      'GET /validations/formula-change-alerts',
+      'GET /validations/lifecycle-metrics',
+      'POST /qr/generate',
+      'GET /qr/validate/:code',
+      'GET /qr/analytics/:productId',
+      'GET /traceability/products/:id/events',
+      'GET /traceability/products/:id/suppliers',
+      'GET /traceability/products/:id/origins',
+      'GET /traceability/products/:id/batches',
+      'GET /traceability/products/:id/route',
+      'GET /traceability/products/:id/summary'
     ]
   });
 });

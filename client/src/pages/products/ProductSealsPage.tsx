@@ -18,26 +18,40 @@ const getClaimsArray = (claims: string | string[] | null | undefined): string[] 
 };
 
 const ProductSealsPage: React.FC = () => {
+  console.log('🔍 ProductSealsPage: Componente renderizado');
+
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
+  console.log('📦 ProductSealsPage: productId extraído da URL:', productId);
+
   useEffect(() => {
+    console.log('🔍 ProductSealsPage: useEffect executado', { productId });
     if (productId) {
+      console.log('📦 ProductSealsPage: Carregando produto', productId);
       loadProduct();
+    } else {
+      console.error('❌ ProductSealsPage: productId não encontrado');
     }
   }, [productId]);
 
   const loadProduct = async () => {
-    if (!productId) return;
+    if (!productId) {
+      console.error('❌ ProductSealsPage: loadProduct chamado sem productId');
+      return;
+    }
 
     try {
+      console.log('📦 ProductSealsPage: Iniciando carregamento do produto', productId);
       setLoading(true);
       const response = await productService.getProduct(productId);
+      console.log('✅ ProductSealsPage: Produto carregado com sucesso', response);
       setProduct(response.product);
     } catch (error: any) {
-      toast.error('Erro ao carregar produto');
+      console.error('❌ ProductSealsPage: Erro ao carregar produto', error);
+      toast.error(`Erro ao carregar produto: ${error.message || 'Erro desconhecido'}`);
       navigate('/dashboard/products');
     } finally {
       setLoading(false);
