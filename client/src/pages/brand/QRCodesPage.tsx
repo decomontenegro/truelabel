@@ -204,7 +204,7 @@ export const QRCodesPage: React.FC = () => {
             <div>
               <p className="text-sm text-gray-600">Validados</p>
               <p className="text-2xl font-bold text-gray-900">
-                {products.filter(p => p.status === 'VALIDATED').length}
+                {products.filter(p => p.status === 'APPROVED' || p.status === 'VALIDATED').length}
               </p>
             </div>
           </div>
@@ -223,7 +223,7 @@ export const QRCodesPage: React.FC = () => {
                 <p className="text-xs text-gray-500">SKU: {product.sku}</p>
               </div>
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(product.status)}`}>
-                {product.status === 'VALIDATED' && 'Validado'}
+                {(product.status === 'APPROVED' || product.status === 'VALIDATED') && 'Validado'}
                 {product.status === 'PENDING' && 'Pendente'}
                 {product.status === 'REJECTED' && 'Rejeitado'}
               </span>
@@ -280,12 +280,12 @@ export const QRCodesPage: React.FC = () => {
               <div className="text-center py-8">
                 <QrCode className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-sm text-gray-600 mb-4">
-                  {product.status === 'VALIDATED'
+                  {(product.status === 'APPROVED' || product.status === 'VALIDATED')
                     ? 'QR Code não gerado'
                     : 'Produto precisa ser validado primeiro'
                   }
                 </p>
-                {product.status === 'VALIDATED' && (
+                {(product.status === 'APPROVED' || product.status === 'VALIDATED') && (
                   <button
                     onClick={() => generateQRCode(product.id)}
                     disabled={generatingQR === product.id}

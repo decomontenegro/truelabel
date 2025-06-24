@@ -2,19 +2,10 @@
   "version": 2,
   "buildCommand": "cd client && npm ci && npm run build",
   "outputDirectory": "client/dist",
-  "functions": {
-    "server/src/index.ts": {
-      "maxDuration": 30
-    }
-  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/server/src/index.ts"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/client/$1"
+      "destination": "/index.html"
     }
   ],
   "env": {
