@@ -1,0 +1,476 @@
+Truelabel
+Institucional
+Conceito
+A TrueLabel é uma plataforma inovadora que visa transformar a relação entre consumidores, prescritores e marcas CPG (Consumer Packaged Goods) através da validação independente e transparente de informações de produtos. Em um mercado onde a confiança é frequentemente abalada por claims não verificados, a TrueLabel conecta alegações de marketing e dados nutricionais a laudos laboratoriais acreditados, apresentando os resultados de forma clara e acessível.
+Proposta de valor
+Nossa proposta de valor central é restaurar a confiança no mercado CPG através da validação transparente e acessível de informações de produtos, criando um ecossistema onde marcas comprometidas com a qualidade podem se destacar, prescritores podem recomendar com segurança, consumidores podem tomar decisões informadas, e o mercado evolui para um padrão mais elevado de transparência.
+Certificações
+ISO/IEC 17029: Verificação e Validação de Informações
+Verificação e validação de informações
+Certificações SOC 2 / WebTrust
+Controles internos de segurança e confiança
+ISO/IEC 27001:2022
+Gestão de segurança da informação
+Modelo de negócio
+Marketing e vendas
+Estratégia B2C
+Estratégia B2B
+Estratégia B2P
+Benchmark
+Trustpilot
+Stakeholders
+Laboratórios
+Eurofins
+SGS
+SFDK
+Foodchain (alergênicos)
+Food Intelligence
+ITAL
+Prescritores
+Softwares de prescrição
+Webdiet
+Mercado
+Módulos transversais
+Módulo de planos e paywall
+Visão geral
+O Módulo de Planos e Paywall da plataforma TrueLabel é responsável por controlar o acesso a funcionalidades premium com base no plano contratado por cada cliente. Ele atua de forma transversal, sendo integrado ao Dashboard, Verified Engine e Report. Seu objetivo é viabilizar o modelo freemium, monetizar o uso progressivo e garantir escalabilidade com governança.
+Objetivos
+Controlar o acesso e limites por plano
+Definir pontos de bloqueio e gatilhos de upgrade
+Integrar com sistema de pagamento e gestão de assinaturas
+Suportar fluxo de upgrade, downgrade e trial
+Garantir rastreabilidade de consumo (SKUs, laudos, usuários, etc.)
+Tipos de plano
+Os planos TrueLabel são organizados em quatro níveis, com acesso progressivo a funcionalidades e volume de validação. Adotamos um modelo híbrido: cada plano possui uma mensalidade fixa com créditos de data points inclusos, e o uso excedente é cobrado separadamente. O plano gratuito é apenas exploratório e não permite validações reais.
+Para qualquer envio de laudo ou ativação de data point, é necessário estar em um plano pago (a partir do Startup). O plano gratuito permite acesso à plataforma e ao fluxo de cadastro de produto, mas não habilita a validação técnica, QR Code ou geração de Report., mas com limites e condições de volume ajustados. O Free permite uso apenas demonstrativo. Os planos pagos habilitam o envio de laudos reais e a geração de relatórios verificados.
+Free
+Mensalidade
+R$0
+Data points
+-
+Data point excedente
+-
+Nº de usuários
+1
+Indicado para
+Explorar a plataforma
+Startup
+Mensalidade
+R$599,00
+Data points
+50
+Data point excedente
+R$45,00
+Nº de usuários
+Até 3 usuários
+Indicado para
+Pequenas marcas iniciando validação
+Scale-up
+Mensalidade
+R$1.499
+Data points
+150
+Data point excedente
+R$30,00
+Nº de usuários
+Até 5 usuários
+Indicado para
+Marcas em expansão de portfólio validado
+Enterprise
+Mensalidade
+Sob medida
+Data points
+Sob medida
+Data point excedente
+R$20,00
+Nº de usuários
+Ilimitado
+Indicado para
+Grandes indústrias ou players multimarcas
+Gatilhos de paywall
+Ao tentar:
+Subir o primeiro laudo
+Gerar um QR Code
+Acessar Report
+Convidar novo usuário além do limite
+Integração com sistema de pagamento
+Integração com Stripe, Iugu ou plataforma escolhida
+Registro de eventos:
+Contratação, renovação, cancelamento, falha
+Envio de fatura, boleto ou checkout transparente
+Webhooks para atualização de status em tempo real
+Regras de negócio
+Todos os planos pagos têm vigência anual com pagamento mensal
+Não há período gratuito em planos pagos (sem trial)
+O plano gratuito permite apenas funcionalidades exploratórias, sem envio de laudos ou geração de report
+Para envio de laudos ou ativação de data points é necessário estar em um plano pago
+Ao exceder qualquer limite, a funcionalidade correspondente é bloqueada e a tela de upgrade é exibida
+Mudanças de plano (upgrade ou downgrade) têm efeito imediato
+As faturas mensais ficam disponíveis para o admin da conta via Dashboard
+O Dashboard mostra os limites de uso e envia alertas em caso de aproximação ou ultrapassagem
+Histórico de uso, trocas de plano e status ficam acessíveis para o admin da conta
+Comportamento no Dashboard
+Banner com o status do plano (ex: “Plano Startup – 12 dias restantes”)
+Indicador de uso por recurso (ex: “42 de 50 data points usados”)
+Botão de acesso à página “Gerenciar Plano”
+Alertas ao se aproximar dos limites de uso
+Acesso e download de faturas mensais
+Política de cancelamento
+O cancelamento do plano pode ser solicitado a qualquer momento pelo admin da conta, via painel "Gerenciar Plano" no Dashboard.
+O cancelamento terá efeito ao final do ciclo anual vigente. Durante esse período, o cliente poderá continuar utilizando os data points restantes do seu plano normalmente. Não há reembolso proporcional de valores pagos.
+Após o cancelamento:
+O cliente manterá acesso em modo de visualização por 30 dias.
+Relatórios e QR Codes continuarão disponíveis publicamente enquanto estiverem válidos.
+Não será possível enviar novos laudos, alterar SKUs ou gerar novos reports.
+A reativação do plano pode ser feita a qualquer momento mediante nova contratação.
+Módulo de autenticação e conta
+Visão geral
+O módulo de Autenticação e Conta da plataforma TrueLabel é responsável por garantir a segurança de acesso, gerenciamento de usuários e identidade das empresas cadastradas. Ele é o ponto de entrada para todos os demais módulos (Dashboard, Report, Engine) e também centraliza o gerenciamento da conta empresarial e de seus membros.
+Objetivos
+Permitir cadastro e autenticação segura de contas empresariais e usuários
+Controlar diferentes níveis de acesso (admin, editor, visualizador)
+Gerenciar informações da empresa, plano ativo e dados de faturamento
+Integrar com sistemas de pagamento e recuperação de senha
+Módulo de integrações e API
+Produto
+TrueLabel Verified Engine
+Visão geral do produto
+O TrueLabel Verified Engine é o núcleo técnico da plataforma TrueLabel, responsável por verificar se os dados declarados nas embalagens dos produtos CPG (Consumer Packaged Goods) estão em conformidade com laudos laboratoriais e certificados oficiais. No primeiro momento, o processo será operado de forma semi-manual, com a equipe TrueLabel confrontando os documentos enviados pelas marcas com os dados diretos dos laboratórios ou certificadoras parceiras.
+Objetivo
+Confirmar a validade de laudos laboratoriais e certificados enviados pelas marcas
+Emitir um status de conformidade por atributo/data point analisado
+Alimentar o Report e o Dashboard com os resultados verificados
+Funcionalidades
+Validação de claims
+Exemplo: embalagem declara “10g de proteína por porção”
+A equipe checa se o laudo enviado corresponde a essa declaração
+O Engine registra a decisão: validado, validado_com_ressalva, não_validado
+Validaçao de certificações
+Exemplo: produto alega ser “Orgânico”
+O Engine checa com a base de dados da certificadora parceira (IBD, Ecocert, etc.) se o certificado está válido
+Retorno: certificado válido, certificado expirado, certificado não encontrado
+Armazenamento de evidências
+Armazena laudos, certificados e evidências de consulta para rastreabilidade
+Registra data, fonte da validação e responsável técnico pela conferência
+Fluxos de funcionalidade
+Validação Manual de Atributos Nutricionais
+Marca envia produto via Dashboard TrueLabel, declarando valores nutricionais.
+Marca anexa laudo técnico em PDF de laboratório reconhecido.
+Analista da TrueLabel acessa o backend interno e abre o laudo.
+Confere o valor declarado com o valor encontrado no laudo.
+Marca o status do atributo: validado, validado_com_ressalva, ou não_validado.
+Sistema armazena decisão, data, fonte e responsável.
+Resultado é enviado ao Report e ao Dashboard.
+Validação Manual de Certificações
+Marca declara possuir certificação (ex: Orgânico, Vegan).
+Marca anexa certificado ou indica número do selo.
+Analista TrueLabel consulta a base do órgão certificador (IBD, Ecocert etc.).
+Confere validade, titularidade e categoria do produto.
+Registra o status: certificado válido, expirado, não encontrado.
+Resultado alimenta Report e Dashboard.
+Auditoria e Revalidação
+Sistema avisa quando um laudo/certificado está perto da expiração.
+Marca é notificada a enviar nova versão.
+Processo de validação se repete com log de nova decisão.
+Histórico de versões fica disponível para rastreabilidade.
+Geração de Output para Report
+Após validação de todos os atributos de um SKU
+Engine estrutura objeto JSON consolidado com todos os dados validados
+Dados são enviados para renderização do Report público
+QR Code é gerado e vinculado ao status do SKU
+Contestação Técnica
+Marca solicita reavaliação de uma decisão técnica
+Equipe TrueLabel acessa laudo e histórico do SKU
+Revalida com novo input ou análise técnica
+Sistema registra alteração com justificativa, mantendo rastreabilidade
+Regras de negócio
+Todo claim só é considerado validado se houver laudo ou certificado válido de um laboratório acreditado
+Certificados (orgânico, vegano, etc.) devem estar dentro do prazo e emitidos por entidade reconhecida
+Laudos nutricionais devem ter no máximo 12 meses e vir de laboratório acreditado
+Versionamento e escalabilidade
+As validações manuais atuais serão registradas com log detalhado
+Cada entrada conterá responsável técnico e timestamp
+Futuras fases incluirão automações com OCR, IA e APIs de integração com parceiros
+Segurança e conformidade
+Conformidade com LGPD para dados sensíveis vinculados a produtos alimentícios
+Registro seguro de todas as decisões e arquivos anexados
+Criptografia de documentos e trilha de auditoria
+Roadmap
+Fase 1 (Atual): Operação manual com registro em sistema estruturado
+Fase 2: Implementação de OCR para leitura automática de laudos
+Fase 3: Integração via API com laboratórios e certificadoras
+Data points
+Data points são pontos de dado validados. Cada item é um data point. Exemplo: Valor calórico = 01 data pointProteínas = 01 data pointGorduras = as gorduras podem ser abertas em saturadas, polinsaturadas, monoinsaturadas. Sendo assim cada uma delas é um data point diferente. Vitaminas = cada vitamina aberta é um data point diferenteMinerais = cada mineral aberto é um data point diferente
+Microbiologia
+Salmonella
+Escherichia coli
+Micotoxinas
+Aflatoxinas
+Perfil nutricional
+Valor calórico
+Proteínas
+Carboidratos
+Gorduras
+Vitaminas
+Minerais
+Microscopia e Macroscopia
+Insetos
+Ácaros
+Bárbulas
+Cinzas insolúveis
+Pelos de animais
+Outros
+Certificações
+Orgânico
+B Corporation
+Non-GMO Project
+Gluten-free
+Vegan
+FSSC 22.000
+BPF
+Metais pesados
+Mercúrio
+Arsênio
+Cádmio
+Chumbo
+Alergênicos
+Leite
+Ovo
+Glúten
+Amendoim
+Castanhas
+Substâncias banidas
+Agentes anabólicos e bloqueadores beta
+Beta-agonistas e diuréticos
+Antagonistas hormonais
+Agentes mascarantes
+Narcóticos/canabinoides
+Estimulantes
+Moduladores seletivos do receptor de andrógenos
+Moduladores metabólicos
+Secretagogos do hormônio do crescimento
+Solventes residuais
+Etanol
+Acetona
+Outros solventes
+Pesticidas e herbicidas
+Glifosato
+AMPA
+Atrazina
+Outras
+Volume
+TrueLabel Verified Report
+Visão geral
+O TrueLabel Verified Report é o principal entregável da plataforma TrueLabel. Trata-se de um relatório digital público que apresenta a validação independente de um produto CPG (Consumer Packaged Good), vinculando dados declarados pela marca a laudos laboratoriais confiáveis. Ele é acessado por um link ou QR Code e visa informar consumidores, prescritores, varejistas e autoridades de forma clara e segura.
+Objetivos
+Aumentar a confiança na marca e no produto
+Fornecer evidências validadas para recomendação clínica
+Traduzir tecnicamente os laudos em linguagem acessível
+Diferenciar produtos no ponto de venda e canais digitais
+Usuários e casos de uso
+Consumidores: verificam qualidade, segurança e benefícios reais
+Prescritores: usam como apoio para recomendação e plano alimentar
+Marcas: utilizam como prova de transparência e confiabilidade
+E-commerce e Varejo: exibem o selo para aumentar conversão
+Estrutura do Report
+Diretrizes
+Mobile-first: Interface otimizada para dispositivos móveis com carregamento rápido
+Menu fixo de abas: Visível o tempo todo para facilitar navegação rápida entre seções
+Hierarquia visual clara: Tipografia escalonada (título, subtítulo, corpo)
+Ícones informativos: Selo, status de validação
+Feedback imediato: Confirmações visuais para interações
+Acessibilidade: Contraste de cores, fontes legíveis, suporte a leitores de tela
+Performance: Carregamento abaixo de 2 segundos em redes 4G
+Estilo visual: Minimalista e funcional (branco, azul)
+Consistência: Componentes e comportamentos visuais padronizados entre abas
+Estrutura
+Header
+Nome da marca
+Nome do produto
+Descrição do produto/unidade
+Imagem do produto
+Status TrueLabel Verified
+Última atualizaçao
+QR code
+Botão compartilhar
+Botão imprimir/gerar pdf
+Botão contestar relatório
+Corpo
+Aba 01: Resumo
+Apresenta os principais destaques de validação de forma condensada: status geral, claims validados, resumo nutricional com semáforo e certificações
+Aba 02: TrueLabel Verified
+Lista detalhada dos claims e atributos e certificações validados (ex: sem glúten, orgânico, etc.), cada um com seu status, justificativa e fonte (ex: laudo ou certificado).
+Aba 03: Rótulo digital
+Substitui o rótulo físico de forma expandida:
+Tabela nutricional por porção e %VD
+Ingredientes
+Alergênicos destacados
+Textos legais obrigatórios
+Aba 04: Sobre a empresa
+Nome e CNPJ do fabricante
+Links para site oficial, SAC e canais sociais
+Espaço para conteúdos futuros (vídeos, artigos, campanhas)
+Rodapé
+Última atualização
+Outros produtos desta marca
+Entenda o selo Trulabel Verified
+Termos e política de privacidade
+Contato
+Redes sociais Truelabel
+Disclaimer
+As informações apresentadas nesta página foram validadas com base em laudos laboratoriais emitidos por parceiros técnicos acreditados, fornecidos pelas próprias marcas. A TrueLabel realiza a verificação técnica de conformidade dos dados recebidos segundo parâmetros regulatórios e científicos atuais, mas não se responsabiliza por alterações posteriores na formulação do produto, erros não identificáveis no laudo ou uso indevido do selo após a verificação.  Para recomendações nutricionais, consulte sempre um profissional de saúde habilitado.
+Fluxo de funcionalidade (User flow)
+Acesso ao Report via QR Code
+Usuário escaneia o QR Code na embalagem do produto
+Plataforma TrueLabel identifica o SKU/lote e carrega o Report correspondente
+Página apresenta: nome do produto, marca, selo de validação e atributos validados
+Usuário pode interagir com as informações e realizar ações (compartilhar, etc.)
+Visualização de informações validadas
+Usuário acessa o Report carregado automaticamente
+Navega entre abas: Resumo, TrueLabel Verified, Rótulo Digital e Sobre a Empresa
+Visualiza o status e explicações para cada claim validado
+Compreende a origem dos dados através do laudo acessível
+Compartilhamento e engajamento
+Usuário clica em botão “Compartilhar”
+Escolhe canal: WhatsApp, Instagram, copiar link
+Plataforma exibe confirmação visual de sucesso
+Exploração de produtos relacionados
+Usuário clica em "Outros produtos da marca"
+É direcionado para uma página de listagem ou navega para novo Report
+Contestação de informações
+Usuário final (ex: prescritor ou consumidor) clica no botão “Contestar informação”
+Seleciona o item/claim contestado dentro do report
+Escreve o motivo da contestação e anexa (opcional) uma evidência ou comentário
+Sistema registra a contestação e envia notificação para a equipe TrueLabel
+Usuário recebe confirmação de recebimento e número de protocolo (comunicado via tela ou e-mail)
+Caso a contestação seja procedente, a equipe TrueLabel pode:
+Atualizar o Report e adicionar observação no Dashboard
+Acionar a marca para revisão do laudo
+Invalidar temporariamente o selo daquele SKU ou remover o claim do Report
+Encerramento da jornada
+Usuário encerra a navegação ou retorna para origem (e-commerce, redes sociais, site da marca)
+Report permanece acessível para futuras consultas via link público
+Arquitetura e componentes
+Frontend Web (PWA): para visualização pública do relatório via link/QR
+Backend/API REST: para consulta de dados verificados por data point
+Banco de Dados: armazena informações de validação, laudos, histórico
+Serviço de Geração de QR Code: cria códigos únicos por SKU/lote
+Sistema de Hash/Autenticidade: valida os laudos vinculados ao relatório
+Regras de negócio
+Cada SKU tem um report ativo por vez
+Laudos são válidos por 12 meses ou até nova versão
+Apenas itens validados (com ou sem ressalvas) aparecem no relatório
+QR Code só pode ser gerado após uma validação positiva
+Autenticação e segurança
+Página do relatório é pública (acessada via link/QR)
+Hash criptográfico assinado vinculado ao laudo
+Proteção contra indexação indesejada via robots.txt
+API de geração de relatório protegida por autenticação JWT
+Auditoria e versionamento de alterações nos relatórios
+Critérios de aceitação
+Report gerado automaticamente após validação final
+QR Code funcional e apontando para a página
+Layout adaptado a dispositivos móveis
+Dados coerentes com informações da marca e do laudo
+Claims exibidos com status e explicação clara
+Laudo acessível e autenticado
+Roadmap
+MVP: Layout responsivo, dados validados, PDF do laudo
+V1: Embed para e-commerce
+TrueLabel Dashboard (Acesso clientes)
+Visão geral
+O TrueLabel Dashboard é a interface de controle e gestão da plataforma TrueLabel voltada para as marcas e fabricantes. É por meio dele que os clientes gerenciam seus SKUs, realizam upload de laudos laboratoriais, acompanham o status de validações e acessam métricas de performance e transparência. Ele é a principal ponte entre as marcas e os produtos "TrueLabel Verified".
+Objetivos
+Permitir o cadastro de produtos (SKUs) com suas respectivas informações nutricionais, claims e certificados
+Submeter laudos e documentos de validação
+Acompanhar o status da validação de cada atributo
+Acessar relatórios, métricas e QR Codes
+Gerenciar usuários da empresa, permissões e planos contratados
+Funcionalidades
+Gestão de produtos
+Cadastro de novo SKU com nome, categoria, ingredientes e tabela nutricional, certificações
+Declaração de claims (ex: sem glúten, vegano, rico em fibras)
+Upload de rótulo e ficha técnica
+Submissão de Laudos
+Upload de arquivos PDF de laudos laboratoriais e certificados
+Indicação do laboratório emissor
+Vínculo do laudo com o SKU e atributo correspondente
+Histórico de documentos por SKU
+Acompanhamento de Validações
+Visualização por SKU:
+Claims e status: "validado", "validado com ressalva", "em análise"
+Comentários técnicos do time TrueLabel
+Notificações de expiração de laudos
+Histórico de versões de validação
+Acesso a Reports e QR Codes
+Visualização do Report gerado para cada SKU validado
+Download ou embed do QR Code correspondente
+Ferramentas para integração com ecommerce e materiais promocionais
+Administração da conta
+Perfil da empresa e dados de faturamento
+Gestão de usuários com diferentes permissões (admin, P&D, marketing)
+Visualização do plano contratado, limites e consumo de laudos
+Autenticação e Criação de Conta
+Tela de login com autenticação segura via e-mail e senha (JWT)
+Opção de recuperação de senha e autenticação em dois fatores (2FA)
+Tela de criação de conta com verificação por e-mail
+Cadastro gratuito permite acesso limitado à plataforma (freemium onboarding)
+O usuário pode:
+Criar conta e acessar o Dashboard
+Cadastrar SKUs
+Visualizar estrutura e fluxo de validação
+Gerenciar perfil e equipe
+Para subir laudos e ativar validações, será solicitado o upgrade de plano
+Possibilidade de convidar usuários adicionais após criação da conta
+Fluxos de funcionalidades (User flows)
+Cadastro de Produto
+Usuário logado acessa área de produtos
+Clica em “Cadastrar novo SKU”
+Preenche informações básicas (nome, categoria, descrição)
+Insere tabela nutricional e ingredientes
+Declara os claims desejados (ex: sem glúten, rico em fibras)
+Salva e aguarda submissão de laudo para ativar validação
+Submissão de Laudo
+Acessa SKU já cadastrado
+Clica em “Submeter Laudo”
+Faz upload do PDF (arrasta ou seleciona)
+Indica tipo de laudo (nutricional, certificado, etc.) e atributo relacionado
+Sistema armazena e envia para verificação via Engine (manual na Fase 1)
+Usuário é notificado por e-mail e dentro da plataforma sobre o resultado
+Visualização de Status
+Usuário acessa dashboard geral
+Visualiza cartões por SKU com indicadores de status (verde, amarelo, cinza)
+Clica para expandir e ver atributo por atributo
+Pode baixar QR Code, visualizar Report ou reenviar nova versão de laudo
+Acesso a Reports
+Dentro de um SKU com validações confirmadas
+Clica em “Visualizar Report”
+É redirecionado para a versão pública do Report (link único)
+Pode baixar o QR ou copiar o link para uso em ecommerce ou material promocional
+Gestão de Conta e Usuários
+Admin acessa “Minha Conta” → “Equipe”
+Convida novos usuários com e-mail e função
+Pode remover, editar permissões ou reenviar convite
+Visualiza consumo de plano (SKUs ativos, laudos usados, próximos vencimentos)
+Criação de Conta
+Usuário acessa a página inicial do TrueLabel
+Clica em “Criar Conta”
+Preenche nome, e-mail corporativo, CNPJ e cria uma senha
+Recebe e-mail de verificação e confirma o endereço
+Acesso liberado ao ambiente gratuito (freemium): pode cadastrar SKUs, explorar a estrutura e convidar equipe
+Ao tentar subir um laudo, é redirecionado para a tela de upgrade de plano
+Após contratação, funcionalidades completas são liberadas (submissão de laudos, geração de reports, analytics, etc.)
+Regras de negócio
+Um SKU só pode gerar report se tiver ao menos 1 claim validado
+O limite de SKUs e laudos varia conforme o plano contratado
+Usuários com permissão "admin" podem aprovar novos usuários internos
+Laudos vencem após 12 meses e devem ser revalidados
+TrueLabel Search
+Visão geral
+Ache um produto que você pode confiar
+TrueLabel Labconnect
+Visão geral
+API de integração com laboratórios
+TrueLabel Prescribe (Acesso prescritores)
+TrueLabel Data (insights e relatórios)
+

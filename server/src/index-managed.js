@@ -21,26 +21,7 @@ const PORT = process.env.PORT || 3334;
 
 // CORS configuration - Updated for Railway deployment
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    const allowedOrigins = [
-      'http://localhost:3001',
-      'http://localhost:3000',
-      'http://localhost:9101',
-      'http://localhost:9102',
-      'http://localhost:5173',
-      'https://truelabel.vercel.app'
-    ];
-
-    // Allow any vercel.app subdomain
-    if (origin.includes('.vercel.app') || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    return callback(new Error('Not allowed by CORS'));
-  },
+  origin: true, // Allow all origins temporarily for debugging
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -430,19 +411,34 @@ app.get('/products/:id', authenticate, async (req, res) => {
 app.put('/products/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, brand, category, description, claims } = req.body;
+    const { name, brand, category, description, claims, status } = req.body;
+
+    // Find the product in storage
+    const productIndex = productsStorage.findIndex(p => p.id === id);
+    if (productIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Produto não encontrado'
+      });
+    }
+
+    const existingProduct = productsStorage[productIndex];
 
     const updatedProduct = {
-      id,
-      name: name || 'Produto Atualizado',
-      brand: brand || 'Marca Atualizada',
-      category: category || 'Categoria Atualizada',
-      description: description || '',
-      claims: claims || '',
-      status: 'PENDING',
-      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      ...existingProduct,
+      name: name || existingProduct.name,
+      brand: brand || existingProduct.brand,
+      category: category || existingProduct.category,
+      description: description !== undefined ? description : existingProduct.description,
+      claims: claims !== undefined ? claims : existingProduct.claims,
+      status: status || existingProduct.status,
       updatedAt: new Date().toISOString()
     };
+
+    // Update the product in storage
+    productsStorage[productIndex] = updatedProduct;
+
+    console.log(`✅ Product updated: ${updatedProduct.name} (ID: ${id}) - Status: ${updatedProduct.status}`);
 
     const response = {
       success: true,
@@ -1327,6 +1323,101 @@ app.post('/certifications', authenticate, async (req, res) => {
   }
 });
 
+// GET /certifications/alerts - Get certification alerts
+app.get('/certifications/alerts', authenticate, async (req, res) => {
+  try {
+    const now = new Date();
+    const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+
+    // Find expiring certifications
+    const expiringCertifications = certificationsStorage.filter(cert => {
+      const expiryDate = new Date(cert.expiryDate);
+      return expiryDate > now && expiryDate <= thirtyDaysFromNow;
+    });
+
+    // Find expired certifications
+    const expiredCertifications = certificationsStorage.filter(cert => {
+      const expiryDate = new Date(cert.expiryDate);
+      return expiryDate <= now;
+    });
+
+    const alerts = [
+      ...expiringCertifications.map(cert => ({
+        id: `expiring-${cert.id}`,
+        type: 'EXPIRING',
+        certificationId: cert.id,
+        certificationName: cert.name,
+        message: `Certificação "${cert.name}" expira em ${Math.ceil((new Date(cert.expiryDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} dias`,
+        expiryDate: cert.expiryDate,
+        severity: 'WARNING',
+        isRead: false,
+        createdAt: new Date().toISOString()
+      })),
+      ...expiredCertifications.map(cert => ({
+        id: `expired-${cert.id}`,
+        type: 'EXPIRED',
+        certificationId: cert.id,
+        certificationName: cert.name,
+        message: `Certificação "${cert.name}" expirou`,
+        expiryDate: cert.expiryDate,
+        severity: 'ERROR',
+        isRead: false,
+        createdAt: new Date().toISOString()
+      }))
+    ];
+
+    const response = {
+      success: true,
+      alerts,
+      total: alerts.length
+    };
+
+    console.log(`🚨 Certification alerts: ${alerts.length} alerts found`);
+    res.json(response);
+  } catch (error) {
+    console.error('Error in certificationsAlerts:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /certifications/statistics - Get certification statistics
+app.get('/certifications/statistics', authenticate, async (req, res) => {
+  try {
+    const total = certificationsStorage.length;
+    const now = new Date();
+    const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+
+    const active = certificationsStorage.filter(cert => {
+      const expiryDate = new Date(cert.expiryDate);
+      return expiryDate > now;
+    }).length;
+
+    const expiring = certificationsStorage.filter(cert => {
+      const expiryDate = new Date(cert.expiryDate);
+      return expiryDate > now && expiryDate <= thirtyDaysFromNow;
+    }).length;
+
+    const expired = certificationsStorage.filter(cert => {
+      const expiryDate = new Date(cert.expiryDate);
+      return expiryDate <= now;
+    }).length;
+
+    const response = {
+      success: true,
+      total,
+      active,
+      expiring,
+      expired
+    };
+
+    console.log(`📊 Certification statistics: Total: ${total}, Active: ${active}, Expiring: ${expiring}, Expired: ${expired}`);
+    res.json(response);
+  } catch (error) {
+    console.error('Error in certificationsStatistics:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // GET /certifications/:id - Get certification by ID
 app.get('/certifications/:id', authenticate, async (req, res) => {
   try {
@@ -1423,34 +1514,93 @@ app.delete('/certifications/:id', authenticate, async (req, res) => {
   }
 });
 
-// GET /certifications/alerts - Get certification alerts
-app.get('/certifications/alerts', authenticate, async (req, res) => {
+
+
+// POST /products/:productId/certifications - Add certification to product
+app.post('/products/:productId/certifications', authenticate, async (req, res) => {
   try {
-    const response = {
-      success: true,
-      data: [],
-      total: 0
+    const { productId } = req.params;
+    const { certificationId, certificateNumber, issueDate, expiryDate } = req.body;
+
+    if (!certificationId || !certificateNumber) {
+      return res.status(400).json({
+        success: false,
+        message: 'Certification ID and certificate number are required'
+      });
+    }
+
+    // Check if product exists
+    const product = productsStorage.find(p => p.id === productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Produto não encontrado'
+      });
+    }
+
+    // Check if certification exists
+    const certification = certificationsStorage.find(c => c.id === certificationId);
+    if (!certification) {
+      return res.status(404).json({
+        success: false,
+        message: 'Certificação não encontrada'
+      });
+    }
+
+    const productCertification = {
+      id: Math.random().toString(36).substr(2, 9),
+      productId,
+      certificationId,
+      certificateNumber,
+      issueDate: issueDate || new Date().toISOString(),
+      expiryDate: expiryDate || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      certification: certification
     };
-    res.json(response);
+
+    // Initialize productCertifications storage if it doesn't exist
+    if (!global.productCertificationsStorage) {
+      global.productCertificationsStorage = [];
+    }
+
+    global.productCertificationsStorage.push(productCertification);
+
+    console.log(`✅ Product certification created: ${certification.name} for product ${product.name}`);
+
+    res.status(201).json({
+      success: true,
+      data: productCertification,
+      message: 'Certificação associada ao produto com sucesso'
+    });
   } catch (error) {
-    console.error('Error in certificationsAlerts:', error);
+    console.error('Error in productCertificationsCreate:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
-// GET /certifications/statistics - Get certification statistics
-app.get('/certifications/statistics', authenticate, async (req, res) => {
+// GET /products/:productId/certifications - Get product certifications
+app.get('/products/:productId/certifications', authenticate, async (req, res) => {
   try {
-    const response = {
+    const { productId } = req.params;
+
+    // Initialize productCertifications storage if it doesn't exist
+    if (!global.productCertificationsStorage) {
+      global.productCertificationsStorage = [];
+    }
+
+    const productCertifications = global.productCertificationsStorage.filter(pc => pc.productId === productId);
+
+    console.log(`📋 Found ${productCertifications.length} certifications for product ${productId}`);
+
+    res.json({
       success: true,
-      total: 0,
-      active: 0,
-      expiring: 0,
-      expired: 0
-    };
-    res.json(response);
+      certifications: productCertifications,
+      total: productCertifications.length
+    });
   } catch (error) {
-    console.error('Error in certificationsStatistics:', error);
+    console.error('Error in productCertificationsList:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
@@ -2222,6 +2372,15 @@ app.post('/qr/generate', authenticate, async (req, res) => {
     }
 
     const product = productsStorage[productIndex];
+
+    // Check if product is validated/approved before generating QR code
+    if (product.status !== 'APPROVED' && product.status !== 'VALIDATED') {
+      return res.status(400).json({
+        success: false,
+        message: 'Apenas produtos validados/aprovados podem gerar QR Codes',
+        currentStatus: product.status
+      });
+    }
 
     // Check if product already has a QR code
     if (product.qrCode) {

@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, X, Clock, User } from 'lucide-react';
-import { Validation } from '@/types';
+import { ArrowLeft, Check, X, Clock, User, Shield, FileText, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { Validation, Product } from '@/types';
 import { validationService } from '@/services/validationService';
+import { productService } from '@/services/productService';
+import { certificationService } from '@/services/certificationService';
 import { toast } from 'react-hot-toast';
 
 const ValidationReviewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [validation, setValidation] = useState<Validation | null>(null);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [productCertifications, setProductCertifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [claimsValidation, setClaimsValidation] = useState<Record<string, 'APPROVED' | 'REJECTED' | 'PENDING'>>({});
 
   useEffect(() => {
     if (id) {
@@ -25,6 +30,37 @@ const ValidationReviewPage: React.FC = () => {
       setLoading(true);
       const response = await validationService.getValidation(id);
       setValidation(response.validation);
+
+      // Load product details if productId exists
+      if (response.validation?.productId) {
+        try {
+          const productResponse = await productService.getProduct(response.validation.productId);
+          setProduct(productResponse.product);
+
+          // Initialize claims validation state
+          if (productResponse.product?.claims) {
+            const claims = typeof productResponse.product.claims === 'string'
+              ? productResponse.product.claims.split(',').map(c => c.trim())
+              : Object.keys(productResponse.product.claims);
+
+            const initialClaimsState: Record<string, 'APPROVED' | 'REJECTED' | 'PENDING'> = {};
+            claims.forEach(claim => {
+              initialClaimsState[claim] = response.validation?.claimsValidated?.[claim] ? 'APPROVED' : 'PENDING';
+            });
+            setClaimsValidation(initialClaimsState);
+          }
+
+          // Load product certifications
+          try {
+            const certifications = await certificationService.getProductCertifications(response.validation.productId);
+            setProductCertifications(certifications);
+          } catch (certError) {
+            console.error('Erro ao carregar certificações:', certError);
+          }
+        } catch (productError) {
+          console.error('Erro ao carregar produto:', productError);
+        }
+      }
     } catch (error) {
       console.error('Erro ao carregar validação:', error);
       toast.error('Erro ao carregar validação');
@@ -34,12 +70,30 @@ const ValidationReviewPage: React.FC = () => {
     }
   };
 
+  const handleClaimValidation = (claim: string, status: 'APPROVED' | 'REJECTED' | 'PENDING') => {
+    setClaimsValidation(prev => ({
+      ...prev,
+      [claim]: status
+    }));
+  };
+
   const handleStatusUpdate = async (newStatus: 'APPROVED' | 'REJECTED') => {
     if (!id || !validation) return;
 
     setUpdating(true);
     try {
-      const response = await validationService.updateValidation(id, { status: newStatus });
+      // Prepare claims validation data
+      const claimsValidated: Record<string, any> = {};
+      Object.entries(claimsValidation).forEach(([claim, status]) => {
+        if (status === 'APPROVED') {
+          claimsValidated[claim] = true;
+        }
+      });
+
+      const response = await validationService.updateValidation(id, {
+        status: newStatus,
+        claimsValidated
+      });
       setValidation(response.validation);
       toast.success(`Validação ${newStatus === 'APPROVED' ? 'aprovada' : 'rejeitada'} com sucesso!`);
     } catch (error) {
@@ -48,6 +102,17 @@ const ValidationReviewPage: React.FC = () => {
     } finally {
       setUpdating(false);
     }
+  };
+
+  const getClaimsArray = (claims: any): string[] => {
+    if (!claims) return [];
+    if (typeof claims === 'string') {
+      return claims.split(',').map(c => c.trim()).filter(c => c.length > 0);
+    }
+    if (typeof claims === 'object') {
+      return Object.keys(claims);
+    }
+    return [];
   };
 
   if (loading) {
@@ -190,6 +255,117 @@ const ValidationReviewPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Product Claims Review */}
+      {product && getClaimsArray(product.claims).length > 0 && (
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <FileText className="w-5 h-5 mr-2" />
+            Claims do Produto para Validação
+          </h3>
+
+          <div className="space-y-3">
+            {getClaimsArray(product.claims).map((claim, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900">{claim}</h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Status:
+                      <span className={`ml-1 px-2 py-1 rounded-full text-xs font-medium ${
+                        claimsValidation[claim] === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                        claimsValidation[claim] === 'REJECTED' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {claimsValidation[claim] === 'APPROVED' ? 'Aprovado' :
+                         claimsValidation[claim] === 'REJECTED' ? 'Rejeitado' : 'Pendente'}
+                      </span>
+                    </p>
+                  </div>
+
+                  {validation.status === 'PENDING' && (
+                    <div className="flex space-x-2 ml-4">
+                      <button
+                        onClick={() => handleClaimValidation(claim, 'APPROVED')}
+                        className={`p-2 rounded-lg transition-colors ${
+                          claimsValidation[claim] === 'APPROVED'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-gray-100 text-gray-600 hover:bg-green-50 hover:text-green-600'
+                        }`}
+                        title="Aprovar claim"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleClaimValidation(claim, 'REJECTED')}
+                        className={`p-2 rounded-lg transition-colors ${
+                          claimsValidation[claim] === 'REJECTED'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600'
+                        }`}
+                        title="Rejeitar claim"
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <div className="flex items-start">
+              <AlertTriangle className="w-5 h-5 text-blue-600 mr-2 mt-0.5" />
+              <div className="text-sm text-blue-800">
+                <p className="font-medium">Instruções para Validação:</p>
+                <p className="mt-1">
+                  Revise cada claim individualmente. Aprove apenas claims que possuem documentação
+                  adequada e atendem aos padrões de qualidade. Claims rejeitados não aparecerão
+                  na validação final do produto.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Product Certifications */}
+      {productCertifications.length > 0 && (
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <Shield className="w-5 h-5 mr-2" />
+            Certificações do Produto
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {productCertifications.map((cert, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900">{cert.certification?.name || 'Certificação'}</h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Número: {cert.certificateNumber || 'N/A'}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Validade: {cert.expiryDate ? new Date(cert.expiryDate).toLocaleDateString('pt-BR') : 'N/A'}
+                    </p>
+                  </div>
+
+                  <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    cert.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                    cert.status === 'EXPIRED' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {cert.status === 'ACTIVE' ? 'Ativa' :
+                     cert.status === 'EXPIRED' ? 'Expirada' : cert.status}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Validation Details */}
       <div className="bg-white p-6 rounded-lg shadow-sm border">

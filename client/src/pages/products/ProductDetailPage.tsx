@@ -19,7 +19,7 @@ interface Product {
   claims: string;
   nutritionalInfo: any;
   imageUrl?: string;
-  status: 'PENDING' | 'VALIDATED' | 'REJECTED';
+  status: 'PENDING' | 'VALIDATED' | 'APPROVED' | 'REJECTED';
   createdAt: string;
   updatedAt: string;
   validations?: Array<{
@@ -85,8 +85,8 @@ const ProductDetailPage = () => {
   };
 
   const handleGenerateQR = async () => {
-    if (!product || product.status !== 'VALIDATED') {
-      toast.error('Apenas produtos validados podem gerar QR Codes');
+    if (!product || (product.status !== 'VALIDATED' && product.status !== 'APPROVED')) {
+      toast.error('Apenas produtos validados/aprovados podem gerar QR Codes');
       return;
     }
 
@@ -106,6 +106,7 @@ const ProductDetailPage = () => {
     const statusConfig = {
       PENDING: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, text: 'Pendente' },
       VALIDATED: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: 'Validado' },
+      APPROVED: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: 'Aprovado' },
       REJECTED: { color: 'bg-red-100 text-red-800', icon: XCircle, text: 'Rejeitado' }
     };
 
