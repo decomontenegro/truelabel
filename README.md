@@ -1,199 +1,146 @@
-# True Label - Platform for CPG Product Validation
+# 🏷️ True Label - Sistema de Gestão de Produtos e Certificações
 
-True Label is a comprehensive platform for validating and certifying consumer packaged goods (CPG) products, providing transparency and trust through QR code-based validation, laboratory reports, and real-time analytics.
+## 📋 Visão Geral
 
-## 🚀 Features
+True Label é uma plataforma completa para gestão de produtos, validações e certificações, com geração segura de QR codes para rastreabilidade.
 
-- **QR Code Generation & Validation**: Secure QR codes for each product with cryptographic protection
-- **Product Management**: Complete CRUD operations for products with detailed information
-- **Laboratory Integration**: Upload and manage lab reports for product validation
-- **Real-time Analytics**: Track QR code scans, validation metrics, and user engagement
-- **Multi-role System**: Support for Brands, Laboratories, Admins, and Consumers
-- **Public Validation Page**: Beautiful, responsive pages for consumers to validate products
-- **Trust Score System**: Automated calculation based on validations, reports, and completeness
+## ✅ Status do Projeto
 
-## 🛠️ Tech Stack
+- **Versão Atual**: v1.0.0-stable
+- **Status**: ✅ Funcional e Deployado
+- **Deploy**: https://truelabel2-11z22qdif-decos-projects-925dd01d.vercel.app
+- **Última Atualização**: 25/06/2025
 
-### Backend
-- **Node.js** with Express.js
-- **TypeScript** for type safety
-- **Prisma ORM** with SQLite (development) / PostgreSQL (production)
-- **JWT Authentication** with bcrypt password hashing
-- **Redis** for caching and queue management (optional)
-- **Multer** for file uploads
-- **QRCode** generation with cryptographic security
+## 🚀 Início Rápido
 
-### Frontend
-- **React 18** with TypeScript
-- **Vite** for blazing fast development
-- **Tailwind CSS** for styling
-- **Zustand** for state management
-- **React Query** for data fetching
-- **React Router v6** for navigation
-- **Recharts** for analytics visualization
-- **Lucide React** for icons
-
-## 📋 Prerequisites
-
-- Node.js 16+ 
-- npm or yarn
-- Redis (optional, for caching)
-- PostgreSQL (for production)
-
-## 🔧 Installation
-
-1. Clone the repository:
+### Verificar Sistema
 ```bash
-git clone https://github.com/yourusername/true-label.git
-cd true-label
+./verify-system.sh
 ```
 
-2. Install dependencies:
+### Instalação Local
 ```bash
-# Install root dependencies
+# 1. Instale dependências
 npm install
 
-# Install server dependencies
-cd server
-npm install
+# 2. Configure variáveis de ambiente
+cp .env.example .env
+cp client/.env.example client/.env
+cp server/.env.example server/.env
 
-# Install client dependencies
-cd ../client
-npm install
+# 3. Inicie o sistema
+npm run dev
 ```
 
-3. Set up environment variables:
+### Acesso
+- **Frontend**: http://localhost:9103
+- **Backend**: http://localhost:3334
 
-Create `.env` files based on `.env.example`:
+## 🏗️ Arquitetura
 
-**Server (.env)**:
+```
+true-label/
+├── client/                 # Frontend React + TypeScript
+├── server/                 # Backend Node.js + Express
+├── docs/                   # Documentação organizada
+├── project-cleanup/        # Arquivos antigos (pode ser removido)
+├── package.json           # Scripts principais
+└── vercel.json            # Configuração de deploy
+```
+
+## 🎯 Funcionalidades
+
+### ✅ Implementadas
+- 🏷️ **Gestão de Produtos** - CRUD completo
+- ✅ **Sistema de Validações** - Aprovação de claims
+- 🛡️ **Certificações** - Gestão e estatísticas
+- 📱 **QR Codes Seguros** - Apenas produtos aprovados
+- 📊 **Dashboard** - Métricas e analytics
+
+### 🔒 Segurança
+- Autenticação JWT
+- Validação rigorosa de dados
+- CORS configurado
+- QR codes apenas para produtos aprovados
+
+## 🛠️ Scripts Disponíveis
+
+```bash
+# Desenvolvimento
+npm run dev              # Inicia frontend + backend
+npm run client          # Apenas frontend
+npm run server          # Apenas backend
+
+# Verificação
+./verify-system.sh       # Verifica se sistema está OK
+
+# Produção
+npm run build           # Build para produção
+```
+
+## 📚 Documentação
+
+- **[Mapa de Processos](docs/development/MAPA-DE-PROCESSOS-TRUELABEL.md)** - Como foi desenvolvido
+- **[Versão Estável](docs/deployment/VERSION-STABLE-v1.0.0.md)** - Documentação da v1.0.0
+- **[Deploy](docs/deployment/DEPLOY-SUCESSO-v1.0.0.md)** - Informações de deploy
+
+## 🚀 Deploy
+
+### Status Atual
+- ✅ **Frontend**: Deployado no Vercel
+- ⚠️ **Backend**: Local (próximo passo para produção)
+
+### URL de Produção
+https://truelabel2-11z22qdif-decos-projects-925dd01d.vercel.app
+
+## 🔧 Configuração
+
+### Variáveis de Ambiente Essenciais
+
+#### Frontend (client/.env)
 ```env
-DATABASE_URL=file:./dev.db
-JWT_SECRET=your-super-secret-jwt-key
-PORT=9100
+VITE_API_URL=http://localhost:3334
+```
+
+#### Backend (server/.env)
+```env
+PORT=3334
+JWT_SECRET=your-secret-key
 NODE_ENV=development
 ```
 
-**Client (.env)**:
-```env
-VITE_API_BASE_URL=http://localhost:9100/api/v1
-VITE_QR_BASE_URL=http://localhost:9101
-VITE_ENVIRONMENT=development
-```
+## 🧪 Verificação Rápida
 
-4. Set up the database:
 ```bash
-cd server
-npx prisma generate
-npx prisma migrate dev
-npm run seed  # Optional: seed with sample data
+# 1. Verificar sistema
+./verify-system.sh
+
+# 2. Testar API
+curl http://localhost:3334/health
+
+# 3. Testar frontend
+open http://localhost:9103
 ```
 
-## 🚀 Running the Application
+## 📊 Limpeza Realizada
 
-### Development Mode
+- ✅ **74 documentações antigas** movidas para `project-cleanup/`
+- ✅ **8 configurações antigas** organizadas
+- ✅ **50 scripts antigos** arquivados
+- ✅ **Estrutura limpa** e organizada
 
-1. Start the backend server:
-```bash
-cd server
-npm run dev
-```
+## 🎯 Próximos Passos
 
-2. In a new terminal, start the frontend:
-```bash
-cd client
-npm run dev
-```
+1. **Deploy do Backend** - Railway/Render
+2. **Banco de Dados** - Supabase/PostgreSQL
+3. **Limpeza Final** - Remover `project-cleanup/` após confirmação
 
-3. Access the application:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:9100
-- API Documentation: http://localhost:9100/api-docs
+## 📞 Suporte
 
-### Production Build
+- **Issues**: https://github.com/decomontenegro/truelabel/issues
+- **Documentação**: `/docs`
 
-1. Build the frontend:
-```bash
-cd client
-npm run build
-```
+---
 
-2. Build the backend:
-```bash
-cd server
-npm run build
-```
-
-3. Start the production server:
-```bash
-cd server
-npm start
-```
-
-## 📚 API Documentation
-
-The API documentation is available at `/api-docs` when running the server. Key endpoints include:
-
-- **Authentication**: `/api/v1/auth/*`
-- **Products**: `/api/v1/products/*`
-- **QR Codes**: `/api/v1/qr/*`
-- **Validations**: `/api/v1/validations/*`
-- **Reports**: `/api/v1/reports/*`
-- **Analytics**: `/api/v1/analytics/*`
-
-## 🧪 Testing
-
-Run tests with:
-```bash
-# Backend tests
-cd server
-npm test
-
-# Frontend tests
-cd client
-npm test
-```
-
-## 🚢 Deployment
-
-### Vercel Deployment
-
-1. Configure environment variables in Vercel dashboard
-2. Use the provided `vercel.json` configuration
-3. Deploy with:
-```bash
-vercel --prod
-```
-
-See `DEPLOYMENT-GUIDE.md` for detailed deployment instructions.
-
-## 📊 Project Status
-
-- ✅ Core functionality implemented (94% complete)
-- ✅ QR code system fully functional
-- ✅ Product management working
-- ✅ Authentication & authorization
-- ✅ File upload for lab reports
-- 🚧 Email notifications (configuration needed)
-- 🚧 Real-time updates via WebSocket (disabled in production)
-- 🚧 Advanced analytics features
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 👥 Team
-
-- True Label Development Team
-
-## 📞 Support
-
-For support, email support@truelabel.com or open an issue in the GitHub repository.
+**Versão Estável Preservada**: Tag `v1.0.0-stable` no GitHub  
+**Sistema Verificado**: ✅ Pronto para uso
