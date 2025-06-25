@@ -1224,17 +1224,201 @@ app.get('/validations/metrics', authenticate, async (req, res) => {
 // CERTIFICATIONS ROUTES
 // ==========================================
 
+// In-memory storage for certifications
+let certificationsStorage = [
+  {
+    id: '1',
+    name: 'Certificação Orgânica',
+    type: 'ORGANIC',
+    description: 'Certificação para produtos orgânicos',
+    issuingBody: 'IBD Certificações',
+    validityPeriod: 12,
+    requirements: ['Ausência de pesticidas', 'Solo orgânico', 'Rastreabilidade'],
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
+
 // GET /certifications - List certifications
 app.get('/certifications', authenticate, async (req, res) => {
   try {
+    const { page = 1, limit = 10, search, type, status } = req.query;
+
+    let filteredCertifications = [...certificationsStorage];
+
+    // Apply filters
+    if (search) {
+      filteredCertifications = filteredCertifications.filter(cert =>
+        cert.name.toLowerCase().includes(search.toLowerCase()) ||
+        cert.description.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    if (type) {
+      filteredCertifications = filteredCertifications.filter(cert => cert.type === type);
+    }
+
+    if (status) {
+      filteredCertifications = filteredCertifications.filter(cert => cert.status === status);
+    }
+
+    // Pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedCertifications = filteredCertifications.slice(startIndex, endIndex);
+
+    console.log(`📋 Certifications list requested: ${paginatedCertifications.length} of ${filteredCertifications.length} total`);
+
     const response = {
       success: true,
-      data: [],
-      total: 0
+      data: paginatedCertifications,
+      total: filteredCertifications.length,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(filteredCertifications.length / limit)
+      }
     };
     res.json(response);
   } catch (error) {
     console.error('Error in certificationsList:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// POST /certifications - Create certification
+app.post('/certifications', authenticate, async (req, res) => {
+  try {
+    const { name, type, description, issuingBody, validityPeriod, requirements } = req.body;
+
+    if (!name || !type || !description) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, type, and description are required'
+      });
+    }
+
+    const newCertification = {
+      id: Math.random().toString(36).substr(2, 9),
+      name,
+      type,
+      description,
+      issuingBody: issuingBody || '',
+      validityPeriod: validityPeriod || 12,
+      requirements: requirements || [],
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    certificationsStorage.push(newCertification);
+
+    console.log(`✅ Certification created: ${newCertification.name} (ID: ${newCertification.id})`);
+
+    res.status(201).json({
+      success: true,
+      data: newCertification,
+      message: 'Certificação criada com sucesso'
+    });
+  } catch (error) {
+    console.error('Error in certificationsCreate:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /certifications/:id - Get certification by ID
+app.get('/certifications/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const certification = certificationsStorage.find(cert => cert.id === id);
+
+    if (!certification) {
+      return res.status(404).json({
+        success: false,
+        message: 'Certificação não encontrada'
+      });
+    }
+
+    console.log(`🔍 Certification found: ${certification.name} (ID: ${id})`);
+
+    res.json({
+      success: true,
+      data: certification
+    });
+  } catch (error) {
+    console.error('Error in certificationsGetById:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// PUT /certifications/:id - Update certification
+app.put('/certifications/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, type, description, issuingBody, validityPeriod, requirements, status } = req.body;
+
+    const certificationIndex = certificationsStorage.findIndex(cert => cert.id === id);
+
+    if (certificationIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Certificação não encontrada'
+      });
+    }
+
+    // Update certification
+    const updatedCertification = {
+      ...certificationsStorage[certificationIndex],
+      ...(name && { name }),
+      ...(type && { type }),
+      ...(description && { description }),
+      ...(issuingBody !== undefined && { issuingBody }),
+      ...(validityPeriod !== undefined && { validityPeriod }),
+      ...(requirements && { requirements }),
+      ...(status && { status }),
+      updatedAt: new Date().toISOString()
+    };
+
+    certificationsStorage[certificationIndex] = updatedCertification;
+
+    console.log(`✏️ Certification updated: ${updatedCertification.name} (ID: ${id})`);
+
+    res.json({
+      success: true,
+      data: updatedCertification,
+      message: 'Certificação atualizada com sucesso'
+    });
+  } catch (error) {
+    console.error('Error in certificationsUpdate:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// DELETE /certifications/:id - Delete certification
+app.delete('/certifications/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const certificationIndex = certificationsStorage.findIndex(cert => cert.id === id);
+
+    if (certificationIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Certificação não encontrada'
+      });
+    }
+
+    const deletedCertification = certificationsStorage[certificationIndex];
+    certificationsStorage.splice(certificationIndex, 1);
+
+    console.log(`🗑️ Certification deleted: ${deletedCertification.name} (ID: ${id})`);
+
+    res.json({
+      success: true,
+      message: 'Certificação removida com sucesso'
+    });
+  } catch (error) {
+    console.error('Error in certificationsDelete:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
